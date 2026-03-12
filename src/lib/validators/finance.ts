@@ -3,6 +3,7 @@ import { z } from "zod";
 import {
   debtStatuses,
   expenseCategories,
+  genders,
   incomeCategories,
   incomeFrequencies,
   maritalStatuses,
@@ -11,6 +12,7 @@ import {
 } from "@/lib/constants/options";
 
 const currencySchema = z.enum(["USD", "BDT"]);
+const genderSchema = z.enum(["", ...genders] as const);
 const maritalStatusSchema = z.enum(["", ...maritalStatuses] as const);
 
 export const incomeSchema = z.object({
@@ -90,6 +92,7 @@ export const profileSchema = z.object({
     )
     .default(""),
   occupation: z.string().trim().max(80, "Occupation must be 80 characters or less").default(""),
+  gender: genderSchema.default(""),
   maritalStatus: maritalStatusSchema.default(""),
   location: z.string().trim().max(80, "Location must be 80 characters or less").default(""),
   bio: z.string().trim().max(240, "Profile note must be 240 characters or less").default(""),

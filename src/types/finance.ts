@@ -1,4 +1,5 @@
 export type CurrencyCode = "USD" | "BDT";
+export type Gender = "" | "male" | "female" | "non-binary" | "other" | "prefer-not-to-say";
 export type MaritalStatus = "" | "single" | "married" | "engaged" | "separated" | "divorced" | "widowed" | "prefer-not-to-say";
 
 export type IncomeFrequency = "daily" | "weekly" | "monthly" | "one-time";
@@ -92,6 +93,7 @@ export interface SettingsRecord extends BaseEntity {
   fullName: string;
   contactNumber: string;
   occupation: string;
+  gender: Gender;
   maritalStatus: MaritalStatus;
   location: string;
   bio: string;

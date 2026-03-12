@@ -1,4 +1,4 @@
-import type { CurrencyCode, DebtStatus, IncomeFrequency, MaritalStatus, OwedStatus } from "@/types/finance";
+import type { CurrencyCode, DebtStatus, Gender, IncomeFrequency, MaritalStatus, OwedStatus } from "@/types/finance";
 
 export const supportedCurrencies: CurrencyCode[] = ["USD", "BDT"];
 
@@ -28,6 +28,14 @@ export const expenseCategories = [
 export const debtStatuses: DebtStatus[] = ["unpaid", "partial", "paid", "overdue"];
 
 export const owedStatuses: OwedStatus[] = ["pending", "partial", "settled", "overdue"];
+
+export const genders = [
+  "male",
+  "female",
+  "non-binary",
+  "other",
+  "prefer-not-to-say"
+] as const satisfies readonly Exclude<Gender, "">[];
 
 export const maritalStatuses = [
   "single",

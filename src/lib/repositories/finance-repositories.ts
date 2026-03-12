@@ -32,6 +32,7 @@ function buildDefaultSettings(): Omit<SettingsRecord, "id" | "userId" | "created
     fullName: "",
     contactNumber: "",
     occupation: "",
+    gender: "",
     maritalStatus: "",
     location: "",
     bio: "",

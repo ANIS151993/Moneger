@@ -4,7 +4,6 @@ import Link from "next/link";
 import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 
-import { BrandLogo } from "@/components/branding/BrandLogo";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -12,7 +11,15 @@ import { dashboardNavigation } from "@/lib/constants/navigation";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useUserSettings } from "@/lib/hooks/use-user-settings";
 import { cn } from "@/lib/utils/cn";
-import { formatMaritalStatus, getProfileDisplayName, getProfileSummary } from "@/lib/utils/profile";
+import {
+  formatGender,
+  formatMaritalStatus,
+  getCompactProfileMeta,
+  getProfileContact,
+  getProfileDisplayName,
+  getProfileLocation,
+  getProfileSummary
+} from "@/lib/utils/profile";
 
 export function AppShell({ children }: { children: ReactNode }) {
   const pathname = usePathname();
@@ -20,14 +27,31 @@ export function AppShell({ children }: { children: ReactNode }) {
   const profile = useUserSettings(user?.uid);
   const displayName = getProfileDisplayName(profile, user?.email);
   const profileSummary = getProfileSummary(profile);
+  const compactMeta = getCompactProfileMeta(profile, user?.email);
+  const contact = getProfileContact(profile);
+  const location = getProfileLocation(profile);
+  const gender = formatGender(profile?.gender);
   const maritalStatus = formatMaritalStatus(profile?.maritalStatus);
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(22,163,74,0.12),_transparent_24rem),linear-gradient(180deg,#f8fafc_0%,#eef6ff_100%)]">
       <div className="mx-auto flex min-h-screen max-w-[1600px] flex-col gap-6 px-4 py-4 lg:flex-row lg:px-6">
         <aside className="w-full shrink-0 rounded-[32px] border border-white/70 bg-slate-950 px-5 py-6 text-slate-100 shadow-2xl lg:sticky lg:top-4 lg:h-[calc(100vh-2rem)] lg:w-[280px]">
-          <BrandLogo compact className="[&>span:first-child]:bg-white [&>span:first-child]:text-emerald-600" />
-          <nav className="mt-8 grid gap-2">
+          <Link
+            className="group relative block overflow-hidden rounded-[30px] border border-white/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.22),_transparent_36%),linear-gradient(160deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-4 shadow-[0_18px_54px_rgba(2,6,23,0.34)] transition hover:-translate-y-0.5 hover:bg-white/10"
+            href="/settings"
+          >
+            <div className="absolute -left-6 -top-4 h-20 w-20 rounded-full bg-emerald-300/15 blur-2xl transition duration-300 group-hover:scale-110" />
+            <div className="relative flex items-center gap-4">
+              <ProfileAvatar imageUrl={profile?.avatarDataUrl} name={displayName} size="md" />
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-300">Profile</p>
+                <p className="mt-1 truncate text-lg font-semibold tracking-tight text-white">{displayName}</p>
+                <p className="mt-1 truncate text-sm text-slate-400">{compactMeta}</p>
+              </div>
+            </div>
+          </Link>
+          <nav className="mt-6 grid gap-2">
             {dashboardNavigation.map((item) => {
               const active = pathname === item.href;
 
@@ -54,15 +78,8 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="mt-8 border-t border-white/10 pt-4">
-            <div className="flex items-center gap-3">
-              <ProfileAvatar className="rounded-[22px]" imageUrl={profile?.avatarDataUrl} name={displayName} size="sm" />
-              <div className="min-w-0">
-                <p className="truncate text-sm font-medium text-white">{displayName}</p>
-                <p className="truncate text-xs text-slate-400">
-                  {profile?.occupation || user?.email || "Local account"}
-                </p>
-              </div>
-            </div>
+            <p className="text-sm font-medium text-white">{displayName}</p>
+            <p className="mt-1 truncate text-xs text-slate-400">{compactMeta}</p>
             <p className="mt-3 text-xs text-slate-400">Data store isolated per signed-in account</p>
             <Button className="mt-4 w-full" variant="ghost" onClick={() => void logout()}>
               Sign out
@@ -84,15 +101,17 @@ export function AppShell({ children }: { children: ReactNode }) {
             >
               <div className="absolute -right-5 -top-5 h-24 w-24 rounded-full bg-emerald-300/25 blur-2xl transition duration-300 group-hover:scale-110" />
               <div className="absolute left-8 top-0 h-16 w-16 rounded-full bg-sky-300/20 blur-2xl" />
-              <div className="relative flex flex-col gap-3 sm:min-w-[320px] sm:flex-row sm:items-center">
-                <ProfileAvatar imageUrl={profile?.avatarDataUrl} name={displayName} size="md" />
-                <div className="min-w-0 flex-1">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-700">Profile</p>
-                    {maritalStatus ? <Badge tone="info">{maritalStatus}</Badge> : null}
-                  </div>
-                  <p className="mt-2 truncate text-lg font-semibold tracking-tight text-slate-950">{displayName}</p>
-                  <p className="mt-1 truncate text-sm text-slate-500">{profileSummary}</p>
+              <div className="relative flex min-w-[280px] flex-col gap-3">
+                <div className="flex flex-wrap items-center gap-2">
+                  <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-700">Profile</p>
+                  {gender ? <Badge tone="neutral">{gender}</Badge> : null}
+                  {maritalStatus ? <Badge tone="info">{maritalStatus}</Badge> : null}
+                </div>
+                <p className="truncate text-lg font-semibold tracking-tight text-slate-950">{displayName}</p>
+                <p className="truncate text-sm text-slate-500">{profileSummary}</p>
+                <div className="flex flex-wrap gap-2 text-xs text-slate-500">
+                  {location ? <span className="rounded-full bg-white px-3 py-1 ring-1 ring-slate-200">{location}</span> : null}
+                  {contact ? <span className="rounded-full bg-white px-3 py-1 ring-1 ring-slate-200">{contact}</span> : null}
                 </div>
                 <div className="inline-flex items-center rounded-full bg-slate-950 px-3 py-2 text-xs font-semibold uppercase tracking-[0.16em] text-white transition group-hover:bg-emerald-600">
                   Edit

@@ -29,12 +29,32 @@ export function getProfileSummary(profile?: Partial<SettingsRecord>) {
 }
 
 export function formatMaritalStatus(status?: SettingsRecord["maritalStatus"]) {
-  if (!status) {
+  return formatProfileOption(status);
+}
+
+export function formatGender(gender?: SettingsRecord["gender"]) {
+  return formatProfileOption(gender);
+}
+
+function formatProfileOption(value?: string) {
+  if (!value) {
     return "";
   }
 
-  return status
+  return value
     .split("-")
     .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
     .join(" ");
+}
+
+export function getCompactProfileMeta(profile?: Partial<SettingsRecord>, email?: string | null) {
+  return profile?.occupation || profile?.contactNumber || profile?.location || email || "Open settings to personalize";
+}
+
+export function getProfileLocation(profile?: Partial<SettingsRecord>) {
+  return profile?.location?.trim() || "";
+}
+
+export function getProfileContact(profile?: Partial<SettingsRecord>) {
+  return profile?.contactNumber?.trim() || "";
 }

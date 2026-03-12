@@ -12,7 +12,7 @@ import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
-import { maritalStatuses } from "@/lib/constants/options";
+import { genders, maritalStatuses } from "@/lib/constants/options";
 import { ledgerService } from "@/lib/services/ledger-service";
 import { getProfileDisplayName, getProfileSummary } from "@/lib/utils/profile";
 import { profileSchema, type ProfileFormValues, type ProfileInput } from "@/lib/validators/finance";
@@ -71,6 +71,7 @@ export function ProfileForm({
       fullName: settings?.fullName || "",
       contactNumber: settings?.contactNumber || "",
       occupation: settings?.occupation || "",
+      gender: settings?.gender || "",
       maritalStatus: settings?.maritalStatus || "",
       location: settings?.location || "",
       bio: settings?.bio || "",
@@ -90,6 +91,7 @@ export function ProfileForm({
       fullName: settings?.fullName || "",
       contactNumber: settings?.contactNumber || "",
       occupation: settings?.occupation || "",
+      gender: settings?.gender || "",
       maritalStatus: settings?.maritalStatus || "",
       location: settings?.location || "",
       bio: settings?.bio || "",
@@ -189,6 +191,19 @@ export function ProfileForm({
           <FormField label="Occupation" error={errors.occupation?.message}>
             <Input placeholder="Founder, Designer, Engineer" {...register("occupation")} />
           </FormField>
+          <FormField label="Gender" error={errors.gender?.message}>
+            <Select {...register("gender")}>
+              <option value="">Select gender</option>
+              {genders.map((gender) => (
+                <option key={gender} value={gender}>
+                  {formatStatusLabel(gender)}
+                </option>
+              ))}
+            </Select>
+          </FormField>
+        </div>
+
+        <div className="grid gap-4 md:grid-cols-2">
           <FormField label="Marital status" error={errors.maritalStatus?.message}>
             <Select {...register("maritalStatus")}>
               <option value="">Select status</option>
@@ -199,30 +214,28 @@ export function ProfileForm({
               ))}
             </Select>
           </FormField>
-        </div>
-
-        <div className="grid gap-4 md:grid-cols-2">
           <FormField label="Location" error={errors.location?.message}>
             <Input placeholder="Dhaka, Bangladesh" {...register("location")} />
           </FormField>
-          <FormField
-            label="Profile photo"
-            error={errors.avatarDataUrl?.message}
-            hint="JPG, PNG, or WEBP up to 2 MB. Stored locally."
-          >
-            <div className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50 p-4">
-              <div className="flex flex-wrap items-center gap-3">
-                <label className="inline-flex cursor-pointer items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
-                  Upload photo
-                  <input accept="image/png,image/jpeg,image/webp" className="hidden" type="file" onChange={handlePhotoChange} />
-                </label>
-                <Button type="button" variant="ghost" onClick={handleRemovePhoto}>
-                  Remove photo
-                </Button>
-              </div>
-            </div>
-          </FormField>
         </div>
+
+        <FormField
+          label="Profile photo"
+          error={errors.avatarDataUrl?.message}
+          hint="JPG, PNG, or WEBP up to 2 MB. Stored locally."
+        >
+          <div className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50 p-4">
+            <div className="flex flex-wrap items-center gap-3">
+              <label className="inline-flex cursor-pointer items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
+                Upload photo
+                <input accept="image/png,image/jpeg,image/webp" className="hidden" type="file" onChange={handlePhotoChange} />
+              </label>
+              <Button type="button" variant="ghost" onClick={handleRemovePhoto}>
+                Remove photo
+              </Button>
+            </div>
+          </div>
+        </FormField>
 
         <FormField label="Profile note" error={errors.bio?.message} hint="Short intro shown in your workspace cards.">
           <Textarea placeholder="Tell future-you what this workspace is for." {...register("bio")} />
@@ -243,6 +256,7 @@ export function ProfileForm({
                 fullName: settings?.fullName || "",
                 contactNumber: settings?.contactNumber || "",
                 occupation: settings?.occupation || "",
+                gender: settings?.gender || "",
                 maritalStatus: settings?.maritalStatus || "",
                 location: settings?.location || "",
                 bio: settings?.bio || "",
