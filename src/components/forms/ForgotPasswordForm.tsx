@@ -33,7 +33,7 @@ export function ForgotPasswordForm() {
     startTransition(async () => {
       try {
         await resetPassword(values.email);
-        setMessage("Password reset flow triggered. Check your email or local demo note.");
+        setMessage("Password reset flow triggered. Check your email.");
       } catch (error) {
         setFormError(error instanceof Error ? error.message : "Unable to send reset email");
       }

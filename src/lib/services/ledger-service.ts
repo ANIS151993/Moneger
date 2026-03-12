@@ -10,7 +10,6 @@ import {
   settingsRepository,
   syncQueueRepository
 } from "@/lib/repositories/finance-repositories";
-import { seedDemoDataIfEmpty } from "@/lib/services/demo-seed";
 
 async function queueSync(
   userId: string,
@@ -78,9 +77,6 @@ export const ledgerService = {
     const record = await settingsRepository.upsert(userId, input);
     await queueSync(userId, "settings", "update", record.id);
     return record;
-  },
-  async seedDemo(userId: string) {
-    await seedDemoDataIfEmpty(userId);
   },
   async clearWorkspace(userId: string) {
     await Promise.all([

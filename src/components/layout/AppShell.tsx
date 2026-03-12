@@ -46,7 +46,7 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
 
           <div className="mt-8 border-t border-white/10 pt-4">
-            <p className="text-sm font-medium text-white">{user?.email || "Offline demo user"}</p>
+            <p className="text-sm font-medium text-white">{user?.email || "Local account"}</p>
             <p className="mt-1 text-xs text-slate-400">Data store isolated per signed-in account</p>
             <Button className="mt-4 w-full" variant="ghost" onClick={() => void logout()}>
               Sign out

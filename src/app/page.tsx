@@ -41,7 +41,7 @@ export default function LandingPage() {
               </Link>
               <Link href="/dashboard">
                 <Button className="px-6 py-4 text-base" variant="ghost">
-                  Explore demo dashboard
+                  Open dashboard
                 </Button>
               </Link>
             </div>

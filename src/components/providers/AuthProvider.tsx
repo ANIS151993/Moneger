@@ -10,7 +10,6 @@ import {
 } from "firebase/auth";
 
 import { auth, firebaseClientConfigured } from "@/lib/firebase/client";
-import { seedDemoDataIfEmpty } from "@/lib/services/demo-seed";
 import { clearLocalAuthSession, readLocalAuthSession, touchSessionCookie, writeLocalAuthSession } from "@/lib/utils/session";
 import { nowIso } from "@/lib/utils/id";
 import type { AuthContextValue, AuthUser } from "@/types/auth";
@@ -54,7 +53,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
         if (nextUser) {
           touchSessionCookie();
-          await seedDemoDataIfEmpty(nextUser.uid);
         } else {
           clearLocalAuthSession();
         }
@@ -72,7 +70,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         authMode: "local"
       };
       setUser(nextUser);
-      void seedDemoDataIfEmpty(nextUser.uid);
     }
 
     setLoading(false);
@@ -97,7 +94,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       createdAt: nowIso()
     });
     setUser(nextUser);
-    await seedDemoDataIfEmpty(nextUser.uid);
     void password;
   }
 

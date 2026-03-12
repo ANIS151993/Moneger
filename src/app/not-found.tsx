@@ -10,7 +10,7 @@ export default function NotFound() {
         <p className="text-xs uppercase tracking-[0.24em] text-emerald-600">404</p>
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">Page not found</h1>
         <p className="mt-4 text-sm leading-7 text-slate-500">
-          The route you requested does not exist in the current Moneger starter.
+          The route you requested does not exist in this Moneger workspace.
         </p>
         <div className="mt-6">
           <Link href="/">

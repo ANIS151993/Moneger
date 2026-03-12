@@ -8,6 +8,7 @@ import { IncomeExpenseLineChart } from "@/components/charts/IncomeExpenseLineCha
 import { RecentActivityList } from "@/components/dashboard/RecentActivityList";
 import { RemindersPanel } from "@/components/dashboard/RemindersPanel";
 import { LoadingCard } from "@/components/shared/LoadingCard";
+import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { StatCard } from "@/components/ui/StatCard";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -17,7 +18,15 @@ import { formatCurrency } from "@/lib/utils/finance";
 
 export default function DashboardPage() {
   const { user } = useAuth();
-  const { snapshot, displayCurrency, loading, settings } = useDashboardData(user?.uid);
+  const { snapshot, dataset, displayCurrency, loading, settings } = useDashboardData(user?.uid);
+  const hasWorkspaceData = Boolean(
+    dataset &&
+      (dataset.incomes.length > 0 ||
+        dataset.expenses.length > 0 ||
+        dataset.debts.length > 0 ||
+        dataset.owed.length > 0 ||
+        dataset.banks.length > 0)
+  );
 
   useEffect(() => {
     if (settings?.notificationsEnabled && snapshot?.reminders.length) {
@@ -65,17 +74,28 @@ export default function DashboardPage() {
         />
       </section>
 
-      <section className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
-        <IncomeExpenseLineChart points={snapshot.monthlyTrends} />
-        <RemindersPanel reminders={snapshot.reminders} />
-      </section>
+      {!hasWorkspaceData ? (
+        <EmptyState
+          title="Your workspace is empty"
+          description="Add your first income, expense, debt, owed amount, or bank account to start tracking everything locally on this device."
+          ctaLabel="Add your first income"
+          ctaHref="/income"
+        />
+      ) : (
+        <>
+          <section className="grid gap-6 xl:grid-cols-[1.35fr_0.65fr]">
+            <IncomeExpenseLineChart points={snapshot.monthlyTrends} />
+            <RemindersPanel reminders={snapshot.reminders} />
+          </section>
 
-      <section className="grid gap-6 xl:grid-cols-2">
-        <CategoryBreakdownChart items={snapshot.categoryTotals} />
-        <DebtOwedChart debt={snapshot.debtVsOwed.debt} owed={snapshot.debtVsOwed.owed} />
-      </section>
+          <section className="grid gap-6 xl:grid-cols-2">
+            <CategoryBreakdownChart items={snapshot.categoryTotals} />
+            <DebtOwedChart debt={snapshot.debtVsOwed.debt} owed={snapshot.debtVsOwed.owed} />
+          </section>
 
-      <RecentActivityList items={snapshot.recentActivity} displayCurrency={displayCurrency} />
+          <RecentActivityList items={snapshot.recentActivity} displayCurrency={displayCurrency} />
+        </>
+      )}
     </div>
   );
 }

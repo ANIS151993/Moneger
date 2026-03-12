@@ -16,26 +16,32 @@ export function CategoryBreakdownChart({ items }: { items: CategoryTotal[] }) {
       <p className="text-xs uppercase tracking-[0.24em] text-slate-400">Category mix</p>
       <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">Expense breakdown</h2>
       <div className="mt-6 h-[320px]">
-        <Doughnut
-          data={{
-            labels: items.map((item) => item.category),
-            datasets: [
-              {
-                data: items.map((item) => item.amount),
-                backgroundColor: palette
+        {items.length === 0 ? (
+          <div className="grid h-full place-items-center rounded-3xl bg-slate-50 px-6 text-center text-sm text-slate-500">
+            Add expense records to see category breakdowns here.
+          </div>
+        ) : (
+          <Doughnut
+            data={{
+              labels: items.map((item) => item.category),
+              datasets: [
+                {
+                  data: items.map((item) => item.amount),
+                  backgroundColor: palette
+                }
+              ]
+            }}
+            options={{
+              maintainAspectRatio: false,
+              responsive: true,
+              plugins: {
+                legend: {
+                  position: "bottom"
+                }
               }
-            ]
-          }}
-          options={{
-            maintainAspectRatio: false,
-            responsive: true,
-            plugins: {
-              legend: {
-                position: "bottom"
-              }
-            }
-          }}
-        />
+            }}
+          />
+        )}
       </div>
     </Card>
   );

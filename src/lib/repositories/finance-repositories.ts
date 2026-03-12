@@ -49,9 +49,7 @@ export const settingsRepository = {
   },
   async upsert(
     userId: string,
-    payload: Omit<SettingsRecord, "id" | "userId" | "createdAt" | "updatedAt" | "lastSeededAt"> & {
-      lastSeededAt?: string | null;
-    }
+    payload: Omit<SettingsRecord, "id" | "userId" | "createdAt" | "updatedAt">
   ) {
     const current = await this.get(userId);
     const now = nowIso();
@@ -60,8 +58,7 @@ export const settingsRepository = {
       userId,
       createdAt: current?.createdAt || now,
       updatedAt: now,
-      ...payload,
-      lastSeededAt: payload.lastSeededAt ?? current?.lastSeededAt ?? null
+      ...payload
     };
     await getUserDatabase(userId).settings.put(record);
     return record;

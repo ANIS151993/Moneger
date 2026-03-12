@@ -77,9 +77,17 @@ export function SettingsForm({
     setMessage(`Browser notification permission: ${permission}`);
   }
 
-  async function handleSeedDemo() {
-    await ledgerService.seedDemo(userId);
-    setMessage("Demo data checked and seeded if empty.");
+  async function handleClearWorkspace() {
+    const confirmed = window.confirm(
+      "This will permanently remove all local income, expense, debt, owed, bank, and queued sync records on this device."
+    );
+
+    if (!confirmed) {
+      return;
+    }
+
+    await ledgerService.clearWorkspace(userId);
+    setMessage("Local finance records cleared.");
   }
 
   return (
@@ -120,8 +128,8 @@ export function SettingsForm({
             >
               Request notification permission
             </Button>
-            <Button type="button" variant="secondary" onClick={() => void handleSeedDemo()}>
-              Seed demo data
+            <Button type="button" variant="danger" onClick={() => void handleClearWorkspace()}>
+              Clear local records
             </Button>
           </div>
         </form>

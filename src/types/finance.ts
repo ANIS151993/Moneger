@@ -88,7 +88,6 @@ export interface SettingsRecord extends BaseEntity {
   optionalEncryptedSyncEnabled: boolean;
   browserNotificationsPermission: NotificationPermission | "unsupported";
   themePreference: "system" | "light";
-  lastSeededAt: string | null;
 }
 
 export type FinanceRecord =

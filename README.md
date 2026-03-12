@@ -101,7 +101,7 @@ This project is configured for static export, so Cloudflare Pages can host the g
 - Debt tracking
 - Money owed tracking
 - Bank tracking
-- Settings, notification scaffolding, sync scaffolding, and demo seed actions
+- Settings, notification scaffolding, and sync scaffolding
 
 ## Security Posture
 
