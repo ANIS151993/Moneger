@@ -67,6 +67,30 @@ npm run dev
 
 5. Open `http://localhost:3000`.
 
+## Free Deployment Path
+
+The lowest-friction free setup for this repo is:
+
+- Cloudflare Pages for the web app
+- Firebase Authentication for login/signup/reset
+- Firestore on the Firebase Spark plan only if you later enable sync
+
+This project is configured for static export, so Cloudflare Pages can host the generated `out/` directory without Firebase App Hosting.
+
+1. Keep your Firebase project on the Spark plan.
+2. In Firebase Authentication, enable `Email/Password`.
+3. In Firebase Authentication authorized domains, add:
+   - `localhost`
+   - your Cloudflare Pages `*.pages.dev` domain
+   - `moneger.marcbd.site`
+4. In Cloudflare Pages, create a project from the GitHub repo.
+5. Use these build settings:
+   - Framework preset: `Next.js (Static HTML Export)`
+   - Build command: `npm run build`
+   - Build output directory: `out`
+6. Add all `NEXT_PUBLIC_*` variables from `.env.local` in the Cloudflare Pages environment settings.
+7. Deploy, test the `*.pages.dev` URL, then attach `moneger.marcbd.site` as the custom domain.
+
 ## Main Product Surfaces
 
 - Landing page with privacy-first positioning
