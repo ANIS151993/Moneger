@@ -5,11 +5,13 @@ import {
   expenseCategories,
   incomeCategories,
   incomeFrequencies,
+  maritalStatuses,
   owedStatuses,
   supportedCurrencies
 } from "@/lib/constants/options";
 
 const currencySchema = z.enum(["USD", "BDT"]);
+const maritalStatusSchema = z.enum(["", ...maritalStatuses] as const);
 
 export const incomeSchema = z.object({
   amount: z.coerce.number().positive("Amount must be greater than zero"),
@@ -71,12 +73,40 @@ export const settingsSchema = z.object({
   themePreference: z.enum(["system", "light"])
 });
 
+export const profileSchema = z.object({
+  fullName: z
+    .string()
+    .trim()
+    .max(80, "Name must be 80 characters or less")
+    .refine((value) => value === "" || value.length >= 2, "Name must be at least 2 characters")
+    .default(""),
+  contactNumber: z
+    .string()
+    .trim()
+    .max(32, "Contact number must be 32 characters or less")
+    .refine(
+      (value) => value === "" || /^[0-9+().\-\s]{7,20}$/.test(value),
+      "Enter a valid contact number"
+    )
+    .default(""),
+  occupation: z.string().trim().max(80, "Occupation must be 80 characters or less").default(""),
+  maritalStatus: maritalStatusSchema.default(""),
+  location: z.string().trim().max(80, "Location must be 80 characters or less").default(""),
+  bio: z.string().trim().max(240, "Profile note must be 240 characters or less").default(""),
+  avatarDataUrl: z
+    .string()
+    .max(3_000_000, "Profile photo is too large")
+    .refine((value) => value === "" || value.startsWith("data:image/"), "Use a valid image file")
+    .default("")
+});
+
 export type IncomeFormValues = z.input<typeof incomeSchema>;
 export type ExpenseFormValues = z.input<typeof expenseSchema>;
 export type DebtFormValues = z.input<typeof debtSchema>;
 export type OwedFormValues = z.input<typeof owedSchema>;
 export type BankFormValues = z.input<typeof bankSchema>;
 export type SettingsFormValues = z.input<typeof settingsSchema>;
+export type ProfileFormValues = z.input<typeof profileSchema>;
 
 export type IncomeInput = z.output<typeof incomeSchema>;
 export type ExpenseInput = z.output<typeof expenseSchema>;
@@ -84,3 +114,4 @@ export type DebtInput = z.output<typeof debtSchema>;
 export type OwedInput = z.output<typeof owedSchema>;
 export type BankInput = z.output<typeof bankSchema>;
 export type SettingsInput = z.output<typeof settingsSchema>;
+export type ProfileInput = z.output<typeof profileSchema>;

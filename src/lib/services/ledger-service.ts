@@ -1,6 +1,14 @@
 "use client";
 
-import type { BankInput, DebtInput, ExpenseInput, IncomeInput, OwedInput, SettingsInput } from "@/lib/validators/finance";
+import type {
+  BankInput,
+  DebtInput,
+  ExpenseInput,
+  IncomeInput,
+  OwedInput,
+  ProfileInput,
+  SettingsInput
+} from "@/lib/validators/finance";
 import {
   bankRepository,
   debtRepository,
@@ -74,6 +82,11 @@ export const ledgerService = {
     await queueSync(userId, "bank", "delete", id);
   },
   async saveSettings(userId: string, input: SettingsInput & { browserNotificationsPermission: NotificationPermission | "unsupported" }) {
+    const record = await settingsRepository.upsert(userId, input);
+    await queueSync(userId, "settings", "update", record.id);
+    return record;
+  },
+  async saveProfile(userId: string, input: ProfileInput) {
     const record = await settingsRepository.upsert(userId, input);
     await queueSync(userId, "settings", "update", record.id);
     return record;

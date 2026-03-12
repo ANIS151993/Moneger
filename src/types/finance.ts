@@ -1,4 +1,5 @@
 export type CurrencyCode = "USD" | "BDT";
+export type MaritalStatus = "" | "single" | "married" | "engaged" | "separated" | "divorced" | "widowed" | "prefer-not-to-say";
 
 export type IncomeFrequency = "daily" | "weekly" | "monthly" | "one-time";
 export type DebtStatus = "unpaid" | "partial" | "paid" | "overdue";
@@ -88,6 +89,13 @@ export interface SettingsRecord extends BaseEntity {
   optionalEncryptedSyncEnabled: boolean;
   browserNotificationsPermission: NotificationPermission | "unsupported";
   themePreference: "system" | "light";
+  fullName: string;
+  contactNumber: string;
+  occupation: string;
+  maritalStatus: MaritalStatus;
+  location: string;
+  bio: string;
+  avatarDataUrl: string;
 }
 
 export type FinanceRecord =

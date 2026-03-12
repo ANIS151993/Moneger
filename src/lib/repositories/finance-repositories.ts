@@ -21,6 +21,24 @@ export const owedRepository = createLocalRepository<OwedRecord>("owed", "owed");
 export const bankRepository = createLocalRepository<BankRecord>("banks", "bank");
 export const syncQueueRepository = createLocalRepository<SyncQueueRecord>("syncQueue", "sync");
 
+function buildDefaultSettings(): Omit<SettingsRecord, "id" | "userId" | "createdAt" | "updatedAt"> {
+  return {
+    displayCurrency: "USD",
+    notificationsEnabled: true,
+    optionalEncryptedSyncEnabled: false,
+    browserNotificationsPermission:
+      typeof Notification === "undefined" ? "unsupported" : Notification.permission,
+    themePreference: "system",
+    fullName: "",
+    contactNumber: "",
+    occupation: "",
+    maritalStatus: "",
+    location: "",
+    bio: "",
+    avatarDataUrl: ""
+  };
+}
+
 export const exchangeRateRepository = {
   async getRate(userId: string, pair: string) {
     return getUserDatabase(userId).exchangeRates.get(pair);
@@ -45,11 +63,20 @@ export const exchangeRateRepository = {
 
 export const settingsRepository = {
   async get(userId: string) {
-    return getUserDatabase(userId).settings.get(`settings_${userId}`);
+    const record = await getUserDatabase(userId).settings.get(`settings_${userId}`);
+
+    if (!record) {
+      return undefined;
+    }
+
+    return {
+      ...buildDefaultSettings(),
+      ...record
+    };
   },
   async upsert(
     userId: string,
-    payload: Omit<SettingsRecord, "id" | "userId" | "createdAt" | "updatedAt">
+    payload: Partial<Omit<SettingsRecord, "id" | "userId" | "createdAt" | "updatedAt">>
   ) {
     const current = await this.get(userId);
     const now = nowIso();
@@ -58,6 +85,8 @@ export const settingsRepository = {
       userId,
       createdAt: current?.createdAt || now,
       updatedAt: now,
+      ...buildDefaultSettings(),
+      ...current,
       ...payload
     };
     await getUserDatabase(userId).settings.put(record);
