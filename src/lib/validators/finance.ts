@@ -6,6 +6,7 @@ import {
   genders,
   incomeCategories,
   incomeFrequencies,
+  languagePreferences,
   maritalStatuses,
   owedStatuses,
   supportedCurrencies
@@ -13,6 +14,7 @@ import {
 
 const currencySchema = z.enum(["USD", "BDT"]);
 const genderSchema = z.enum(["", ...genders] as const);
+const languagePreferenceSchema = z.enum(languagePreferences.map((item) => item.value) as ["en", "bn"]);
 const maritalStatusSchema = z.enum(["", ...maritalStatuses] as const);
 
 export const incomeSchema = z.object({
@@ -70,6 +72,7 @@ export const bankSchema = z.object({
 
 export const settingsSchema = z.object({
   displayCurrency: currencySchema,
+  languagePreference: languagePreferenceSchema,
   notificationsEnabled: z.boolean(),
   optionalEncryptedSyncEnabled: z.boolean(),
   themePreference: z.enum(["system", "light"])

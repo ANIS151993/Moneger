@@ -24,6 +24,7 @@ export const syncQueueRepository = createLocalRepository<SyncQueueRecord>("syncQ
 function buildDefaultSettings(): Omit<SettingsRecord, "id" | "userId" | "createdAt" | "updatedAt"> {
   return {
     displayCurrency: "USD",
+    languagePreference: "en",
     notificationsEnabled: true,
     optionalEncryptedSyncEnabled: false,
     browserNotificationsPermission:

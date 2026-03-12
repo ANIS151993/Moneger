@@ -1,6 +1,18 @@
-import type { CurrencyCode, DebtStatus, Gender, IncomeFrequency, MaritalStatus, OwedStatus } from "@/types/finance";
+import type {
+  CurrencyCode,
+  DebtStatus,
+  Gender,
+  IncomeFrequency,
+  LanguagePreference,
+  MaritalStatus,
+  OwedStatus
+} from "@/types/finance";
 
 export const supportedCurrencies: CurrencyCode[] = ["USD", "BDT"];
+export const languagePreferences = [
+  { value: "en", label: "English" },
+  { value: "bn", label: "Bangla" }
+] as const satisfies ReadonlyArray<{ value: LanguagePreference; label: string }>;
 
 export const incomeFrequencies: IncomeFrequency[] = ["daily", "weekly", "monthly", "one-time"];
 

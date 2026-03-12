@@ -4,14 +4,20 @@ import { useLiveQuery } from "dexie-react-hooks";
 
 import { ProfileForm } from "@/components/forms/ProfileForm";
 import { SettingsForm } from "@/components/forms/SettingsForm";
-import { SimpleTable } from "@/components/shared/SimpleTable";
-import { Badge } from "@/components/ui/Badge";
-import { EmptyState } from "@/components/ui/EmptyState";
+import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { getUserDatabase } from "@/lib/db/moneger-db";
 import { useUserSettings } from "@/lib/hooks/use-user-settings";
-import { formatDateTime, relativeFromNow } from "@/lib/utils/date";
+
+const settingsSections = [
+  { id: "profile-settings", label: "Profile Settings", description: "Personal identity and photo" },
+  { id: "currency-settings", label: "Currency Settings", description: "Money display defaults" },
+  { id: "language-settings", label: "Language Settings", description: "Preferred interface language" },
+  { id: "app-settings", label: "App Settings", description: "Theme and reminder behavior" },
+  { id: "privacy-sync-settings", label: "Privacy & Sync", description: "Local-first sync posture" },
+  { id: "workspace-settings", label: "Workspace Settings", description: "Reset local data safely" }
+] as const;
 
 export default function SettingsPage() {
   const { user } = useAuth();
@@ -37,56 +43,34 @@ export default function SettingsPage() {
       <PageHeader
         eyebrow="Settings"
         title="Profile, privacy, and sync controls"
-        description="Manage your personal profile, workspace preferences, and local sync queue without turning cloud storage into the default."
+        description="Use clear subsections to manage your profile, currency, language, app behavior, privacy posture, and workspace actions."
       />
 
-      <div className="grid gap-6 xl:grid-cols-[1.08fr_0.92fr]">
-        <ProfileForm email={user.email} settings={settings} userId={user.uid} />
+      <div className="grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)]">
+        <Card className="h-fit xl:sticky xl:top-6">
+          <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">Settings Menu</p>
+          <div className="mt-5 grid gap-2">
+            {settingsSections.map((section) => (
+              <a
+                key={section.id}
+                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-emerald-300 hover:bg-emerald-50"
+                href={`#${section.id}`}
+              >
+                <p className="text-sm font-semibold text-slate-900">{section.label}</p>
+                <p className="mt-1 text-xs text-slate-500">{section.description}</p>
+              </a>
+            ))}
+          </div>
+          <p className="mt-5 text-xs leading-6 text-slate-500">
+            All settings remain isolated per signed-in account and stored locally on this device by default.
+          </p>
+        </Card>
+
         <div className="grid gap-6">
-          <SettingsForm userId={user.uid} settings={settings} />
-          {syncQueue.length === 0 ? (
-            <EmptyState
-              title="Sync queue is empty"
-              description="Queued local changes will appear here if you later choose to prepare encrypted sync uploads."
-            />
-          ) : (
-            <SimpleTable
-              title="Sync queue"
-              description="Queued local changes waiting for optional encrypted sync handling."
-              rows={syncQueue}
-              columns={[
-                {
-                  key: "entity",
-                  header: "Entity",
-                  render: (item) => item.entityType
-                },
-                {
-                  key: "action",
-                  header: "Action",
-                  render: (item) => item.action
-                },
-                {
-                  key: "status",
-                  header: "Status",
-                  render: (item) => (
-                    <Badge tone={item.status === "uploaded" ? "success" : item.status === "failed" ? "danger" : "info"}>
-                      {item.status}
-                    </Badge>
-                  )
-                },
-                {
-                  key: "createdAt",
-                  header: "Queued",
-                  render: (item) => (
-                    <div>
-                      <p>{relativeFromNow(item.createdAt)}</p>
-                      <p className="text-xs text-slate-400">{formatDateTime(item.createdAt)}</p>
-                    </div>
-                  )
-                }
-              ]}
-            />
-          )}
+          <section id="profile-settings">
+            <ProfileForm email={user.email} settings={settings} userId={user.uid} />
+          </section>
+          <SettingsForm syncQueue={syncQueue} userId={user.uid} settings={settings} />
         </div>
       </div>
     </div>
