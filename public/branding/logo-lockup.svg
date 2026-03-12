@@ -1,0 +1,8 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 420 120">
+  <rect width="96" height="96" rx="24" fill="#16A34A"/>
+  <path d="M21 70V26h12l15 19 15-19h12v44H61V48L48 64 35 48v22H21Z" transform="translate(0 0)" fill="#fff"/>
+  <g transform="translate(122 34)">
+    <text x="0" y="24" font-family="Inter, sans-serif" font-size="34" font-weight="700" fill="#0F172A">Moneger</text>
+    <text x="0" y="54" font-family="Inter, sans-serif" font-size="18" fill="#475569">Your Smart Money Manager</text>
+  </g>
+</svg>

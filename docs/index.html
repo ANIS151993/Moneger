@@ -1,0 +1,81 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Moneger Project Story</title>
+    <link rel="stylesheet" href="./styles.css" />
+  </head>
+  <body>
+    <main class="page">
+      <section class="hero">
+        <div class="hero-copy">
+          <span class="eyebrow">GitHub Project Page</span>
+          <h1>Moneger</h1>
+          <p class="lead">A privacy-first, local-first money management app built so your financial source of truth stays on your device.</p>
+          <div class="hero-actions">
+            <a class="button button-primary" href="https://moneger.marcbd.site" target="_blank" rel="noreferrer">Open Web App</a>
+            <a class="button button-secondary" href="https://moneger.marcbd.site" target="_blank" rel="noreferrer">Download / Install App</a>
+          </div>
+        </div>
+        <div class="hero-card">
+          <div class="metric">
+            <span>Storage model</span>
+            <strong>IndexedDB first</strong>
+          </div>
+          <div class="metric">
+            <span>Remote role</span>
+            <strong>Auth + optional encrypted sync</strong>
+          </div>
+          <div class="metric">
+            <span>Core principle</span>
+            <strong>Your Money. Your Control.</strong>
+          </div>
+        </div>
+      </section>
+
+      <section class="grid">
+        <article class="card">
+          <span class="eyebrow">Why I built this</span>
+          <h2>Privacy should be the default for personal finance</h2>
+          <p>Most money apps normalize storing sensitive records on a remote server. Moneger starts from the opposite assumption: users should not lose access to their own financial records because a server is down or a sync service fails.</p>
+        </article>
+        <article class="card">
+          <span class="eyebrow">How I built this</span>
+          <h2>Local-first architecture with a modern web stack</h2>
+          <p>Moneger uses Next.js, TypeScript, Tailwind CSS, Dexie, Chart.js, and Firebase Auth. IndexedDB is the primary ledger database. Firebase is kept limited to auth and optional encrypted sync scaffolding.</p>
+        </article>
+        <article class="card">
+          <span class="eyebrow">How to use this</span>
+          <h2>Track income, expenses, debts, owed money, and banks</h2>
+          <p>Create an account, enter records, view dashboard totals and charts, check settlement reminders, and keep your records available offline. If you later want sync, add encrypted sync carefully rather than pushing raw finance data upstream.</p>
+        </article>
+      </section>
+
+      <section class="card wide">
+        <span class="eyebrow">Feature Summary</span>
+        <div class="columns">
+          <div>
+            <h3>Included</h3>
+            <ul>
+              <li>Signup, login, password reset, and sign out flow</li>
+              <li>Income, expense, debt, owed, and bank tracking</li>
+              <li>Dashboard charts and mixed-currency totals</li>
+              <li>Exchange-rate cache with offline fallback</li>
+              <li>Notification and encrypted sync scaffolding</li>
+            </ul>
+          </div>
+          <div>
+            <h3>Principles</h3>
+            <ul>
+              <li>Local-first source of truth</li>
+              <li>Offline-first core experience</li>
+              <li>No plaintext remote finance storage by default</li>
+              <li>Reusable architecture for future mobile adaptation</li>
+            </ul>
+          </div>
+        </div>
+      </section>
+    </main>
+  </body>
+  </html>
