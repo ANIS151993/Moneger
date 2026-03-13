@@ -124,20 +124,24 @@ export default function GuidePage() {
                   </div>
                 </div>
 
-                <div className="rounded-[26px] border border-slate-900/10 bg-slate-950 px-5 py-5 text-white shadow-[0_18px_50px_rgba(15,23,42,0.2)]">
-                  <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-300">
+                <div className="relative overflow-hidden rounded-[26px] border border-slate-900/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.24),_transparent_34%),linear-gradient(160deg,#020617_0%,#0f172a_55%,#064e3b_100%)] px-5 py-5 text-white shadow-[0_18px_50px_rgba(15,23,42,0.2)]">
+                  <div className="absolute -right-6 top-0 h-20 w-20 rounded-full bg-sky-300/15 blur-3xl" />
+                  <div className="relative">
+                    <p className="inline-flex rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-200">
                     {content.progressLabel}
-                  </p>
-                  <p className="mt-3 text-sm leading-6 text-slate-300">{section.summary}</p>
-                  <Link
-                    className={buttonClassName({
-                      className: "mt-5 w-full",
-                      variant: "ghost"
-                    })}
-                    href={section.ctaHref}
-                  >
-                    {section.ctaLabel}
-                  </Link>
+                    </p>
+                    <p className="mt-3 text-sm leading-6 text-slate-300">{section.summary}</p>
+                    <Link
+                      className={buttonClassName({
+                        className:
+                          "mt-5 w-full rounded-[18px] border-emerald-300/30 bg-[radial-gradient(circle_at_top_right,_rgba(125,211,252,0.24),_transparent_42%),linear-gradient(135deg,#16a34a_0%,#14b8a6_58%,#38bdf8_100%)] text-white shadow-[0_16px_34px_rgba(22,163,74,0.24)] hover:shadow-[0_20px_42px_rgba(22,163,74,0.3)]",
+                        variant: "primary"
+                      })}
+                      href={section.ctaHref}
+                    >
+                      {section.ctaLabel}
+                    </Link>
+                  </div>
                 </div>
               </div>
             </Card>

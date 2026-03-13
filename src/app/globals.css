@@ -145,3 +145,7 @@ select {
 .fx-sparkline-panel {
   animation: fxFloat 5s ease-in-out infinite;
 }
+
+.developer-ribbon {
+  animation: fxFloat 6.5s ease-in-out infinite;
+}

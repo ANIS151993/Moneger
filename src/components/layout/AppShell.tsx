@@ -55,7 +55,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </Link>
           <nav className="mt-6 grid gap-2">
-            {navigation.map((item, index) => {
+            {navigation.map((item) => {
               const active = pathname === item.href;
 
               return (
@@ -83,16 +83,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                   >
                     <div className="absolute right-4 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-white/[0.08] blur-xl" />
                   </div>
-                  <div className="relative flex items-center justify-between gap-3 pl-3">
+                  <div className="relative flex items-center gap-3 pl-3">
                     <span>{t(item.labelKey)}</span>
-                    <span
-                      className={cn(
-                        "rounded-full px-2 py-1 text-[10px] font-semibold tracking-[0.18em]",
-                        active ? "bg-white/[0.12] text-white" : "bg-white/[0.08] text-slate-400 group-hover:text-slate-200"
-                      )}
-                    >
-                      {String(index + 1).padStart(2, "0")}
-                    </span>
                   </div>
                 </Link>
               );
@@ -100,32 +92,23 @@ export function AppShell({ children }: { children: ReactNode }) {
           </nav>
 
           <Link
-            className={cn(
-              "group relative mt-4 block overflow-hidden rounded-[26px] border p-4 shadow-[0_18px_54px_rgba(2,6,23,0.24)] transition duration-300 hover:-translate-y-0.5",
-              guideActive
-                ? "border-sky-300/[0.35] bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.3),_transparent_34%),linear-gradient(150deg,rgba(14,116,144,0.92),rgba(15,23,42,0.96))]"
-                : "border-emerald-300/20 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.24),_transparent_32%),linear-gradient(150deg,rgba(16,185,129,0.2),rgba(15,23,42,0.18))] hover:border-sky-300/[0.25]"
-            )}
+            className={buttonClassName({
+              className: cn(
+                "group relative mt-4 flex w-full items-center justify-center overflow-hidden rounded-[24px] border px-4 py-3 text-sm shadow-[0_18px_42px_rgba(8,47,73,0.26)]",
+                guideActive
+                  ? "border-sky-200/50 bg-[radial-gradient(circle_at_top_right,_rgba(125,211,252,0.32),_transparent_36%),linear-gradient(135deg,#0f172a_0%,#0f766e_54%,#38bdf8_100%)] text-white"
+                  : "border-emerald-300/20 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.2),_transparent_34%),linear-gradient(135deg,#052e16_0%,#0f172a_56%,#0f766e_100%)] text-white hover:border-sky-200/40 hover:shadow-[0_22px_50px_rgba(8,47,73,0.32)]"
+              ),
+              variant: "secondary"
+            })}
             href="/guide"
           >
-            <div className="absolute -right-4 top-0 h-16 w-16 rounded-full bg-sky-300/20 blur-2xl transition duration-300 group-hover:scale-110" />
-            <div className="relative flex items-start justify-between gap-3">
-              <div className="min-w-0">
-                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
-                  {t("layout.guideSpotlightEyebrow")}
-                </p>
-                <h2 className="mt-2 text-sm font-semibold tracking-tight text-white">
-                  {t("layout.guideSpotlightTitle")}
-                </h2>
-                <p className="mt-2 text-xs leading-5 text-slate-200">
-                  {profileComplete
-                    ? t("layout.guideSpotlightDescription")
-                    : t("layout.guideSpotlightOnboardingDescription")}
-                </p>
-              </div>
-              <span className="rounded-full border border-white/[0.12] bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">
-                {t("layout.guideSpotlightAction")}
+            <div className="absolute -right-6 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full bg-sky-300/20 blur-2xl transition duration-300 group-hover:scale-125" />
+            <div className="relative flex items-center gap-3">
+              <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/15 bg-white/10 text-xs font-bold text-white">
+                G
               </span>
+              <span>{t("layout.guideSpotlightTitle")}</span>
             </div>
           </Link>
 
