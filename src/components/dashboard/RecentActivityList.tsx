@@ -24,7 +24,7 @@ export function RecentActivityList({
   const { t } = useI18n();
 
   return (
-    <Card>
+    <Card className="border-slate-200/80 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.1),_transparent_32%),linear-gradient(180deg,#ffffff_0%,#f8fbff_100%)]">
       <div className="flex items-end justify-between gap-4">
         <div>
           <p className="text-xs uppercase tracking-[0.24em] text-slate-400">{t("dashboard.recentActivityEyebrow")}</p>
@@ -38,7 +38,10 @@ export function RecentActivityList({
           </div>
         ) : (
           items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between gap-4 rounded-3xl bg-slate-50 px-4 py-4">
+            <div
+              key={item.id}
+              className="flex items-center justify-between gap-4 rounded-3xl border border-white/80 bg-white/90 px-4 py-4 shadow-sm transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_16px_36px_rgba(15,23,42,0.08)]"
+            >
               <div>
                 <div className="flex items-center gap-3">
                   <p className="font-medium text-slate-900">{item.title}</p>

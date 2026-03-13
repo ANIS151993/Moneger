@@ -20,12 +20,14 @@ export function ProfileAvatar({
   name,
   imageUrl,
   size = "md",
-  className
+  className,
+  showBadge = true
 }: {
   name?: string | null;
   imageUrl?: string;
   size?: keyof typeof avatarSizes;
   className?: string;
+  showBadge?: boolean;
 }) {
   const initials = getProfileInitials(name);
 
@@ -46,14 +48,16 @@ export function ProfileAvatar({
           </div>
         )}
       </div>
-      <div
-        className={cn(
-          "absolute -bottom-1 -right-1 rounded-full border border-white/70 bg-emerald-400 font-black uppercase tracking-[0.2em] text-slate-950 shadow-lg",
-          avatarBadgeSizes[size]
-        )}
-      >
-        Live
-      </div>
+      {showBadge ? (
+        <div
+          className={cn(
+            "absolute -bottom-1 -right-1 rounded-full border border-white/70 bg-emerald-400 font-black uppercase tracking-[0.2em] text-slate-950 shadow-lg",
+            avatarBadgeSizes[size]
+          )}
+        >
+          Live
+        </div>
+      ) : null}
     </div>
   );
 }

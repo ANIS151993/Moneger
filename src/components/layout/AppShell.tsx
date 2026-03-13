@@ -34,6 +34,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const navigation = profileComplete ? dashboardNavigation : onboardingNavigation;
   const profileHref = profileComplete ? "/settings" : "/welcome";
   const guideActive = pathname === "/guide";
+  const showWorkspaceHeader = pathname !== "/dashboard";
 
   useEffect(() => {
     setMobileNavOpen(false);
@@ -58,7 +59,7 @@ export function AppShell({ children }: { children: ReactNode }) {
         <div className="sticky top-0 z-30 lg:hidden">
           <div className="glass flex items-center justify-between gap-3 rounded-[26px] border border-white/80 px-3 py-3 shadow-[0_16px_40px_rgba(15,23,42,0.1)] backdrop-blur">
             <Link className="flex min-w-0 flex-1 items-center gap-3" href={profileHref}>
-              <ProfileAvatar className="origin-left scale-[0.88]" imageUrl={profile?.avatarDataUrl} name={displayName} size="sm" />
+              <ProfileAvatar className="origin-left scale-[0.88]" imageUrl={profile?.avatarDataUrl} name={displayName} showBadge={false} size="sm" />
               <div className="min-w-0">
                 <p className="truncate text-sm font-semibold tracking-tight text-slate-950">{displayName}</p>
                 <p className="truncate text-[11px] text-slate-500">{compactMeta}</p>
@@ -130,18 +131,19 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
 
           <Link
-            className="group relative block overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.22),_transparent_36%),linear-gradient(160deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] p-4 shadow-[0_18px_54px_rgba(2,6,23,0.34)] transition hover:-translate-y-0.5 hover:bg-white/10 lg:rounded-[30px]"
+            className="group relative block overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.22),_transparent_36%),linear-gradient(160deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] px-4 py-3.5 shadow-[0_18px_54px_rgba(2,6,23,0.34)] transition hover:-translate-y-0.5 hover:bg-white/10 lg:rounded-[30px] lg:px-4 lg:py-4"
             href={profileHref}
           >
             <div className="absolute -left-6 -top-4 h-20 w-20 rounded-full bg-emerald-300/15 blur-2xl transition duration-300 group-hover:scale-110" />
-            <div className="relative flex items-center gap-4">
-              <ProfileAvatar className="origin-left scale-[0.92] sm:scale-100" imageUrl={profile?.avatarDataUrl} name={displayName} size="md" />
-              <div className="min-w-0">
+            <div className="relative flex items-center gap-3 lg:gap-4">
+              <ProfileAvatar imageUrl={profile?.avatarDataUrl} name={displayName} showBadge={false} size="sm" className="self-start lg:hidden" />
+              <ProfileAvatar imageUrl={profile?.avatarDataUrl} name={displayName} showBadge={false} size="md" className="hidden self-start lg:inline-flex" />
+              <div className="min-w-0 flex-1 py-1">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-300">
                   {profileComplete ? t("layout.profile") : t("layout.profileSetup")}
                 </p>
                 <p className="mt-1 truncate text-base font-semibold tracking-tight text-white sm:text-lg">{displayName}</p>
-                <p className="mt-1 truncate text-sm text-slate-400">{compactMeta}</p>
+                <p className="mt-1 truncate text-xs text-slate-400 sm:text-sm">{compactMeta}</p>
               </div>
             </div>
           </Link>
@@ -225,19 +227,21 @@ export function AppShell({ children }: { children: ReactNode }) {
         </aside>
 
         <div className="flex min-h-0 flex-1 flex-col gap-4 lg:gap-6">
-          <header className="flex flex-col gap-3 rounded-[26px] border border-white/80 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.12),_transparent_28%),linear-gradient(145deg,rgba(255,255,255,0.82),rgba(241,245,249,0.74))] px-4 py-4 shadow-[0_18px_52px_rgba(15,23,42,0.08)] backdrop-blur sm:px-5 sm:py-5 md:flex-row md:items-start md:justify-between lg:rounded-[32px] lg:px-6">
-            <div>
-              <p className="text-xs uppercase tracking-[0.22em] text-emerald-600">
-                {profileComplete ? t("layout.workspaceTag") : t("layout.onboardingTag")}
-              </p>
-              <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
-                {profileComplete ? t("layout.workspaceTitle") : t("layout.onboardingTitle")}
-              </h2>
-            </div>
-            <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-700">
-              {profileComplete ? t("layout.workspaceBanner") : t("layout.onboardingBanner")}
-            </div>
-          </header>
+          {showWorkspaceHeader ? (
+            <header className="flex flex-col gap-3 rounded-[26px] border border-white/80 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.12),_transparent_28%),linear-gradient(145deg,rgba(255,255,255,0.82),rgba(241,245,249,0.74))] px-4 py-4 shadow-[0_18px_52px_rgba(15,23,42,0.08)] backdrop-blur sm:px-5 sm:py-5 md:flex-row md:items-start md:justify-between lg:rounded-[32px] lg:px-6">
+              <div>
+                <p className="text-xs uppercase tracking-[0.22em] text-emerald-600">
+                  {profileComplete ? t("layout.workspaceTag") : t("layout.onboardingTag")}
+                </p>
+                <h2 className="mt-2 text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">
+                  {profileComplete ? t("layout.workspaceTitle") : t("layout.onboardingTitle")}
+                </h2>
+              </div>
+              <div className="rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm leading-6 text-emerald-700">
+                {profileComplete ? t("layout.workspaceBanner") : t("layout.onboardingBanner")}
+              </div>
+            </header>
+          ) : null}
           <main className="pb-[calc(1rem+env(safe-area-inset-bottom))] lg:pb-8">
             <div className="space-y-4 rounded-[28px] bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.42),_transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.02))] p-1 sm:space-y-6 lg:rounded-[34px]">
               {children}
