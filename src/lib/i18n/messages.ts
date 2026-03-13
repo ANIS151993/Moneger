@@ -46,6 +46,19 @@ const englishMessages: TranslationTable = {
     "Read the guide in a focused section before or during onboarding without mixing it into the main menu list.",
   "layout.guideSpotlightAction": "Open user guide",
 
+  "install.badge": "Quick access",
+  "install.title": "Save {{brand}} to your device",
+  "install.description":
+    "Open your workspace instantly from a saved shortcut instead of typing the web address every time.",
+  "install.installNow": "Install app",
+  "install.later": "Later",
+  "install.iosStep1": "Tap the Share button in Safari.",
+  "install.iosStep2": "Choose Add to Home Screen.",
+  "install.desktopSafariStep1": "Open Safari and choose File.",
+  "install.desktopSafariStep2": "Choose Add to Dock.",
+  "install.chromiumStep1": "Open the browser menu.",
+  "install.chromiumStep2": "Choose Install app or Create shortcut.",
+
   "landing.login": "Log in",
   "landing.createAccount": "Create account",
   "landing.privacyTag": "Privacy-first. Local-first. Offline-first.",

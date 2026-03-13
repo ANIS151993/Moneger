@@ -52,9 +52,17 @@ export const metadata: Metadata = {
     description: brand.description
   },
   icons: {
-    icon: "/icons/icon.svg",
-    shortcut: "/icons/icon.svg",
-    apple: "/icons/icon.svg"
+    icon: [
+      { url: "/icons/icon.svg", type: "image/svg+xml" },
+      { url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }
+    ],
+    shortcut: [{ url: "/icons/icon-192.png", sizes: "192x192", type: "image/png" }],
+    apple: [{ url: "/icons/apple-touch-icon.png", sizes: "180x180", type: "image/png" }]
+  },
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "default",
+    title: brand.name
   },
   manifest: "/manifest.webmanifest"
 };
@@ -71,33 +79,6 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${poppins.variable} ${jetBrainsMono.variable} font-sans`}>
-        <script
-          dangerouslySetInnerHTML={{
-            __html: `
-              (function () {
-                if (!('serviceWorker' in navigator)) {
-                  return;
-                }
-
-                navigator.serviceWorker.getRegistrations().then(function (registrations) {
-                  registrations.forEach(function (registration) {
-                    registration.unregister();
-                  });
-                }).catch(function () {});
-
-                if ('caches' in window) {
-                  caches.keys().then(function (keys) {
-                    keys.filter(function (key) {
-                      return key.indexOf('moneger-shell') === 0;
-                    }).forEach(function (key) {
-                      caches.delete(key);
-                    });
-                  }).catch(function () {});
-                }
-              })();
-            `
-          }}
-        />
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

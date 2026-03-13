@@ -6,6 +6,7 @@ import { useEffect, useState, type ReactNode } from "react";
 
 import { DeveloperSignatureCard } from "@/components/branding/DeveloperSignatureCard";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
+import { InstallShortcutPrompt } from "@/components/shared/InstallShortcutPrompt";
 import { Button, buttonClassName } from "@/components/ui/Button";
 import { useI18n } from "@/components/providers/LanguageProvider";
 import { dashboardNavigation, onboardingNavigation } from "@/lib/constants/navigation";
@@ -423,6 +424,8 @@ export function AppShell({ children }: { children: ReactNode }) {
               <DeveloperSignatureCard />
             </div>
           </main>
+
+          <InstallShortcutPrompt enabled={profileComplete} hidden={mobileOverlayVisible} />
         </div>
 
         {profileComplete ? (
