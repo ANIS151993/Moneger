@@ -1,7 +1,6 @@
 "use client";
 
 import { useI18n } from "@/components/providers/LanguageProvider";
-import { relativeFromNow } from "@/lib/utils/date";
 import {
   formatExchangeRate,
   getCurrencyComparisonRate
@@ -63,11 +62,6 @@ export function CurrencyComparisonCard({
       <p className="relative min-w-0 flex-1 truncate text-sm font-semibold tracking-tight text-white">
         1 {baseCurrency} = {formatExchangeRate(currentRate)} {comparisonCurrency}
       </p>
-      <div className="relative text-[10px] font-medium text-slate-300">
-        {rates.updatedAt
-          ? t("dashboard.ratePanelUpdated", { time: relativeFromNow(rates.updatedAt) })
-          : t("dashboard.ratePanelLive")}
-      </div>
     </div>
   );
 }

@@ -103,12 +103,6 @@ export default function DashboardPage() {
                   </div>
                 ) : null}
 
-                <CurrencyComparisonCard
-                  baseCurrency={baseCurrency}
-                  comparisonCurrency={comparisonCurrency}
-                  rates={rates}
-                  className="mt-5"
-                />
               </div>
 
               {priorityTimeline.length > 0 ? (
@@ -159,6 +153,14 @@ export default function DashboardPage() {
             </div>
           </div>
         </Card>
+      </section>
+
+      <section>
+        <CurrencyComparisonCard
+          baseCurrency={baseCurrency}
+          comparisonCurrency={comparisonCurrency}
+          rates={rates}
+        />
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
