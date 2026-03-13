@@ -56,20 +56,13 @@ export default function DashboardPage() {
     return formatSummaryValue(amountInUsd, comparisonCurrency);
   }
 
-  const quickCounts = [
-    { label: t("nav.income"), value: String(dataset?.incomes.length || 0).padStart(2, "0") },
-    { label: t("nav.expenses"), value: String(dataset?.expenses.length || 0).padStart(2, "0") },
-    { label: t("nav.debts"), value: String(dataset?.debts.length || 0).padStart(2, "0") },
-    { label: t("nav.banks"), value: String(dataset?.banks.length || 0).padStart(2, "0") }
-  ];
-
   return (
     <div className="space-y-6">
       <section className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
         <Card className="fx-card-sheen relative overflow-hidden border-0 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.26),_transparent_34%),radial-gradient(circle_at_bottom_left,_rgba(16,185,129,0.2),_transparent_38%),linear-gradient(135deg,#020617_0%,#0f172a_52%,#064e3b_100%)] p-0 text-white shadow-[0_28px_80px_rgba(15,23,42,0.22)]">
           <div className="absolute -left-10 top-8 h-36 w-36 rounded-full bg-emerald-400/15 blur-3xl" />
           <div className="absolute right-0 top-0 h-28 w-28 rounded-full bg-sky-400/12 blur-3xl" />
-          <div className="relative grid gap-5 p-5 sm:p-6 lg:grid-cols-[minmax(0,1fr)_240px]">
+          <div className="relative p-5 sm:p-6">
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2">
                 <Badge className="border-white/10 bg-white/10 text-white ring-0">{t("nav.overview")}</Badge>
@@ -103,23 +96,6 @@ export default function DashboardPage() {
                   </div>
                 ) : null}
               </div>
-            </div>
-
-            <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-1">
-              {quickCounts.map((item, index) => (
-                <div
-                  key={item.label}
-                  className="rounded-[24px] border border-white/10 bg-white/[0.08] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)] backdrop-blur transition duration-300 hover:-translate-y-0.5 hover:bg-white/[0.1]"
-                >
-                  <div className="flex items-center justify-between gap-3">
-                    <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-300">{item.label}</p>
-                    <span className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
-                      0{index + 1}
-                    </span>
-                  </div>
-                  <p className="mt-3 text-3xl font-semibold tracking-tight text-white">{item.value}</p>
-                </div>
-              ))}
             </div>
           </div>
         </Card>

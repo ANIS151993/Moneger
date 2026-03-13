@@ -83,10 +83,10 @@ export function CurrencyComparisonCard({
 
   if (!comparisonCurrency) {
     return (
-      <Card className="fx-card-sheen group relative w-full overflow-hidden rounded-[24px] border border-emerald-100 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.14),_transparent_36%),linear-gradient(135deg,#ffffff_0%,#f0fdf4_58%,#dcfce7_100%)] px-4 py-2.5 shadow-[0_14px_36px_rgba(22,163,74,0.12)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_46px_rgba(22,163,74,0.18)] md:max-w-[500px]">
+      <Card className="fx-card-sheen group relative w-full overflow-hidden rounded-full border border-emerald-100 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.12),_transparent_34%),linear-gradient(135deg,#ffffff_0%,#f0fdf4_58%,#dcfce7_100%)] px-4 py-2 shadow-[0_14px_34px_rgba(22,163,74,0.12)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_44px_rgba(22,163,74,0.18)]">
         <div className="absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_left,_rgba(16,185,129,0.12),_transparent_68%)]" />
-        <div className="relative flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
-          <div className="flex flex-wrap items-center gap-2">
+        <div className="relative flex flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">
+          <div className="flex min-w-0 flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/85 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
               <span className="fx-live-dot h-2 w-2 rounded-full bg-emerald-500" />
               {t("dashboard.ratePanelLive")}
@@ -95,14 +95,8 @@ export function CurrencyComparisonCard({
               USD/FX
             </span>
           </div>
-
-          <div className="min-w-0 flex-1">
-            <p className="truncate text-sm font-semibold tracking-tight text-slate-950">
-              {t("dashboard.ratePanelPromptTitle")}
-            </p>
-            <p className="mt-0.5 truncate text-[10px] text-slate-600">
-              {t("dashboard.ratePanelPromptDescription")}
-            </p>
+          <div className="min-w-0 flex-1 sm:text-right">
+            <p className="truncate text-sm font-semibold tracking-tight text-slate-950">{t("dashboard.ratePanelPromptTitle")}</p>
           </div>
         </div>
       </Card>
@@ -120,11 +114,11 @@ export function CurrencyComparisonCard({
   const trendLabel = `${rateTrend >= 0 ? "+" : ""}${formatExchangeRate(Math.abs(rateTrend))}`;
 
   return (
-    <Card className="fx-card-sheen group relative w-full overflow-hidden rounded-[24px] border border-cyan-400/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.16),_transparent_34%),radial-gradient(circle_at_bottom_left,_rgba(16,185,129,0.14),_transparent_40%),linear-gradient(135deg,#020617_0%,#0f172a_52%,#062c2c_100%)] px-4 py-2.5 text-white shadow-[0_16px_44px_rgba(15,23,42,0.26)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_54px_rgba(15,23,42,0.32)] md:max-w-[540px]">
-      <div className="absolute -left-6 top-1/2 h-18 w-18 -translate-y-1/2 rounded-full bg-emerald-400/12 blur-3xl transition duration-300 group-hover:scale-110" />
-      <div className="absolute -right-8 top-0 h-20 w-20 rounded-full bg-sky-400/12 blur-3xl transition duration-300 group-hover:scale-110" />
-      <div className="relative flex flex-col gap-2.5 md:flex-row md:items-center md:gap-3">
-        <div className="flex flex-wrap items-center gap-2 md:min-w-fit">
+    <Card className="fx-card-sheen group relative w-full overflow-hidden rounded-full border border-cyan-400/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.18),_transparent_30%),radial-gradient(circle_at_bottom_left,_rgba(16,185,129,0.14),_transparent_36%),linear-gradient(135deg,#020617_0%,#0f172a_56%,#062c2c_100%)] px-4 py-2 text-white shadow-[0_16px_40px_rgba(15,23,42,0.24)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_50px_rgba(15,23,42,0.3)]">
+      <div className="absolute -left-6 top-1/2 h-16 w-16 -translate-y-1/2 rounded-full bg-emerald-400/12 blur-3xl transition duration-300 group-hover:scale-110" />
+      <div className="absolute -right-8 top-0 h-18 w-18 rounded-full bg-sky-400/12 blur-3xl transition duration-300 group-hover:scale-110" />
+      <div className="relative flex flex-wrap items-center gap-2 sm:flex-nowrap sm:gap-3">
+        <div className="flex min-w-0 flex-wrap items-center gap-2">
           <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
             <span className="fx-live-dot h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_14px_rgba(110,231,183,0.9)]" />
             {t("dashboard.ratePanelLive")}
@@ -138,10 +132,10 @@ export function CurrencyComparisonCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-[15px] font-semibold tracking-tight text-white">
+          <p className="truncate text-sm font-semibold tracking-tight text-white">
             1 {baseCurrency} = {formatExchangeRate(currentRate)} {comparisonCurrency}
           </p>
-          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-300">
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] text-slate-300">
             <span>
               {rates.updatedAt
                 ? t("dashboard.ratePanelUpdated", { time: relativeFromNow(rates.updatedAt) })
@@ -151,11 +145,11 @@ export function CurrencyComparisonCard({
           </div>
         </div>
 
-        <div className="fx-sparkline-panel min-w-[108px] rounded-[18px] border border-white/10 bg-white/[0.06] p-1.5 shadow-inner shadow-black/10 backdrop-blur md:ml-auto">
-          <svg className="h-[38px] w-[108px]" viewBox="0 0 132 56" preserveAspectRatio="none" aria-hidden="true">
+        <div className="fx-sparkline-panel ml-auto min-w-[90px] rounded-full border border-white/10 bg-white/[0.06] px-2 py-1 shadow-inner shadow-black/10 backdrop-blur">
+          <svg className="h-[24px] w-[90px]" viewBox="0 0 132 56" preserveAspectRatio="none" aria-hidden="true">
             <defs>
               <linearGradient id="fx-area-fill" x1="0" x2="0" y1="0" y2="1">
-                <stop offset="0%" stopColor="rgba(52,211,153,0.45)" />
+                <stop offset="0%" stopColor="rgba(52,211,153,0.4)" />
                 <stop offset="100%" stopColor="rgba(52,211,153,0.02)" />
               </linearGradient>
               <linearGradient id="fx-line-stroke" x1="0" x2="1" y1="0" y2="0">

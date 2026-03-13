@@ -131,14 +131,14 @@ export function AppShell({ children }: { children: ReactNode }) {
           </div>
 
           <Link
-            className="group relative block overflow-hidden rounded-[28px] border border-white/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.22),_transparent_36%),linear-gradient(160deg,rgba(255,255,255,0.08),rgba(255,255,255,0.02))] px-4 py-3.5 shadow-[0_18px_54px_rgba(2,6,23,0.34)] transition hover:-translate-y-0.5 hover:bg-white/10 lg:rounded-[30px] lg:px-4 lg:py-4"
+            className="group relative flex min-h-[92px] items-center overflow-hidden rounded-[28px] border border-white/12 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.24),_transparent_38%),linear-gradient(160deg,rgba(255,255,255,0.1),rgba(255,255,255,0.03))] px-4 py-4 shadow-[0_18px_54px_rgba(2,6,23,0.34)] transition hover:-translate-y-0.5 hover:bg-white/10 lg:rounded-[30px]"
             href={profileHref}
           >
             <div className="absolute -left-6 -top-4 h-20 w-20 rounded-full bg-emerald-300/15 blur-2xl transition duration-300 group-hover:scale-110" />
-            <div className="relative flex items-center gap-3 lg:gap-4">
-              <ProfileAvatar imageUrl={profile?.avatarDataUrl} name={displayName} showBadge={false} size="sm" className="self-start lg:hidden" />
-              <ProfileAvatar imageUrl={profile?.avatarDataUrl} name={displayName} showBadge={false} size="md" className="hidden self-start lg:inline-flex" />
-              <div className="min-w-0 flex-1 py-1">
+            <div className="absolute inset-y-4 left-3 w-1 rounded-full bg-[linear-gradient(180deg,rgba(134,239,172,0.95),rgba(56,189,248,0.95))]" />
+            <div className="relative flex w-full items-center gap-4 pl-3">
+              <ProfileAvatar imageUrl={profile?.avatarDataUrl} name={displayName} showBadge={false} size="md" />
+              <div className="min-w-0 flex-1">
                 <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-300">
                   {profileComplete ? t("layout.profile") : t("layout.profileSetup")}
                 </p>
