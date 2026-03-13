@@ -38,6 +38,13 @@ const englishMessages: TranslationTable = {
   "layout.onboardingTag": "Mandatory onboarding",
   "layout.onboardingTitle": "Complete your profile to unlock the workspace",
   "layout.onboardingBanner": "Only profile setup and the user guide are available until onboarding is complete.",
+  "layout.guideSpotlightEyebrow": "Guided learning",
+  "layout.guideSpotlightTitle": "App User Guide",
+  "layout.guideSpotlightDescription":
+    "Open the full step-by-step guide any time to review dashboard logic, records, currencies, debts, and privacy controls.",
+  "layout.guideSpotlightOnboardingDescription":
+    "Read the guide in a focused section before or during onboarding without mixing it into the main menu list.",
+  "layout.guideSpotlightAction": "Open user guide",
 
   "landing.login": "Log in",
   "landing.createAccount": "Create account",

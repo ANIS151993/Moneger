@@ -4,6 +4,7 @@ import Link from "next/link";
 import { useState, useTransition } from "react";
 
 import { useI18n } from "@/components/providers/LanguageProvider";
+import { buttonClassName } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { Select } from "@/components/ui/Select";
@@ -129,7 +130,10 @@ export default function GuidePage() {
                   </p>
                   <p className="mt-3 text-sm leading-6 text-slate-300">{section.summary}</p>
                   <Link
-                    className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-white px-4 py-3 text-sm font-semibold text-slate-950 transition hover:bg-emerald-50"
+                    className={buttonClassName({
+                      className: "mt-5 w-full",
+                      variant: "ghost"
+                    })}
                     href={section.ctaHref}
                   >
                     {section.ctaLabel}
@@ -164,7 +168,10 @@ export default function GuidePage() {
               <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">{content.lockedTitle}</h2>
               <p className="mt-3 text-sm leading-6 text-slate-600">{content.lockedDescription}</p>
               <Link
-                className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+                className={buttonClassName({
+                  className: "mt-5 w-full",
+                  variant: "secondary"
+                })}
                 href="/welcome"
               >
                 Complete profile now

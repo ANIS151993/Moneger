@@ -3,6 +3,7 @@
 import Link from "next/link";
 
 import { useI18n } from "@/components/providers/LanguageProvider";
+import { buttonClassName } from "@/components/ui/Button";
 
 export function DeveloperSignatureCard() {
   const { t } = useI18n();
@@ -32,7 +33,10 @@ export function DeveloperSignatureCard() {
             {t("developer.portfolioLabel")}
           </p>
           <Link
-            className="mt-3 inline-flex items-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:-translate-y-0.5 hover:bg-slate-800"
+            className={buttonClassName({
+              className: "mt-3",
+              variant: "secondary"
+            })}
             href="https://marcbd.site"
             rel="noreferrer"
             target="_blank"

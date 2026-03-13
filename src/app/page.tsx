@@ -4,7 +4,7 @@ import Link from "next/link";
 
 import { useI18n } from "@/components/providers/LanguageProvider";
 import { BrandLogo } from "@/components/branding/BrandLogo";
-import { Button } from "@/components/ui/Button";
+import { buttonClassName } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { brand } from "@/lib/branding/brand";
 
@@ -21,11 +21,11 @@ export default function LandingPage() {
         <header className="glass flex items-center justify-between rounded-[30px] border border-white/80 px-6 py-4 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
           <BrandLogo />
           <div className="flex items-center gap-3">
-            <Link href="/login">
-              <Button variant="ghost">{t("landing.login")}</Button>
+            <Link className={buttonClassName({ variant: "ghost" })} href="/login">
+              {t("landing.login")}
             </Link>
-            <Link href="/signup">
-              <Button>{t("landing.createAccount")}</Button>
+            <Link className={buttonClassName({})} href="/signup">
+              {t("landing.createAccount")}
             </Link>
           </div>
         </header>
@@ -49,13 +49,11 @@ export default function LandingPage() {
               {t("landing.heroDescription")}
             </p>
             <div className="mt-8 flex flex-wrap gap-4">
-              <Link href="/signup">
-                <Button className="px-6 py-4 text-base">{t("landing.startUsing")}</Button>
+              <Link className={buttonClassName({ className: "px-6 py-4 text-base" })} href="/signup">
+                {t("landing.startUsing")}
               </Link>
-              <Link href="/dashboard">
-                <Button className="px-6 py-4 text-base" variant="ghost">
-                  {t("landing.openDashboard")}
-                </Button>
+              <Link className={buttonClassName({ className: "px-6 py-4 text-base", variant: "ghost" })} href="/dashboard">
+                {t("landing.openDashboard")}
               </Link>
             </div>
             <div className="mt-10 grid gap-4 sm:grid-cols-3">

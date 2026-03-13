@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 
 import { ProfileForm } from "@/components/forms/ProfileForm";
 import { useI18n } from "@/components/providers/LanguageProvider";
+import { buttonClassName } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -53,7 +54,10 @@ export default function WelcomePage() {
               {t("onboarding.unlockDescription")}
             </p>
             <Link
-              className="mt-4 inline-flex items-center justify-center rounded-2xl border border-emerald-200 bg-white px-4 py-3 text-sm font-semibold text-emerald-800 transition hover:bg-emerald-100"
+              className={buttonClassName({
+                className: "mt-4",
+                variant: "ghost"
+              })}
               href="/guide"
             >
               {t("onboarding.readGuide")}
@@ -97,7 +101,10 @@ export default function WelcomePage() {
               {t("onboarding.guidePreviewDescription")}
             </p>
             <Link
-              className="mt-5 inline-flex w-full items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+              className={buttonClassName({
+                className: "mt-5 w-full",
+                variant: "secondary"
+              })}
               href="/guide"
             >
               {t("onboarding.openGuide")}

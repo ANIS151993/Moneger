@@ -70,6 +70,33 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang="en" suppressHydrationWarning>
       <body className={`${inter.variable} ${poppins.variable} ${jetBrainsMono.variable} font-sans`}>
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function () {
+                if (!('serviceWorker' in navigator)) {
+                  return;
+                }
+
+                navigator.serviceWorker.getRegistrations().then(function (registrations) {
+                  registrations.forEach(function (registration) {
+                    registration.unregister();
+                  });
+                }).catch(function () {});
+
+                if ('caches' in window) {
+                  caches.keys().then(function (keys) {
+                    keys.filter(function (key) {
+                      return key.indexOf('moneger-shell') === 0;
+                    }).forEach(function (key) {
+                      caches.delete(key);
+                    });
+                  }).catch(function () {});
+                }
+              })();
+            `
+          }}
+        />
         <AppProviders>{children}</AppProviders>
       </body>
     </html>

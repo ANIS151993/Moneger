@@ -6,7 +6,7 @@ import type { ReactNode } from "react";
 
 import { DeveloperSignatureCard } from "@/components/branding/DeveloperSignatureCard";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
-import { Button } from "@/components/ui/Button";
+import { Button, buttonClassName } from "@/components/ui/Button";
 import { useI18n } from "@/components/providers/LanguageProvider";
 import { dashboardNavigation, onboardingNavigation } from "@/lib/constants/navigation";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -71,6 +71,27 @@ export function AppShell({ children }: { children: ReactNode }) {
               );
             })}
           </nav>
+
+          <div className="mt-6 overflow-hidden rounded-[28px] border border-emerald-300/20 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.24),_transparent_32%),linear-gradient(150deg,rgba(16,185,129,0.2),rgba(15,23,42,0.18))] p-4 shadow-[0_18px_54px_rgba(2,6,23,0.24)]">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
+              {t("layout.guideSpotlightEyebrow")}
+            </p>
+            <h2 className="mt-3 text-xl font-semibold tracking-tight text-white">
+              {t("layout.guideSpotlightTitle")}
+            </h2>
+            <p className="mt-3 text-sm leading-6 text-slate-200">
+              {profileComplete ? t("layout.guideSpotlightDescription") : t("layout.guideSpotlightOnboardingDescription")}
+            </p>
+            <Link
+              className={buttonClassName({
+                className: "mt-5 w-full",
+                variant: "ghost"
+              })}
+              href="/guide"
+            >
+              {t("layout.guideSpotlightAction")}
+            </Link>
+          </div>
 
           <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-4">
             <p className="text-xs uppercase tracking-[0.22em] text-slate-400">{t("layout.privacyMode")}</p>

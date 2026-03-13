@@ -3,7 +3,7 @@
 import Link from "next/link";
 
 import { useI18n } from "@/components/providers/LanguageProvider";
-import { Button } from "@/components/ui/Button";
+import { buttonClassName } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 
 export default function NotFound() {
@@ -16,8 +16,8 @@ export default function NotFound() {
         <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{t("notFound.title")}</h1>
         <p className="mt-4 text-sm leading-7 text-slate-500">{t("notFound.description")}</p>
         <div className="mt-6">
-          <Link href="/">
-            <Button>{t("notFound.returnHome")}</Button>
+          <Link className={buttonClassName({})} href="/">
+            {t("notFound.returnHome")}
           </Link>
         </div>
       </Card>
