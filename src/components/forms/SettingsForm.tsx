@@ -12,7 +12,7 @@ import { Card } from "@/components/ui/Card";
 import { EmptyState } from "@/components/ui/EmptyState";
 import { FormField } from "@/components/ui/FormField";
 import { Select } from "@/components/ui/Select";
-import { languagePreferences } from "@/lib/constants/options";
+import { currencyCatalog, languagePreferences, supportedCurrencies } from "@/lib/constants/options";
 import { ledgerService } from "@/lib/services/ledger-service";
 import {
   browserNotificationSupported,
@@ -157,8 +157,11 @@ export function SettingsForm({
             hint={t("settings.baseCurrencyDescription")}
           >
             <Select {...register("baseCurrency")}>
-              <option value="USD">USD</option>
-              <option value="BDT">BDT</option>
+              {supportedCurrencies.map((currency) => (
+                <option key={currency} value={currency}>
+                  {currencyCatalog[currency].label}
+                </option>
+              ))}
             </Select>
           </FormField>
           <FormField
@@ -168,12 +171,11 @@ export function SettingsForm({
           >
             <Select {...register("comparisonCurrency")}>
               <option value="">{t("settings.comparisonCurrencyNone")}</option>
-              <option value="USD" disabled={selectedBaseCurrency === "USD"}>
-                USD
-              </option>
-              <option value="BDT" disabled={selectedBaseCurrency === "BDT"}>
-                BDT
-              </option>
+              {supportedCurrencies.map((currency) => (
+                <option key={currency} value={currency} disabled={selectedBaseCurrency === currency}>
+                  {currencyCatalog[currency].label}
+                </option>
+              ))}
             </Select>
           </FormField>
         </div>

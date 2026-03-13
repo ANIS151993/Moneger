@@ -22,19 +22,28 @@ export function convertAmount(
     return amount;
   }
 
-  if (from === "USD" && to === "BDT") {
-    return amount * rates.usdToBdt;
+  const fromRate = rates.rates[from];
+  const toRate = rates.rates[to];
+
+  if (!fromRate || !toRate) {
+    return amount;
   }
 
-  if (from === "BDT" && to === "USD") {
-    return amount * rates.bdtToUsd;
+  const amountInUsd = from === CORE_CURRENCY ? amount : amount / fromRate;
+
+  if (to === CORE_CURRENCY) {
+    return amountInUsd;
   }
 
-  return amount;
+  return amountInUsd * toRate;
 }
 
 export function roundCurrency(amount: number) {
   return Number(amount.toFixed(2));
+}
+
+export function roundRate(amount: number) {
+  return Number(amount.toFixed(6));
 }
 
 export function normalizeToCoreCurrency(
@@ -51,4 +60,19 @@ export function convertFromCoreCurrency(
   rates: CurrencyRateMap
 ) {
   return roundCurrency(convertAmount(amount, CORE_CURRENCY, to, rates));
+}
+
+export function getCurrencyComparisonRate(
+  baseCurrency: CurrencyCode,
+  comparisonCurrency: CurrencyCode,
+  rates: CurrencyRateMap
+) {
+  return roundRate(convertAmount(1, baseCurrency, comparisonCurrency, rates));
+}
+
+export function formatExchangeRate(rate: number) {
+  return new Intl.NumberFormat(getLanguageDefinition(getRuntimeLanguage()).locale, {
+    minimumFractionDigits: rate >= 100 ? 2 : rate >= 1 ? 3 : 4,
+    maximumFractionDigits: rate >= 100 ? 4 : 6
+  }).format(rate);
 }

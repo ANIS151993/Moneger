@@ -12,8 +12,8 @@ import {
   supportedCurrencies
 } from "@/lib/constants/options";
 
-const currencySchema = z.enum(["USD", "BDT"]);
-const optionalCurrencySchema = z.enum(["", "USD", "BDT"]);
+const currencySchema = z.enum(supportedCurrencies as [typeof supportedCurrencies[number], ...typeof supportedCurrencies[number][]]);
+const optionalCurrencySchema = z.enum(["", ...supportedCurrencies] as ["", ...typeof supportedCurrencies[number][]]);
 const genderSchema = z.enum(["", ...genders] as const);
 const languagePreferenceSchema = z.enum(
   languagePreferences.map((item) => item.value) as [

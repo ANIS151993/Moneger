@@ -6,12 +6,13 @@ import { getUserDatabase } from "@/lib/db/moneger-db";
 import { createDashboardSnapshot } from "@/lib/services/dashboard";
 import { useCurrencyEngine } from "@/lib/hooks/use-currency-engine";
 import { useUserSettings } from "@/lib/hooks/use-user-settings";
+import type { CurrencyCode } from "@/types/finance";
 
 export function useDashboardData(userId?: string) {
   const settings = useUserSettings(userId);
-  const baseCurrency: "USD" | "BDT" = settings?.baseCurrency || "USD";
-  const comparisonCurrency: "" | "USD" | "BDT" = settings?.comparisonCurrency || "";
-  const { rates, loading: ratesLoading } = useCurrencyEngine(userId);
+  const baseCurrency: CurrencyCode = settings?.baseCurrency || "USD";
+  const comparisonCurrency: "" | CurrencyCode = settings?.comparisonCurrency || "";
+  const { rates, history, loading: ratesLoading } = useCurrencyEngine(userId);
   const db = userId ? getUserDatabase(userId) : null;
 
   const dataset = useLiveQuery(
@@ -47,6 +48,7 @@ export function useDashboardData(userId?: string) {
     baseCurrency,
     comparisonCurrency,
     rates,
+    rateHistory: history,
     ratesLoading,
     dataset,
     snapshot,

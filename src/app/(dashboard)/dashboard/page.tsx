@@ -3,6 +3,7 @@
 import { useEffect } from "react";
 
 import { CategoryBreakdownChart } from "@/components/charts/CategoryBreakdownChart";
+import { CurrencyComparisonCard } from "@/components/dashboard/CurrencyComparisonCard";
 import { DebtOwedChart } from "@/components/charts/DebtOwedChart";
 import { IncomeExpenseLineChart } from "@/components/charts/IncomeExpenseLineChart";
 import { RecentActivityList } from "@/components/dashboard/RecentActivityList";
@@ -20,7 +21,9 @@ import { convertFromCoreCurrency, formatCurrency } from "@/lib/utils/finance";
 export default function DashboardPage() {
   const { user } = useAuth();
   const { t } = useI18n();
-  const { snapshot, dataset, baseCurrency, comparisonCurrency, loading, rates, settings } = useDashboardData(user?.uid);
+  const { snapshot, dataset, baseCurrency, comparisonCurrency, loading, rateHistory, rates, settings } = useDashboardData(
+    user?.uid
+  );
   const hasWorkspaceData = Boolean(
     dataset &&
       (dataset.incomes.length > 0 ||
@@ -58,6 +61,14 @@ export default function DashboardPage() {
         eyebrow={t("dashboard.eyebrow")}
         title={t("dashboard.title")}
         description={t("dashboard.description")}
+        actions={
+          <CurrencyComparisonCard
+            baseCurrency={baseCurrency}
+            comparisonCurrency={comparisonCurrency}
+            rates={rates}
+            history={rateHistory}
+          />
+        }
       />
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-5">

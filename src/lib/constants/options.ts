@@ -8,7 +8,33 @@ import type {
   OwedStatus
 } from "@/types/finance";
 
-export const supportedCurrencies: CurrencyCode[] = ["USD", "BDT"];
+export const supportedCurrencies: CurrencyCode[] = [
+  "USD",
+  "BDT",
+  "INR",
+  "PKR",
+  "SAR",
+  "RUB",
+  "KGS",
+  "EUR",
+  "NPR",
+  "CAD",
+  "AUD"
+];
+
+export const currencyCatalog: Record<CurrencyCode, { code: CurrencyCode; label: string }> = {
+  USD: { code: "USD", label: "USD · US Dollar" },
+  BDT: { code: "BDT", label: "BDT · Bangladeshi Taka" },
+  INR: { code: "INR", label: "INR · Indian Rupee" },
+  PKR: { code: "PKR", label: "PKR · Pakistani Rupee" },
+  SAR: { code: "SAR", label: "SAR · Saudi Riyal" },
+  RUB: { code: "RUB", label: "RUB · Russian Ruble" },
+  KGS: { code: "KGS", label: "KGS · Kyrgyzstani Som" },
+  EUR: { code: "EUR", label: "EUR · Euro" },
+  NPR: { code: "NPR", label: "NPR · Nepalese Rupee" },
+  CAD: { code: "CAD", label: "CAD · Canadian Dollar" },
+  AUD: { code: "AUD", label: "AUD · Australian Dollar" }
+};
 export const languagePreferences = [
   { value: "en", label: "English" },
   { value: "bn", label: "বাংলা" },

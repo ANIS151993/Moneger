@@ -1,4 +1,15 @@
-export type CurrencyCode = "USD" | "BDT";
+export type CurrencyCode =
+  | "USD"
+  | "BDT"
+  | "INR"
+  | "PKR"
+  | "SAR"
+  | "RUB"
+  | "KGS"
+  | "EUR"
+  | "NPR"
+  | "CAD"
+  | "AUD";
 export type Gender = "" | "male" | "female" | "non-binary" | "other" | "prefer-not-to-say";
 export type LanguagePreference = "en" | "bn" | "hi" | "ur" | "ar" | "ru" | "ky" | "fr" | "de" | "ne";
 export type MaritalStatus = "" | "single" | "married" | "engaged" | "separated" | "divorced" | "widowed" | "prefer-not-to-say";
@@ -74,6 +85,13 @@ export interface ExchangeRateRecord extends BaseEntity {
   rate: number;
   fetchedAt: string;
   source: string;
+}
+
+export interface ExchangeRateSnapshotRecord extends BaseEntity {
+  base: CurrencyCode;
+  fetchedAt: string;
+  source: string;
+  rates: Record<CurrencyCode, number>;
 }
 
 export interface SyncQueueRecord extends BaseEntity {
@@ -159,8 +177,8 @@ export interface DashboardSnapshot {
 }
 
 export interface CurrencyRateMap {
-  usdToBdt: number;
-  bdtToUsd: number;
+  base: CurrencyCode;
+  rates: Record<CurrencyCode, number>;
   updatedAt: string | null;
 }
 

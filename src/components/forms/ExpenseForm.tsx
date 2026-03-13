@@ -11,7 +11,7 @@ import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
-import { expenseCategories, supportedCurrencies } from "@/lib/constants/options";
+import { currencyCatalog, expenseCategories, supportedCurrencies } from "@/lib/constants/options";
 import { ledgerService } from "@/lib/services/ledger-service";
 import { expenseSchema, type ExpenseFormValues, type ExpenseInput } from "@/lib/validators/finance";
 import type { CurrencyCode } from "@/types/finance";
@@ -64,7 +64,7 @@ export function ExpenseForm({ userId, defaultCurrency = "USD" }: { userId: strin
             <Select {...register("currency")}>
               {supportedCurrencies.map((currency) => (
                 <option key={currency} value={currency}>
-                  {currency}
+                  {currencyCatalog[currency].label}
                 </option>
               ))}
             </Select>

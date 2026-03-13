@@ -1,6 +1,6 @@
 import { differenceInCalendarDays, parseISO } from "date-fns";
 
-import type { DebtRecord, OwedRecord, ReminderItem } from "@/types/finance";
+import type { CurrencyCode, DebtRecord, OwedRecord, ReminderItem } from "@/types/finance";
 
 function buildReminder(
   id: string,
@@ -8,7 +8,7 @@ function buildReminder(
   title: string,
   subtitle: string,
   amount: number,
-  currency: "USD" | "BDT",
+  currency: CurrencyCode,
   dueDate: string,
   severity: "upcoming" | "overdue"
 ): ReminderItem {

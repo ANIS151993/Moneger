@@ -1,9 +1,11 @@
 "use client";
 
+import { supportedCurrencies } from "@/lib/constants/options";
 import type {
   BankRecord,
   DebtRecord,
   ExchangeRateRecord,
+  ExchangeRateSnapshotRecord,
   ExpenseRecord,
   IncomeRecord,
   OwedRecord,
@@ -13,6 +15,12 @@ import type {
 import { getUserDatabase } from "@/lib/db/moneger-db";
 import { createLocalRepository } from "@/lib/repositories/base-local-repository";
 import { nowIso } from "@/lib/utils/id";
+
+const supportedCurrencySet = new Set(supportedCurrencies);
+
+function isSupportedCurrency(value: unknown): value is SettingsRecord["baseCurrency"] {
+  return typeof value === "string" && supportedCurrencySet.has(value as SettingsRecord["baseCurrency"]);
+}
 
 export const incomeRepository = createLocalRepository<IncomeRecord>("incomes", "income");
 export const expenseRepository = createLocalRepository<ExpenseRecord>("expenses", "expense");
@@ -64,6 +72,34 @@ export const exchangeRateRepository = {
   }
 };
 
+export const exchangeRateSnapshotRepository = {
+  async getLatest(userId: string) {
+    return getUserDatabase(userId).exchangeRateSnapshots.orderBy("fetchedAt").last();
+  },
+  async listRecent(userId: string, limit = 12) {
+    return getUserDatabase(userId).exchangeRateSnapshots
+      .orderBy("fetchedAt")
+      .reverse()
+      .limit(limit)
+      .toArray();
+  },
+  async saveSnapshot(
+    userId: string,
+    payload: Omit<ExchangeRateSnapshotRecord, "id" | "userId" | "createdAt" | "updatedAt">
+  ) {
+    const now = nowIso();
+    const record: ExchangeRateSnapshotRecord = {
+      id: `snapshot_${payload.fetchedAt}`,
+      userId,
+      createdAt: now,
+      updatedAt: now,
+      ...payload
+    };
+    await getUserDatabase(userId).exchangeRateSnapshots.put(record);
+    return record;
+  }
+};
+
 export const settingsRepository = {
   async get(userId: string) {
     const record = await getUserDatabase(userId).settings.get(`settings_${userId}`);
@@ -74,11 +110,11 @@ export const settingsRepository = {
 
     const legacyRecord = record as SettingsRecord & { displayCurrency?: SettingsRecord["baseCurrency"] };
     const legacyDisplayCurrency =
-      typeof legacyRecord.displayCurrency === "string"
+      isSupportedCurrency(legacyRecord.displayCurrency)
         ? legacyRecord.displayCurrency
         : undefined;
     const normalizedComparisonCurrency: SettingsRecord["comparisonCurrency"] =
-      record.comparisonCurrency === "USD" || record.comparisonCurrency === "BDT"
+      isSupportedCurrency(record.comparisonCurrency)
         ? record.comparisonCurrency
         : "";
 
