@@ -50,7 +50,12 @@ const englishMessages: TranslationTable = {
   "install.title": "Save {{brand}} to your device",
   "install.description":
     "Open your workspace instantly from a saved shortcut instead of typing the web address every time.",
-  "install.installNow": "Install app",
+  "install.descriptionAuto":
+    "One tap saves a shortcut on this device so you can open your workspace instantly.",
+  "install.descriptionManual":
+    "This browser requires one manual Add to Home Screen or Add to Dock step. After you save it, confirm once and this prompt will stay hidden.",
+  "install.installNow": "Save shortcut",
+  "install.confirmSaved": "I saved it",
   "install.later": "Later",
   "install.iosStep1": "Tap the Share button in Safari.",
   "install.iosStep2": "Choose Add to Home Screen.",

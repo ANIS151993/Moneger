@@ -15,6 +15,29 @@ interface BeforeInstallPromptEvent extends Event {
 }
 
 const INSTALLED_STORAGE_KEY = "moneger:app-installed";
+const INSTALLED_COOKIE_KEY = "moneger_app_installed";
+
+function hasStoredInstalledState() {
+  if (typeof window === "undefined") {
+    return false;
+  }
+
+  return (
+    window.localStorage.getItem(INSTALLED_STORAGE_KEY) === "true" ||
+    document.cookie.split("; ").some((item) => item.startsWith(`${INSTALLED_COOKIE_KEY}=true`))
+  );
+}
+
+function persistInstalledState() {
+  if (typeof window === "undefined") {
+    return;
+  }
+
+  window.localStorage.setItem(INSTALLED_STORAGE_KEY, "true");
+  document.cookie = `${INSTALLED_COOKIE_KEY}=true; Max-Age=31536000; Path=/; SameSite=Lax${
+    window.location.protocol === "https:" ? "; Secure" : ""
+  }`;
+}
 
 function isStandaloneMode() {
   if (typeof window === "undefined") {
@@ -73,11 +96,10 @@ export function InstallShortcutPrompt({
       return;
     }
 
-    const installedFromStorage = window.localStorage.getItem(INSTALLED_STORAGE_KEY) === "true";
-    const installedNow = installedFromStorage || isStandaloneMode();
+    const installedNow = hasStoredInstalledState() || isStandaloneMode();
 
     if (installedNow) {
-      window.localStorage.setItem(INSTALLED_STORAGE_KEY, "true");
+      persistInstalledState();
     }
 
     setInstalled(installedNow);
@@ -90,7 +112,7 @@ export function InstallShortcutPrompt({
     }
 
     function handleInstalled() {
-      window.localStorage.setItem(INSTALLED_STORAGE_KEY, "true");
+      persistInstalledState();
       setInstalled(true);
       setDeferredPrompt(null);
     }
@@ -139,6 +161,9 @@ export function InstallShortcutPrompt({
     }
   }, [platform, t]);
 
+  const supportsOneTapInstall = Boolean(deferredPrompt);
+  const description = supportsOneTapInstall ? t("install.descriptionAuto") : t("install.descriptionManual");
+
   async function handleInstall() {
     if (!deferredPrompt) {
       return;
@@ -148,7 +173,7 @@ export function InstallShortcutPrompt({
     const choice = await deferredPrompt.userChoice;
 
     if (choice.outcome === "accepted") {
-      window.localStorage.setItem(INSTALLED_STORAGE_KEY, "true");
+      persistInstalledState();
       setInstalled(true);
     }
 
@@ -185,30 +210,38 @@ export function InstallShortcutPrompt({
           <h3 className="mt-3 max-w-[18rem] text-lg font-semibold tracking-tight text-slate-950">
             {t("install.title", { brand: brand.name })}
           </h3>
-          <p className="mt-2 text-sm leading-6 text-slate-600">{t("install.description")}</p>
+          <p className="mt-2 text-sm leading-6 text-slate-600">{description}</p>
 
-          <div className="mt-4 rounded-[22px] border border-slate-200/80 bg-white/75 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
-            <ol className="grid gap-2 text-sm text-slate-700">
-              {steps.map((step, index) => (
-                <li key={step} className="flex items-start gap-3">
-                  <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-[11px] font-semibold text-white">
-                    {index + 1}
-                  </span>
-                  <span>{step}</span>
-                </li>
-              ))}
-            </ol>
-          </div>
+          {!supportsOneTapInstall ? (
+            <div className="mt-4 rounded-[22px] border border-slate-200/80 bg-white/75 px-4 py-3 shadow-[inset_0_1px_0_rgba(255,255,255,0.7)]">
+              <ol className="grid gap-2 text-sm text-slate-700">
+                {steps.map((step, index) => (
+                  <li key={step} className="flex items-start gap-3">
+                    <span className="mt-0.5 inline-flex h-6 w-6 shrink-0 items-center justify-center rounded-full bg-slate-950 text-[11px] font-semibold text-white">
+                      {index + 1}
+                    </span>
+                    <span>{step}</span>
+                  </li>
+                ))}
+              </ol>
+            </div>
+          ) : null}
 
           <div className="mt-4 flex flex-wrap gap-2">
-            {deferredPrompt ? <Button onClick={() => void handleInstall()}>{t("install.installNow")}</Button> : null}
-            <Button
-              className={deferredPrompt ? "" : "min-w-[8.5rem]"}
-              variant={deferredPrompt ? "ghost" : "secondary"}
-              onClick={() => setClosed(true)}
-            >
-              {t("install.later")}
-            </Button>
+            {supportsOneTapInstall ? (
+              <Button onClick={() => void handleInstall()}>{t("install.installNow")}</Button>
+            ) : (
+              <Button
+                className="min-w-[8.5rem]"
+                variant="secondary"
+                onClick={() => {
+                  persistInstalledState();
+                  setInstalled(true);
+                }}
+              >
+                {t("install.confirmSaved")}
+              </Button>
+            )}
           </div>
         </div>
       </div>
