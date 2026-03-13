@@ -3,6 +3,7 @@
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { OwedForm } from "@/components/forms/OwedForm";
+import { useI18n } from "@/components/providers/LanguageProvider";
 import { SimpleTable } from "@/components/shared/SimpleTable";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -10,12 +11,16 @@ import { EmptyState } from "@/components/ui/EmptyState";
 import { PageHeader } from "@/components/ui/PageHeader";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { getUserDatabase } from "@/lib/db/moneger-db";
+import { useUserSettings } from "@/lib/hooks/use-user-settings";
 import { ledgerService } from "@/lib/services/ledger-service";
 import { formatDate } from "@/lib/utils/date";
 import { formatCurrency } from "@/lib/utils/finance";
 
 export default function OwedPage() {
   const { user } = useAuth();
+  const { t } = useI18n();
+  const settings = useUserSettings(user?.uid);
+  const baseCurrency = settings?.baseCurrency || "USD";
   const owed = useLiveQuery(
     async () => {
       if (!user) {
@@ -35,59 +40,59 @@ export default function OwedPage() {
   return (
     <div className="space-y-6">
       <PageHeader
-        eyebrow="Money owed"
-        title="Track what should come back to you"
-        description="Stay on top of debtor details, settlement timing, and overdue reimbursements."
+        eyebrow={t("owedPage.eyebrow")}
+        title={t("owedPage.title")}
+        description={t("owedPage.description")}
       />
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <OwedForm userId={user.uid} />
+        <OwedForm key={baseCurrency} userId={user.uid} defaultCurrency={baseCurrency} />
         {owed.length === 0 ? (
           <EmptyState
-            title="No owed records yet"
-            description="Add the money people owe you so the dashboard can include it in your net picture."
+            title={t("owedPage.emptyTitle")}
+            description={t("owedPage.emptyDescription")}
           />
         ) : (
           <SimpleTable
-            title="Owed ledger"
-            description="Useful for reimbursements, personal lending, and client receivables."
+            title={t("owedPage.tableTitle")}
+            description={t("owedPage.tableDescription")}
             rows={owed}
             columns={[
               {
                 key: "debtor",
-                header: "Debtor",
+                header: t("owedPage.debtor"),
                 render: (item) => (
                   <div>
                     <p className="font-medium text-slate-900">{item.debtorName}</p>
-                    <p className="text-xs text-slate-400">{item.debtorEmail || item.debtorPhone || "No contact"}</p>
+                    <p className="text-xs text-slate-400">{item.debtorEmail || item.debtorPhone || t("common.noContact")}</p>
                   </div>
                 )
               },
               {
                 key: "amount",
-                header: "Amount",
+                header: t("common.amount"),
                 render: (item) => formatCurrency(item.amount, item.currency)
               },
               {
                 key: "settlement",
-                header: "Settlement",
+                header: t("owedPage.settlement"),
                 render: (item) => formatDate(item.settlementDate)
               },
               {
                 key: "status",
-                header: "Status",
+                header: t("common.status"),
                 render: (item) => (
                   <Badge tone={item.status === "overdue" ? "danger" : item.status === "settled" ? "success" : "info"}>
-                    {item.status}
+                    {t(`options.owedStatus.${item.status}`)}
                   </Badge>
                 )
               },
               {
                 key: "actions",
-                header: "Actions",
+                header: t("common.actions"),
                 render: (item) => (
                   <Button variant="ghost" onClick={() => void ledgerService.deleteOwed(user.uid, item.id)}>
-                    Delete
+                    {t("common.delete")}
                   </Button>
                 )
               }

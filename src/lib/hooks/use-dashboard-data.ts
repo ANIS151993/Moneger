@@ -9,7 +9,8 @@ import { useUserSettings } from "@/lib/hooks/use-user-settings";
 
 export function useDashboardData(userId?: string) {
   const settings = useUserSettings(userId);
-  const displayCurrency = settings?.displayCurrency || "USD";
+  const baseCurrency: "USD" | "BDT" = settings?.baseCurrency || "USD";
+  const comparisonCurrency: "" | "USD" | "BDT" = settings?.comparisonCurrency || "";
   const { rates, loading: ratesLoading } = useCurrencyEngine(userId);
   const db = userId ? getUserDatabase(userId) : null;
 
@@ -36,14 +37,15 @@ export function useDashboardData(userId?: string) {
   const snapshot = dataset
     ? createDashboardSnapshot({
         ...dataset,
-        displayCurrency,
+        baseCurrency,
         rates
       })
     : null;
 
   return {
     settings,
-    displayCurrency,
+    baseCurrency,
+    comparisonCurrency,
     rates,
     ratesLoading,
     dataset,

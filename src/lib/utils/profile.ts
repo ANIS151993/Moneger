@@ -1,8 +1,9 @@
 import type { SettingsRecord } from "@/types/finance";
+import { getRuntimeLanguage, translateMessage } from "@/lib/i18n/messages";
 
 function fallbackNameFromEmail(email?: string | null) {
   if (!email) {
-    return "Moneger user";
+    return translateMessage(getRuntimeLanguage(), "profile.defaultUserName");
   }
 
   return email.split("@")[0]?.replace(/[._-]+/g, " ") || email;
@@ -13,7 +14,7 @@ export function getProfileDisplayName(profile?: Partial<SettingsRecord>, email?:
 }
 
 export function getProfileInitials(name?: string | null) {
-  const source = (name || "Moneger User").trim();
+  const source = (name || translateMessage(getRuntimeLanguage(), "profile.defaultUserName")).trim();
   const parts = source.split(/\s+/).filter(Boolean);
 
   return parts
@@ -25,30 +26,33 @@ export function getProfileInitials(name?: string | null) {
 export function getProfileSummary(profile?: Partial<SettingsRecord>) {
   const summary = [profile?.occupation, profile?.location].filter(Boolean).join(" • ");
 
-  return summary || profile?.bio?.trim() || "Complete your profile details in settings";
+  return summary || profile?.bio?.trim() || translateMessage(getRuntimeLanguage(), "profile.defaultSummary");
 }
 
 export function formatMaritalStatus(status?: SettingsRecord["maritalStatus"]) {
-  return formatProfileOption(status);
-}
-
-export function formatGender(gender?: SettingsRecord["gender"]) {
-  return formatProfileOption(gender);
-}
-
-function formatProfileOption(value?: string) {
-  if (!value) {
+  if (!status) {
     return "";
   }
 
-  return value
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
+  return translateMessage(getRuntimeLanguage(), `options.maritalStatus.${status}`);
+}
+
+export function formatGender(gender?: SettingsRecord["gender"]) {
+  if (!gender) {
+    return "";
+  }
+
+  return translateMessage(getRuntimeLanguage(), `options.gender.${gender}`);
 }
 
 export function getCompactProfileMeta(profile?: Partial<SettingsRecord>, email?: string | null) {
-  return profile?.occupation || profile?.contactNumber || profile?.location || email || "Open settings to personalize";
+  return (
+    profile?.occupation ||
+    profile?.contactNumber ||
+    profile?.location ||
+    email ||
+    translateMessage(getRuntimeLanguage(), "profile.defaultCompactMeta")
+  );
 }
 
 export function getProfileLocation(profile?: Partial<SettingsRecord>) {

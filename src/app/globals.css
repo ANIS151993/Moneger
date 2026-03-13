@@ -12,8 +12,22 @@
 }
 
 @theme inline {
-  --font-sans: var(--font-inter);
-  --font-display: var(--font-poppins);
+  --font-sans:
+    var(--font-inter),
+    "Noto Sans",
+    "Noto Sans Bengali",
+    "Noto Sans Devanagari",
+    "Noto Sans Arabic",
+    "Segoe UI",
+    sans-serif;
+  --font-display:
+    var(--font-poppins),
+    "Noto Sans",
+    "Noto Sans Bengali",
+    "Noto Sans Devanagari",
+    "Noto Sans Arabic",
+    "Segoe UI",
+    sans-serif;
   --font-mono: var(--font-jetbrains);
 }
 
@@ -23,6 +37,10 @@
 
 html {
   scroll-behavior: smooth;
+}
+
+html[dir="rtl"] body {
+  direction: rtl;
 }
 
 body {

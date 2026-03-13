@@ -1,6 +1,6 @@
 export type CurrencyCode = "USD" | "BDT";
 export type Gender = "" | "male" | "female" | "non-binary" | "other" | "prefer-not-to-say";
-export type LanguagePreference = "en" | "bn";
+export type LanguagePreference = "en" | "bn" | "hi" | "ur" | "ar" | "ru" | "ky" | "fr" | "de" | "ne";
 export type MaritalStatus = "" | "single" | "married" | "engaged" | "separated" | "divorced" | "widowed" | "prefer-not-to-say";
 
 export type IncomeFrequency = "daily" | "weekly" | "monthly" | "one-time";
@@ -86,7 +86,8 @@ export interface SyncQueueRecord extends BaseEntity {
 }
 
 export interface SettingsRecord extends BaseEntity {
-  displayCurrency: CurrencyCode;
+  baseCurrency: CurrencyCode;
+  comparisonCurrency: CurrencyCode | "";
   languagePreference: LanguagePreference;
   notificationsEnabled: boolean;
   optionalEncryptedSyncEnabled: boolean;

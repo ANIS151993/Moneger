@@ -5,6 +5,7 @@ import { useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { useI18n } from "@/components/providers/LanguageProvider";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { FormField } from "@/components/ui/FormField";
@@ -17,6 +18,7 @@ export function ForgotPasswordForm() {
   const [formError, setFormError] = useState("");
   const [isPending, startTransition] = useTransition();
   const { resetPassword } = useAuth();
+  const { t } = useI18n();
   const {
     register,
     handleSubmit,
@@ -33,36 +35,34 @@ export function ForgotPasswordForm() {
     startTransition(async () => {
       try {
         await resetPassword(values.email);
-        setMessage("Password reset flow triggered. Check your email.");
+        setMessage(t("auth.passwordResetSent"));
       } catch (error) {
-        setFormError(error instanceof Error ? error.message : "Unable to send reset email");
+        setFormError(error instanceof Error ? error.message : t("auth.errorReset"));
       }
     });
   }
 
   return (
     <Card className="rounded-[32px] p-8">
-      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">Recover access</p>
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">Reset your password</h1>
-      <p className="mt-3 text-sm text-slate-500">
-        Request a reset link without exposing any financial records to the server.
-      </p>
+      <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">{t("auth.recoverAccess")}</p>
+      <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{t("auth.resetPasswordTitle")}</h1>
+      <p className="mt-3 text-sm text-slate-500">{t("auth.resetPasswordDescription")}</p>
 
       <form className="mt-8 grid gap-4" onSubmit={handleSubmit(onSubmit)}>
-        <FormField label="Email" error={errors.email?.message}>
+        <FormField label={t("common.email")} error={errors.email?.message}>
           <Input placeholder="you@example.com" type="email" {...register("email")} />
         </FormField>
         {message ? <p className="text-sm font-medium text-emerald-600">{message}</p> : null}
         {formError ? <p className="text-sm font-medium text-rose-600">{formError}</p> : null}
         <Button className="mt-2 w-full" type="submit" disabled={isPending}>
-          {isPending ? "Sending..." : "Send reset link"}
+          {isPending ? t("auth.sending") : t("auth.sendResetLink")}
         </Button>
       </form>
 
       <div className="mt-6 text-sm text-slate-500">
-        Remembered your password?{" "}
+        {t("auth.rememberedPassword")}{" "}
         <Link className="font-medium text-slate-900" href="/login">
-          Sign in
+          {t("auth.signIn")}
         </Link>
       </div>
     </Card>

@@ -1,5 +1,3 @@
-import { format } from "date-fns";
-
 import type {
   ActivityItem,
   BankRecord,
@@ -11,16 +9,13 @@ import type {
   IncomeRecord,
   OwedRecord
 } from "@/types/finance";
-import { convertAmount, roundCurrency } from "@/lib/utils/finance";
+import { convertFromCoreCurrency, normalizeToCoreCurrency, roundCurrency } from "@/lib/utils/finance";
+import { formatMonthLabel } from "@/lib/utils/date";
 import { buildReminders } from "@/lib/services/reminders";
 
-function sumRecords(
-  items: Array<{ amount: number; currency: CurrencyCode }>,
-  currency: CurrencyCode,
-  rates: CurrencyRateMap
-) {
+function sumRecordsInUsd(items: Array<{ amount: number; currency: CurrencyCode }>, rates: CurrencyRateMap) {
   return roundCurrency(
-    items.reduce((total, item) => total + convertAmount(item.amount, item.currency, currency, rates), 0)
+    items.reduce((total, item) => total + normalizeToCoreCurrency(item.amount, item.currency, rates), 0)
   );
 }
 
@@ -78,26 +73,26 @@ function buildMonthlyTrends(
   currency: CurrencyCode,
   rates: CurrencyRateMap
 ) {
-  const buckets = new Map<string, { income: number; expenses: number }>();
+  const buckets = new Map<string, { incomeUsd: number; expensesUsd: number }>();
 
   for (const item of incomes) {
-    const key = format(new Date(item.date), "MMM");
-    const current = buckets.get(key) || { income: 0, expenses: 0 };
-    current.income += convertAmount(item.amount, item.currency, currency, rates);
+    const key = formatMonthLabel(item.date);
+    const current = buckets.get(key) || { incomeUsd: 0, expensesUsd: 0 };
+    current.incomeUsd += normalizeToCoreCurrency(item.amount, item.currency, rates);
     buckets.set(key, current);
   }
 
   for (const item of expenses) {
-    const key = format(new Date(item.date), "MMM");
-    const current = buckets.get(key) || { income: 0, expenses: 0 };
-    current.expenses += convertAmount(item.amount, item.currency, currency, rates);
+    const key = formatMonthLabel(item.date);
+    const current = buckets.get(key) || { incomeUsd: 0, expensesUsd: 0 };
+    current.expensesUsd += normalizeToCoreCurrency(item.amount, item.currency, rates);
     buckets.set(key, current);
   }
 
   return Array.from(buckets.entries()).map(([label, values]) => ({
     label,
-    income: roundCurrency(values.income),
-    expenses: roundCurrency(values.expenses)
+    income: convertFromCoreCurrency(values.incomeUsd, currency, rates),
+    expenses: convertFromCoreCurrency(values.expensesUsd, currency, rates)
   }));
 }
 
@@ -110,14 +105,14 @@ function buildCategoryTotals(
 
   for (const item of expenses) {
     const current = totals.get(item.category) || 0;
-    totals.set(
-      item.category,
-      current + convertAmount(item.amount, item.currency, currency, rates)
-    );
+    totals.set(item.category, current + normalizeToCoreCurrency(item.amount, item.currency, rates));
   }
 
   return Array.from(totals.entries())
-    .map(([category, amount]) => ({ category, amount: roundCurrency(amount) }))
+    .map(([category, amount]) => ({
+      category,
+      amount: convertFromCoreCurrency(amount, currency, rates)
+    }))
     .sort((left, right) => right.amount - left.amount);
 }
 
@@ -127,14 +122,14 @@ export function createDashboardSnapshot(params: {
   debts: DebtRecord[];
   owed: OwedRecord[];
   banks: BankRecord[];
-  displayCurrency: CurrencyCode;
+  baseCurrency: CurrencyCode;
   rates: CurrencyRateMap;
 }): DashboardSnapshot {
-  const { incomes, expenses, debts, owed, displayCurrency, rates } = params;
-  const totalIncome = sumRecords(incomes, displayCurrency, rates);
-  const totalExpenses = sumRecords(expenses, displayCurrency, rates);
-  const totalDebt = sumRecords(debts, displayCurrency, rates);
-  const totalOwed = sumRecords(owed, displayCurrency, rates);
+  const { incomes, expenses, debts, owed, baseCurrency, rates } = params;
+  const totalIncome = sumRecordsInUsd(incomes, rates);
+  const totalExpenses = sumRecordsInUsd(expenses, rates);
+  const totalDebt = sumRecordsInUsd(debts, rates);
+  const totalOwed = sumRecordsInUsd(owed, rates);
 
   return {
     totalIncome,
@@ -143,12 +138,12 @@ export function createDashboardSnapshot(params: {
     totalOwed,
     netBalance: roundCurrency(totalIncome - totalExpenses - totalDebt + totalOwed),
     recentActivity: buildActivity(incomes, expenses, debts, owed).slice(0, 8),
-    monthlyTrends: buildMonthlyTrends(incomes, expenses, displayCurrency, rates),
-    categoryTotals: buildCategoryTotals(expenses, displayCurrency, rates),
+    monthlyTrends: buildMonthlyTrends(incomes, expenses, baseCurrency, rates),
+    categoryTotals: buildCategoryTotals(expenses, baseCurrency, rates),
     reminders: buildReminders(debts, owed),
     debtVsOwed: {
-      debt: totalDebt,
-      owed: totalOwed
+      debt: convertFromCoreCurrency(totalDebt, baseCurrency, rates),
+      owed: convertFromCoreCurrency(totalOwed, baseCurrency, rates)
     }
   };
 }

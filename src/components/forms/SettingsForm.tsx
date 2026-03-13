@@ -4,6 +4,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { useI18n } from "@/components/providers/LanguageProvider";
 import { SimpleTable } from "@/components/shared/SimpleTable";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -32,16 +33,20 @@ export function SettingsForm({
 }) {
   const [message, setMessage] = useState("");
   const [isPending, startTransition] = useTransition();
+  const { setLanguagePreference, t } = useI18n();
   const {
     register,
     handleSubmit,
     getValues,
     reset,
+    setValue,
+    watch,
     formState: { errors }
   } = useForm<SettingsFormValues, unknown, SettingsInput>({
     resolver: zodResolver(settingsSchema),
     defaultValues: {
-      displayCurrency: settings?.displayCurrency || "USD",
+      baseCurrency: settings?.baseCurrency || "USD",
+      comparisonCurrency: settings?.comparisonCurrency || "",
       languagePreference: settings?.languagePreference || "en",
       notificationsEnabled: settings?.notificationsEnabled ?? true,
       optionalEncryptedSyncEnabled: settings?.optionalEncryptedSyncEnabled ?? false,
@@ -52,7 +57,8 @@ export function SettingsForm({
   useEffect(() => {
     if (settings) {
       reset({
-        displayCurrency: settings.displayCurrency,
+        baseCurrency: settings.baseCurrency,
+        comparisonCurrency: settings.comparisonCurrency,
         languagePreference: settings.languagePreference,
         notificationsEnabled: settings.notificationsEnabled,
         optionalEncryptedSyncEnabled: settings.optionalEncryptedSyncEnabled,
@@ -60,6 +66,22 @@ export function SettingsForm({
       });
     }
   }, [reset, settings]);
+
+  const selectedLanguage = watch("languagePreference");
+  const selectedBaseCurrency = watch("baseCurrency");
+  const selectedComparisonCurrency = watch("comparisonCurrency");
+
+  useEffect(() => {
+    if (selectedLanguage) {
+      setLanguagePreference(selectedLanguage);
+    }
+  }, [selectedLanguage, setLanguagePreference]);
+
+  useEffect(() => {
+    if (selectedComparisonCurrency && selectedComparisonCurrency === selectedBaseCurrency) {
+      setValue("comparisonCurrency", "", { shouldDirty: true, shouldValidate: true });
+    }
+  }, [selectedBaseCurrency, selectedComparisonCurrency, setValue]);
 
   function onSubmit(values: SettingsInput) {
     setMessage("");
@@ -70,7 +92,7 @@ export function SettingsForm({
         browserNotificationsPermission:
           typeof Notification === "undefined" ? "unsupported" : Notification.permission
       });
-      setMessage("Settings saved locally.");
+      setMessage(t("settings.saved"));
     });
   }
 
@@ -81,20 +103,22 @@ export function SettingsForm({
       ...currentValues,
       browserNotificationsPermission: permission
     });
-    setMessage(`Browser notification permission: ${permission}`);
+    setMessage(
+      t("settings.notificationPermissionMessage", {
+        permission: t(`permission.${permission}`)
+      })
+    );
   }
 
   async function handleClearWorkspace() {
-    const confirmed = window.confirm(
-      "This will permanently remove all local income, expense, debt, owed, bank, and queued sync records on this device."
-    );
+    const confirmed = window.confirm(t("settings.clearLocalRecordsConfirmation"));
 
     if (!confirmed) {
       return;
     }
 
     await ledgerService.clearWorkspace(userId);
-    setMessage("Local finance records cleared.");
+    setMessage(t("settings.clearLocalRecordsSuccess"));
   }
 
   return (
@@ -102,15 +126,15 @@ export function SettingsForm({
       <Card className="border-slate-900 bg-slate-950 text-white shadow-[0_24px_80px_rgba(2,6,23,0.42)]">
         <div className="flex flex-col gap-4 lg:flex-row lg:items-center lg:justify-between">
           <div>
-            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-300">Settings Control Center</p>
-            <h2 className="mt-3 text-2xl font-semibold tracking-tight">Manage app-level preferences</h2>
+            <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-300">{t("settings.controlCenter")}</p>
+            <h2 className="mt-3 text-2xl font-semibold tracking-tight">{t("settings.controlCenterTitle")}</h2>
             <p className="mt-2 max-w-2xl text-sm leading-6 text-slate-300">
-              Organize your workspace by category, save once, and keep all app-level settings local to this account.
+              {t("settings.controlCenterDescription")}
             </p>
           </div>
           <div className="flex flex-wrap items-center gap-3">
             <Button type="submit" disabled={isPending}>
-              {isPending ? "Saving..." : "Save all settings"}
+              {isPending ? t("common.saving") : t("settings.saveAll")}
             </Button>
             {message ? <p className="text-sm font-medium text-emerald-300">{message}</p> : null}
           </div>
@@ -118,29 +142,51 @@ export function SettingsForm({
       </Card>
 
       <Card id="currency-settings">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">Currency Settings</p>
-        <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">Money display rules</h2>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">{t("settings.currencySection")}</p>
+        <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">{t("settings.currencyTitle")}</h2>
         <p className="mt-2 text-sm text-slate-500">
-          Choose the base currency used in totals, trends, and summary cards across the workspace.
+          {t("settings.currencyDescription")}
         </p>
+        <div className="mt-4 rounded-2xl border border-emerald-100 bg-emerald-50 px-4 py-3 text-sm text-emerald-700">
+          {t("settings.currencyCoreRule")}
+        </div>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <FormField label="Display currency" error={errors.displayCurrency?.message}>
-            <Select {...register("displayCurrency")}>
+          <FormField
+            label={t("common.baseCurrency")}
+            error={errors.baseCurrency?.message}
+            hint={t("settings.baseCurrencyDescription")}
+          >
+            <Select {...register("baseCurrency")}>
               <option value="USD">USD</option>
               <option value="BDT">BDT</option>
+            </Select>
+          </FormField>
+          <FormField
+            label={t("common.comparisonCurrency")}
+            error={errors.comparisonCurrency?.message}
+            hint={t("settings.comparisonCurrencyDescription")}
+          >
+            <Select {...register("comparisonCurrency")}>
+              <option value="">{t("settings.comparisonCurrencyNone")}</option>
+              <option value="USD" disabled={selectedBaseCurrency === "USD"}>
+                USD
+              </option>
+              <option value="BDT" disabled={selectedBaseCurrency === "BDT"}>
+                BDT
+              </option>
             </Select>
           </FormField>
         </div>
       </Card>
 
       <Card id="language-settings">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-600">Language Settings</p>
-        <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">Interface language preference</h2>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-sky-600">{t("settings.languageSection")}</p>
+        <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">{t("settings.languageTitle")}</h2>
         <p className="mt-2 text-sm text-slate-500">
-          Save your preferred workspace language. This currently stores the preference locally for your account.
+          {t("settings.languageDescription")}
         </p>
         <div className="mt-6 grid gap-4 md:grid-cols-2">
-          <FormField label="Language" error={errors.languagePreference?.message}>
+          <FormField label={t("settings.language")} error={errors.languagePreference?.message}>
             <Select {...register("languagePreference")}>
               {languagePreferences.map((language) => (
                 <option key={language.value} value={language.value}>
@@ -153,28 +199,28 @@ export function SettingsForm({
       </Card>
 
       <Card id="app-settings">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-600">App Settings</p>
-        <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">Theme, reminders, and notifications</h2>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-600">{t("settings.appSection")}</p>
+        <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">{t("settings.appTitle")}</h2>
         <p className="mt-2 text-sm text-slate-500">
-          Configure how the app behaves on this device without sending your data to a backend.
+          {t("settings.appDescription")}
         </p>
         <div className="mt-6 grid gap-4">
           <div className="grid gap-4 md:grid-cols-2">
-            <FormField label="Theme" error={errors.themePreference?.message}>
+            <FormField label={t("settings.theme")} error={errors.themePreference?.message}>
               <Select {...register("themePreference")}>
-                <option value="system">System</option>
-                <option value="light">Light</option>
+                <option value="system">{t("settings.theme.system")}</option>
+                <option value="light">{t("settings.theme.light")}</option>
               </Select>
             </FormField>
           </div>
           <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700">
-            Enable in-app reminders
+            {t("settings.enableReminders")}
             <input type="checkbox" {...register("notificationsEnabled")} />
           </label>
           <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
-            <p className="text-sm font-medium text-slate-900">Browser notification permission</p>
+            <p className="text-sm font-medium text-slate-900">{t("settings.notificationPermissionTitle")}</p>
             <p className="mt-1 text-sm text-slate-500">
-              Grant permission if you want reminder alerts from this device.
+              {t("settings.notificationPermissionDescription")}
             </p>
             <div className="mt-4">
               <Button
@@ -183,7 +229,7 @@ export function SettingsForm({
                 onClick={() => void handleRequestPermission()}
                 disabled={!browserNotificationSupported()}
               >
-                Request notification permission
+                {t("settings.requestPermission")}
               </Button>
             </div>
           </div>
@@ -191,55 +237,55 @@ export function SettingsForm({
       </Card>
 
       <Card id="privacy-sync-settings">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-600">Privacy & Sync</p>
-        <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">Local-first data controls</h2>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-amber-600">{t("settings.privacySection")}</p>
+        <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">{t("settings.privacyTitle")}</h2>
         <p className="mt-2 text-sm text-slate-500">
-          Keep remote storage optional and review the local queue used for future encrypted sync workflows.
+          {t("settings.privacyDescription")}
         </p>
         <div className="mt-6 grid gap-4">
           <label className="flex items-center justify-between rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 text-sm font-medium text-slate-700">
-            Optional encrypted sync scaffolding
+            {t("settings.syncToggle")}
             <input type="checkbox" {...register("optionalEncryptedSyncEnabled")} />
           </label>
           <div className="rounded-2xl border border-slate-200 bg-white px-4 py-4">
-            <p className="text-sm font-medium text-slate-900">Architecture note</p>
+            <p className="text-sm font-medium text-slate-900">{t("settings.architectureTitle")}</p>
             <p className="mt-2 text-sm leading-6 text-slate-500">
-              Your finance records stay local by default. This queue is only here to support future encrypted sync if you choose to enable it.
+              {t("settings.architectureDescription")}
             </p>
           </div>
           {syncQueue.length === 0 ? (
             <EmptyState
-              title="Sync queue is empty"
-              description="Queued local changes will appear here if you later choose to prepare encrypted sync uploads."
+              title={t("settings.syncQueueEmptyTitle")}
+              description={t("settings.syncQueueEmptyDescription")}
             />
           ) : (
             <SimpleTable
-              title="Sync queue"
-              description="Queued local changes waiting for optional encrypted sync handling."
+              title={t("settings.syncQueueTitle")}
+              description={t("settings.syncQueueDescription")}
               rows={syncQueue}
               columns={[
                 {
                   key: "entity",
-                  header: "Entity",
-                  render: (item) => item.entityType
+                  header: t("common.entity"),
+                  render: (item) => t(`options.syncEntity.${item.entityType}`)
                 },
                 {
                   key: "action",
-                  header: "Action",
-                  render: (item) => item.action
+                  header: t("common.action"),
+                  render: (item) => t(`options.syncAction.${item.action}`)
                 },
                 {
                   key: "status",
-                  header: "Status",
+                  header: t("common.status"),
                   render: (item) => (
                     <Badge tone={item.status === "uploaded" ? "success" : item.status === "failed" ? "danger" : "info"}>
-                      {item.status}
+                      {t(`options.syncStatus.${item.status}`)}
                     </Badge>
                   )
                 },
                 {
                   key: "createdAt",
-                  header: "Queued",
+                  header: t("common.queued"),
                   render: (item) => (
                     <div>
                       <p>{relativeFromNow(item.createdAt)}</p>
@@ -254,14 +300,14 @@ export function SettingsForm({
       </Card>
 
       <Card id="workspace-settings">
-        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-rose-600">Workspace Settings</p>
-        <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">Device-level reset actions</h2>
+        <p className="text-xs font-semibold uppercase tracking-[0.24em] text-rose-600">{t("settings.workspaceSection")}</p>
+        <h2 className="mt-3 text-xl font-semibold tracking-tight text-slate-950">{t("settings.workspaceTitle")}</h2>
         <p className="mt-2 text-sm text-slate-500">
-          Use this only when you want to clear the local records stored for this account on this device.
+          {t("settings.workspaceDescription")}
         </p>
         <div className="mt-6 flex flex-wrap gap-3">
           <Button type="button" variant="danger" onClick={() => void handleClearWorkspace()}>
-            Clear local records
+            {t("settings.clearLocalRecords")}
           </Button>
         </div>
       </Card>

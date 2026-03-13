@@ -4,6 +4,7 @@ import type { DebtRecord, OwedRecord, ReminderItem } from "@/types/finance";
 
 function buildReminder(
   id: string,
+  type: "debt" | "owed",
   title: string,
   subtitle: string,
   amount: number,
@@ -13,7 +14,7 @@ function buildReminder(
 ): ReminderItem {
   return {
     id,
-    type: title.toLowerCase().includes("owed") ? "owed" : "debt",
+    type,
     title,
     subtitle,
     amount,
@@ -36,6 +37,7 @@ export function buildReminders(debts: DebtRecord[], owed: OwedRecord[]) {
       reminders.push(
         buildReminder(
           item.id,
+          "debt",
           "Debt settlement due",
           item.creditorName,
           item.amount,
@@ -57,6 +59,7 @@ export function buildReminders(debts: DebtRecord[], owed: OwedRecord[]) {
       reminders.push(
         buildReminder(
           item.id,
+          "owed",
           "Money owed reminder",
           item.debtorName,
           item.amount,

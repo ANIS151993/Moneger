@@ -11,7 +11,15 @@ import type {
 export const supportedCurrencies: CurrencyCode[] = ["USD", "BDT"];
 export const languagePreferences = [
   { value: "en", label: "English" },
-  { value: "bn", label: "Bangla" }
+  { value: "bn", label: "বাংলা" },
+  { value: "hi", label: "हिन्दी" },
+  { value: "ur", label: "اردو" },
+  { value: "ar", label: "العربية" },
+  { value: "ru", label: "Русский" },
+  { value: "ky", label: "Кыргызча" },
+  { value: "fr", label: "Français" },
+  { value: "de", label: "Deutsch" },
+  { value: "ne", label: "नेपाली" }
 ] as const satisfies ReadonlyArray<{ value: LanguagePreference; label: string }>;
 
 export const incomeFrequencies: IncomeFrequency[] = ["daily", "weekly", "monthly", "one-time"];

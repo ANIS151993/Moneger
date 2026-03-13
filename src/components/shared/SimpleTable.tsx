@@ -26,7 +26,7 @@ export function SimpleTable<T>({
         <p className="mt-1 text-sm text-slate-500">{description}</p>
       </div>
       <div className="overflow-x-auto">
-        <table className="min-w-full divide-y divide-slate-100 text-left">
+        <table className="min-w-full divide-y divide-slate-100 text-start">
           <thead className="bg-slate-50/80">
             <tr>
               {columns.map((column) => (

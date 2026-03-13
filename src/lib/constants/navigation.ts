@@ -1,9 +1,9 @@
 export const dashboardNavigation = [
-  { href: "/dashboard", label: "Overview" },
-  { href: "/income", label: "Income" },
-  { href: "/expenses", label: "Expenses" },
-  { href: "/debts", label: "Debts" },
-  { href: "/owed", label: "Money Owed" },
-  { href: "/banks", label: "Banks" },
-  { href: "/settings", label: "Settings" }
-];
+  { href: "/dashboard", labelKey: "nav.overview" },
+  { href: "/income", labelKey: "nav.income" },
+  { href: "/expenses", labelKey: "nav.expenses" },
+  { href: "/debts", labelKey: "nav.debts" },
+  { href: "/owed", labelKey: "nav.moneyOwed" },
+  { href: "/banks", labelKey: "nav.banks" },
+  { href: "/settings", labelKey: "nav.settings" }
+] as const;

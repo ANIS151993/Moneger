@@ -1,6 +1,7 @@
 "use client";
 
 import type { ReminderItem } from "@/types/finance";
+import { translateRuntimeMessage } from "@/lib/i18n/messages";
 
 export function browserNotificationSupported() {
   return typeof window !== "undefined" && "Notification" in window;
@@ -20,8 +21,14 @@ export function pushReminderNotifications(reminders: ReminderItem[]) {
   }
 
   reminders.slice(0, 2).forEach((reminder) => {
-    const title = reminder.severity === "overdue" ? "Overdue payment alert" : "Upcoming settlement alert";
-    const body = `${reminder.title} — ${reminder.subtitle}`;
+    const title =
+      reminder.severity === "overdue"
+        ? translateRuntimeMessage("notifications.overduePaymentAlert")
+        : translateRuntimeMessage("notifications.upcomingSettlementAlert");
+    const body = translateRuntimeMessage(
+      reminder.type === "debt" ? "notifications.body.debt" : "notifications.body.owed",
+      { name: reminder.subtitle }
+    );
 
     new Notification(title, {
       body,

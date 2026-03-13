@@ -23,7 +23,8 @@ export const syncQueueRepository = createLocalRepository<SyncQueueRecord>("syncQ
 
 function buildDefaultSettings(): Omit<SettingsRecord, "id" | "userId" | "createdAt" | "updatedAt"> {
   return {
-    displayCurrency: "USD",
+    baseCurrency: "USD",
+    comparisonCurrency: "",
     languagePreference: "en",
     notificationsEnabled: true,
     optionalEncryptedSyncEnabled: false,
@@ -71,9 +72,21 @@ export const settingsRepository = {
       return undefined;
     }
 
+    const legacyRecord = record as SettingsRecord & { displayCurrency?: SettingsRecord["baseCurrency"] };
+    const legacyDisplayCurrency =
+      typeof legacyRecord.displayCurrency === "string"
+        ? legacyRecord.displayCurrency
+        : undefined;
+    const normalizedComparisonCurrency: SettingsRecord["comparisonCurrency"] =
+      record.comparisonCurrency === "USD" || record.comparisonCurrency === "BDT"
+        ? record.comparisonCurrency
+        : "";
+
     return {
       ...buildDefaultSettings(),
-      ...record
+      ...record,
+      baseCurrency: record.baseCurrency || legacyDisplayCurrency || "USD",
+      comparisonCurrency: normalizedComparisonCurrency
     };
   },
   async upsert(

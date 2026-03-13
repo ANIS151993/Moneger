@@ -5,6 +5,7 @@ import { useEffect, useState, useTransition } from "react";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { useI18n } from "@/components/providers/LanguageProvider";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -21,27 +22,20 @@ import type { SettingsRecord } from "@/types/finance";
 const MAX_PHOTO_BYTES = 2 * 1024 * 1024;
 const SUPPORTED_PROFILE_IMAGE_TYPES = ["image/jpeg", "image/png", "image/webp"];
 
-function formatStatusLabel(value: string) {
-  return value
-    .split("-")
-    .map((part) => part.charAt(0).toUpperCase() + part.slice(1))
-    .join(" ");
-}
-
 function fileToDataUrl(file: File) {
   return new Promise<string>((resolve, reject) => {
     const reader = new FileReader();
 
     reader.onload = () => {
       if (typeof reader.result !== "string") {
-        reject(new Error("Unable to read the selected photo"));
+        reject(new Error("PROFILE_PHOTO_READ_ERROR"));
         return;
       }
 
       resolve(reader.result);
     };
 
-    reader.onerror = () => reject(new Error("Unable to read the selected photo"));
+    reader.onerror = () => reject(new Error("PROFILE_PHOTO_READ_ERROR"));
     reader.readAsDataURL(file);
   });
 }
@@ -58,6 +52,7 @@ export function ProfileForm({
   const [message, setMessage] = useState("");
   const [formError, setFormError] = useState("");
   const [isPending, startTransition] = useTransition();
+  const { t } = useI18n();
   const {
     register,
     handleSubmit,
@@ -106,9 +101,9 @@ export function ProfileForm({
     startTransition(async () => {
       try {
         await ledgerService.saveProfile(userId, values);
-        setMessage("Profile saved locally.");
+        setMessage(t("profile.saved"));
       } catch (error) {
-        setFormError(error instanceof Error ? error.message : "Unable to save profile");
+        setFormError(error instanceof Error ? error.message : t("profile.saveError"));
       }
     });
   }
@@ -124,13 +119,13 @@ export function ProfileForm({
     setFormError("");
 
     if (!SUPPORTED_PROFILE_IMAGE_TYPES.includes(file.type)) {
-      setFormError("Select a JPG, PNG, or WEBP image");
+      setFormError(t("profile.photoTypeError"));
       event.target.value = "";
       return;
     }
 
     if (file.size > MAX_PHOTO_BYTES) {
-      setFormError("Profile photo must be 2 MB or smaller");
+      setFormError(t("profile.photoSizeError"));
       event.target.value = "";
       return;
     }
@@ -138,9 +133,9 @@ export function ProfileForm({
     try {
       const dataUrl = await fileToDataUrl(file);
       setValue("avatarDataUrl", dataUrl, { shouldDirty: true, shouldValidate: true });
-      setMessage("Profile photo ready. Save profile to keep it.");
+      setMessage(t("profile.photoReady"));
     } catch (error) {
-      setFormError(error instanceof Error ? error.message : "Unable to load the selected photo");
+      setFormError(error instanceof Error && error.message !== "PROFILE_PHOTO_READ_ERROR" ? error.message : t("profile.photoReadError"));
     } finally {
       event.target.value = "";
     }
@@ -148,7 +143,7 @@ export function ProfileForm({
 
   function handleRemovePhoto() {
     setValue("avatarDataUrl", "", { shouldDirty: true, shouldValidate: true });
-    setMessage("Profile photo removed. Save profile to apply the change.");
+    setMessage(t("profile.photoRemoved"));
     setFormError("");
   }
 
@@ -161,17 +156,17 @@ export function ProfileForm({
           <div className="flex items-center gap-4">
             <ProfileAvatar imageUrl={avatarDataUrl} name={displayName} size="lg" />
             <div className="min-w-0">
-              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-200">Profile Studio</p>
+              <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-200">{t("profile.title")}</p>
               <h2 className="mt-3 truncate text-3xl font-semibold tracking-tight">{displayName}</h2>
               <p className="mt-2 max-w-xl text-sm leading-6 text-slate-200">{summary}</p>
-              <p className="mt-3 text-xs uppercase tracking-[0.22em] text-slate-300">{email || "Local account"}</p>
+              <p className="mt-3 text-xs uppercase tracking-[0.22em] text-slate-300">{email || t("profile.localAccount")}</p>
             </div>
           </div>
           <div className="rounded-[24px] border border-white/15 bg-white/10 px-4 py-4 shadow-lg backdrop-blur">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-300">Storage</p>
-            <p className="mt-2 text-sm font-medium text-white">Saved only on this device</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-300">{t("profile.storageTitle")}</p>
+            <p className="mt-2 text-sm font-medium text-white">{t("profile.storageHeading")}</p>
             <p className="mt-1 max-w-xs text-sm leading-6 text-slate-300">
-              Your profile photo and personal details stay in the browser unless you later add remote sync.
+              {t("profile.storageDescription")}
             </p>
           </div>
         </div>
@@ -179,24 +174,24 @@ export function ProfileForm({
 
       <form className="grid gap-5 p-6" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-4 md:grid-cols-2">
-          <FormField label="Full name" error={errors.fullName?.message}>
-            <Input placeholder="Anis Rahman" {...register("fullName")} />
+          <FormField label={t("profile.fullName")} error={errors.fullName?.message}>
+            <Input placeholder={t("profile.namePlaceholder")} {...register("fullName")} />
           </FormField>
-          <FormField label="Contact number" error={errors.contactNumber?.message}>
-            <Input placeholder="+880 17XX-XXXXXX" {...register("contactNumber")} />
+          <FormField label={t("profile.contactNumber")} error={errors.contactNumber?.message}>
+            <Input placeholder={t("profile.contactPlaceholder")} {...register("contactNumber")} />
           </FormField>
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <FormField label="Occupation" error={errors.occupation?.message}>
-            <Input placeholder="Founder, Designer, Engineer" {...register("occupation")} />
+          <FormField label={t("profile.occupation")} error={errors.occupation?.message}>
+            <Input placeholder={t("profile.occupationPlaceholder")} {...register("occupation")} />
           </FormField>
-          <FormField label="Gender" error={errors.gender?.message}>
+          <FormField label={t("profile.gender")} error={errors.gender?.message}>
             <Select {...register("gender")}>
-              <option value="">Select gender</option>
+              <option value="">{t("profile.selectGender")}</option>
               {genders.map((gender) => (
                 <option key={gender} value={gender}>
-                  {formatStatusLabel(gender)}
+                  {t(`options.gender.${gender}`)}
                 </option>
               ))}
             </Select>
@@ -204,41 +199,41 @@ export function ProfileForm({
         </div>
 
         <div className="grid gap-4 md:grid-cols-2">
-          <FormField label="Marital status" error={errors.maritalStatus?.message}>
+          <FormField label={t("profile.maritalStatus")} error={errors.maritalStatus?.message}>
             <Select {...register("maritalStatus")}>
-              <option value="">Select status</option>
+              <option value="">{t("profile.selectMaritalStatus")}</option>
               {maritalStatuses.map((status) => (
                 <option key={status} value={status}>
-                  {formatStatusLabel(status)}
+                  {t(`options.maritalStatus.${status}`)}
                 </option>
               ))}
             </Select>
           </FormField>
-          <FormField label="Location" error={errors.location?.message}>
-            <Input placeholder="Dhaka, Bangladesh" {...register("location")} />
+          <FormField label={t("profile.location")} error={errors.location?.message}>
+            <Input placeholder={t("profile.locationPlaceholder")} {...register("location")} />
           </FormField>
         </div>
 
         <FormField
-          label="Profile photo"
+          label={t("profile.photo")}
           error={errors.avatarDataUrl?.message}
-          hint="JPG, PNG, or WEBP up to 2 MB. Stored locally."
+          hint={t("profile.photoHint")}
         >
           <div className="rounded-[24px] border border-dashed border-slate-200 bg-slate-50 p-4">
             <div className="flex flex-wrap items-center gap-3">
               <label className="inline-flex cursor-pointer items-center justify-center rounded-2xl bg-slate-950 px-4 py-3 text-sm font-semibold text-white transition hover:bg-slate-800">
-                Upload photo
+                {t("profile.photoUpload")}
                 <input accept="image/png,image/jpeg,image/webp" className="hidden" type="file" onChange={handlePhotoChange} />
               </label>
               <Button type="button" variant="ghost" onClick={handleRemovePhoto}>
-                Remove photo
+                {t("profile.photoRemove")}
               </Button>
             </div>
           </div>
         </FormField>
 
-        <FormField label="Profile note" error={errors.bio?.message} hint="Short intro shown in your workspace cards.">
-          <Textarea placeholder="Tell future-you what this workspace is for." {...register("bio")} />
+        <FormField label={t("profile.note")} error={errors.bio?.message} hint={t("profile.noteHint")}>
+          <Textarea placeholder={t("profile.notePlaceholder")} {...register("bio")} />
         </FormField>
 
         {message ? <p className="text-sm font-medium text-emerald-600">{message}</p> : null}
@@ -246,7 +241,7 @@ export function ProfileForm({
 
         <div className="flex flex-wrap gap-3">
           <Button type="submit" disabled={isPending}>
-            {isPending ? "Saving..." : "Save profile"}
+            {isPending ? t("common.saving") : t("profile.save")}
           </Button>
           <Button
             type="button"
@@ -266,7 +261,7 @@ export function ProfileForm({
               setFormError("");
             }}
           >
-            Reset changes
+            {t("profile.reset")}
           </Button>
         </div>
       </form>

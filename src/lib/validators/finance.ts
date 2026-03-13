@@ -13,8 +13,14 @@ import {
 } from "@/lib/constants/options";
 
 const currencySchema = z.enum(["USD", "BDT"]);
+const optionalCurrencySchema = z.enum(["", "USD", "BDT"]);
 const genderSchema = z.enum(["", ...genders] as const);
-const languagePreferenceSchema = z.enum(languagePreferences.map((item) => item.value) as ["en", "bn"]);
+const languagePreferenceSchema = z.enum(
+  languagePreferences.map((item) => item.value) as [
+    typeof languagePreferences[number]["value"],
+    ...typeof languagePreferences[number]["value"][]
+  ]
+);
 const maritalStatusSchema = z.enum(["", ...maritalStatuses] as const);
 
 export const incomeSchema = z.object({
@@ -71,11 +77,15 @@ export const bankSchema = z.object({
 });
 
 export const settingsSchema = z.object({
-  displayCurrency: currencySchema,
+  baseCurrency: currencySchema,
+  comparisonCurrency: optionalCurrencySchema,
   languagePreference: languagePreferenceSchema,
   notificationsEnabled: z.boolean(),
   optionalEncryptedSyncEnabled: z.boolean(),
   themePreference: z.enum(["system", "light"])
+}).refine((value) => value.comparisonCurrency === "" || value.comparisonCurrency !== value.baseCurrency, {
+  message: "Comparison currency must be different from the base currency",
+  path: ["comparisonCurrency"]
 });
 
 export const profileSchema = z.object({
