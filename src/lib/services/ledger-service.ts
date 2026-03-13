@@ -18,6 +18,7 @@ import {
   settingsRepository,
   syncQueueRepository
 } from "@/lib/repositories/finance-repositories";
+import type { LanguagePreference } from "@/types/finance";
 
 async function queueSync(
   userId: string,
@@ -88,6 +89,11 @@ export const ledgerService = {
   },
   async saveProfile(userId: string, input: ProfileInput) {
     const record = await settingsRepository.upsert(userId, input);
+    await queueSync(userId, "settings", "update", record.id);
+    return record;
+  },
+  async saveLanguagePreference(userId: string, languagePreference: LanguagePreference) {
+    const record = await settingsRepository.upsert(userId, { languagePreference });
     await queueSync(userId, "settings", "update", record.id);
     return record;
   },

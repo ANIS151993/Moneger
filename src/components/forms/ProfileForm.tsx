@@ -43,11 +43,15 @@ function fileToDataUrl(file: File) {
 export function ProfileForm({
   userId,
   email,
-  settings
+  settings,
+  mode = "settings",
+  onSaved
 }: {
   userId: string;
   email?: string | null;
   settings?: SettingsRecord;
+  mode?: "settings" | "onboarding";
+  onSaved?: () => void;
 }) {
   const [message, setMessage] = useState("");
   const [formError, setFormError] = useState("");
@@ -57,6 +61,8 @@ export function ProfileForm({
     register,
     handleSubmit,
     reset,
+    clearErrors,
+    setError,
     setValue,
     watch,
     formState: { errors }
@@ -74,6 +80,7 @@ export function ProfileForm({
     }
   });
   const avatarDataUrl = watch("avatarDataUrl");
+  const isOnboarding = mode === "onboarding";
   const displayName = getProfileDisplayName({ ...settings, fullName: watch("fullName") }, email);
   const summary = getProfileSummary({
     ...settings,
@@ -98,10 +105,37 @@ export function ProfileForm({
     setMessage("");
     setFormError("");
 
+    if (isOnboarding) {
+      clearErrors(["fullName", "contactNumber", "occupation", "gender", "maritalStatus", "location"]);
+
+      const requiredEntries = [
+        ["fullName", values.fullName],
+        ["contactNumber", values.contactNumber],
+        ["occupation", values.occupation],
+        ["gender", values.gender],
+        ["maritalStatus", values.maritalStatus],
+        ["location", values.location]
+      ] as const;
+      const missingEntries = requiredEntries.filter(([, value]) => !value?.trim());
+
+      if (missingEntries.length > 0) {
+        for (const [field] of missingEntries) {
+          setError(field, {
+            type: "required",
+            message: t("profile.requiredForOnboarding")
+          });
+        }
+
+        setFormError(t("profile.completeRequiredError"));
+        return;
+      }
+    }
+
     startTransition(async () => {
       try {
         await ledgerService.saveProfile(userId, values);
-        setMessage(t("profile.saved"));
+        setMessage(isOnboarding ? t("profile.onboardingSaved") : t("profile.saved"));
+        onSaved?.();
       } catch (error) {
         setFormError(error instanceof Error ? error.message : t("profile.saveError"));
       }
@@ -163,16 +197,27 @@ export function ProfileForm({
             </div>
           </div>
           <div className="rounded-[24px] border border-white/15 bg-white/10 px-4 py-4 shadow-lg backdrop-blur">
-            <p className="text-xs uppercase tracking-[0.2em] text-slate-300">{t("profile.storageTitle")}</p>
-            <p className="mt-2 text-sm font-medium text-white">{t("profile.storageHeading")}</p>
+            <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
+              {isOnboarding ? t("profile.onboardingTitle") : t("profile.storageTitle")}
+            </p>
+            <p className="mt-2 text-sm font-medium text-white">
+              {isOnboarding ? t("profile.onboardingHeading") : t("profile.storageHeading")}
+            </p>
             <p className="mt-1 max-w-xs text-sm leading-6 text-slate-300">
-              {t("profile.storageDescription")}
+              {isOnboarding ? t("profile.onboardingDescription") : t("profile.storageDescription")}
             </p>
           </div>
         </div>
       </div>
 
       <form className="grid gap-5 p-6" onSubmit={handleSubmit(onSubmit)}>
+        {isOnboarding ? (
+          <div className="rounded-[24px] border border-emerald-100 bg-emerald-50 px-4 py-4 text-sm text-emerald-800">
+            <p className="font-semibold">{t("profile.completeRequiredTitle")}</p>
+            <p className="mt-1 leading-6">{t("profile.completeRequiredDescription")}</p>
+          </div>
+        ) : null}
+
         <div className="grid gap-4 md:grid-cols-2">
           <FormField label={t("profile.fullName")} error={errors.fullName?.message}>
             <Input placeholder={t("profile.namePlaceholder")} {...register("fullName")} />
@@ -241,28 +286,30 @@ export function ProfileForm({
 
         <div className="flex flex-wrap gap-3">
           <Button type="submit" disabled={isPending}>
-            {isPending ? t("common.saving") : t("profile.save")}
+            {isPending ? t("common.saving") : isOnboarding ? t("profile.completeSetup") : t("profile.save")}
           </Button>
-          <Button
-            type="button"
-            variant="secondary"
-            onClick={() => {
-              reset({
-                fullName: settings?.fullName || "",
-                contactNumber: settings?.contactNumber || "",
-                occupation: settings?.occupation || "",
-                gender: settings?.gender || "",
-                maritalStatus: settings?.maritalStatus || "",
-                location: settings?.location || "",
-                bio: settings?.bio || "",
-                avatarDataUrl: settings?.avatarDataUrl || ""
-              });
-              setMessage("");
-              setFormError("");
-            }}
-          >
-            {t("profile.reset")}
-          </Button>
+          {!isOnboarding ? (
+            <Button
+              type="button"
+              variant="secondary"
+              onClick={() => {
+                reset({
+                  fullName: settings?.fullName || "",
+                  contactNumber: settings?.contactNumber || "",
+                  occupation: settings?.occupation || "",
+                  gender: settings?.gender || "",
+                  maritalStatus: settings?.maritalStatus || "",
+                  location: settings?.location || "",
+                  bio: settings?.bio || "",
+                  avatarDataUrl: settings?.avatarDataUrl || ""
+                });
+                setMessage("");
+                setFormError("");
+              }}
+            >
+              {t("profile.reset")}
+            </Button>
+          ) : null}
         </div>
       </form>
     </Card>

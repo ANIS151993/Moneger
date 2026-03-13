@@ -38,7 +38,7 @@ export function SignupForm() {
     startTransition(async () => {
       try {
         await signup(values.email, values.password);
-        router.push("/dashboard");
+        router.push("/welcome");
       } catch (error) {
         setFormError(error instanceof Error ? error.message : t("auth.errorCreateAccount"));
       }

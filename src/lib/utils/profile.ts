@@ -1,6 +1,17 @@
 import type { SettingsRecord } from "@/types/finance";
 import { getRuntimeLanguage, translateMessage } from "@/lib/i18n/messages";
 
+export const requiredProfileFields = [
+  "fullName",
+  "contactNumber",
+  "occupation",
+  "gender",
+  "maritalStatus",
+  "location"
+] as const;
+
+export type RequiredProfileField = (typeof requiredProfileFields)[number];
+
 function fallbackNameFromEmail(email?: string | null) {
   if (!email) {
     return translateMessage(getRuntimeLanguage(), "profile.defaultUserName");
@@ -61,4 +72,16 @@ export function getProfileLocation(profile?: Partial<SettingsRecord>) {
 
 export function getProfileContact(profile?: Partial<SettingsRecord>) {
   return profile?.contactNumber?.trim() || "";
+}
+
+export function getIncompleteProfileFields(profile?: Partial<SettingsRecord> | null) {
+  return requiredProfileFields.filter((field) => {
+    const value = profile?.[field];
+
+    return typeof value === "string" ? value.trim().length === 0 : !value;
+  });
+}
+
+export function isProfileComplete(profile?: Partial<SettingsRecord> | null) {
+  return getIncompleteProfileFields(profile).length === 0;
 }

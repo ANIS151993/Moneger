@@ -22,9 +22,12 @@ const englishMessages: TranslationTable = {
   "nav.debts": "Debts",
   "nav.moneyOwed": "Money Owed",
   "nav.banks": "Banks",
+  "nav.completeProfile": "Complete Profile",
+  "nav.guide": "User Guide",
   "nav.settings": "Settings",
 
   "layout.profile": "Profile",
+  "layout.profileSetup": "Profile Setup",
   "layout.privacyMode": "Privacy Mode",
   "layout.privacyDescription": "Financial records stay local in IndexedDB unless you add encrypted sync.",
   "layout.dataStoreIsolated": "Data store isolated per signed-in account",
@@ -32,6 +35,9 @@ const englishMessages: TranslationTable = {
   "layout.workspaceTag": "Local-first finance workspace",
   "layout.workspaceTitle": "Your Money. Your Control.",
   "layout.workspaceBanner": "Local-first workspace with account-isolated settings and optional encrypted sync.",
+  "layout.onboardingTag": "Mandatory onboarding",
+  "layout.onboardingTitle": "Complete your profile to unlock the workspace",
+  "layout.onboardingBanner": "Only profile setup and the user guide are available until onboarding is complete.",
 
   "landing.login": "Log in",
   "landing.createAccount": "Create account",
@@ -298,11 +304,41 @@ const englishMessages: TranslationTable = {
   "settingsPage.workspaceSettings": "Workspace Settings",
   "settingsPage.workspaceSettingsDescription": "Reset local data safely",
 
+  "onboarding.loadingProfileGate": "Checking your profile setup...",
+  "onboarding.redirectingProfileGate": "Redirecting to required profile setup...",
+  "onboarding.redirectingGuide": "Profile completed. Opening the user guide...",
+  "onboarding.eyebrow": "Mandatory onboarding",
+  "onboarding.title": "Complete your profile before entering the workspace",
+  "onboarding.description":
+    "Every new user must finish their profile once. After that, the full app unlocks and your preferences follow you across the dashboard, guide, and settings.",
+  "onboarding.unlockTitle": "Unlock order",
+  "onboarding.unlockDescription":
+    "Complete the required profile first, then continue to the multilingual user guide and the rest of the app.",
+  "onboarding.readGuide": "Read the guide first",
+  "onboarding.stepsTitle": "What happens next",
+  "onboarding.stepProfileTitle": "Complete your profile",
+  "onboarding.stepProfileDescription":
+    "Fill in the required personal details so the app can personalize language, reminders, and identity details.",
+  "onboarding.stepGuideTitle": "Learn the workflow",
+  "onboarding.stepGuideDescription":
+    "Open the built-in user guide to understand the dashboard, currencies, records, banks, debts, and privacy model.",
+  "onboarding.stepWorkspaceTitle": "Start using the workspace",
+  "onboarding.stepWorkspaceDescription":
+    "Once your profile is saved, the dashboard, ledger pages, and settings become fully available.",
+  "onboarding.guidePreviewTitle": "Multilingual learning",
+  "onboarding.guidePreviewDescription":
+    "The user guide can be switched into your preferred language so new users can learn before they start entering real data.",
+  "onboarding.openGuide": "Open user guide",
+
   "profile.title": "Profile Studio",
   "profile.storageTitle": "Storage",
   "profile.storageHeading": "Saved only on this device",
   "profile.storageDescription":
     "Your profile photo and personal details stay in the browser unless you later add remote sync.",
+  "profile.onboardingTitle": "Required setup",
+  "profile.onboardingHeading": "Finish your profile before using the app",
+  "profile.onboardingDescription":
+    "These details are required once per account so the workspace can personalize records, reminders, and language settings correctly.",
   "profile.fullName": "Full name",
   "profile.contactNumber": "Contact number",
   "profile.occupation": "Occupation",
@@ -318,12 +354,19 @@ const englishMessages: TranslationTable = {
   "profile.save": "Save profile",
   "profile.reset": "Reset changes",
   "profile.saved": "Profile saved locally.",
+  "profile.onboardingSaved": "Profile completed. Your workspace is ready.",
   "profile.photoReady": "Profile photo ready. Save profile to keep it.",
   "profile.photoRemoved": "Profile photo removed. Save profile to apply the change.",
   "profile.photoTypeError": "Select a JPG, PNG, or WEBP image",
   "profile.photoSizeError": "Profile photo must be 2 MB or smaller",
   "profile.photoReadError": "Unable to load the selected photo",
   "profile.saveError": "Unable to save profile",
+  "profile.requiredForOnboarding": "Required before you can continue",
+  "profile.completeRequiredTitle": "Complete the required profile fields",
+  "profile.completeRequiredDescription":
+    "Name, contact number, occupation, gender, marital status, and location must be filled in before the rest of the app becomes available.",
+  "profile.completeRequiredError": "Complete every required profile field before continuing.",
+  "profile.completeSetup": "Complete setup",
   "profile.namePlaceholder": "Anis Rahman",
   "profile.contactPlaceholder": "+880 17XX-XXXXXX",
   "profile.occupationPlaceholder": "Founder, Designer, Engineer",
@@ -443,6 +486,14 @@ const englishMessages: TranslationTable = {
   "options.syncEntity.owed": "Money owed",
   "options.syncEntity.bank": "Bank",
   "options.syncEntity.settings": "Settings",
+
+  "developer.eyebrow": "Developer details",
+  "developer.description":
+    "Built as a polished local-first finance workspace with guided onboarding, multilingual learning, and startup-style product presentation.",
+  "developer.copyright": "Copyright",
+  "developer.portfolioLabel": "Portfolio",
+  "developer.portfolioDescription":
+    "Visit the portfolio for more product, engineering, and design work by the developer behind this build.",
 
   "permission.granted": "Granted",
   "permission.denied": "Denied",
