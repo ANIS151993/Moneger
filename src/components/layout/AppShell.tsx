@@ -14,8 +14,16 @@ import { useUserSettings } from "@/lib/hooks/use-user-settings";
 import { cn } from "@/lib/utils/cn";
 import { getCompactProfileMeta, getProfileDisplayName, isProfileComplete } from "@/lib/utils/profile";
 
+function normalizePathname(pathname?: string | null) {
+  if (!pathname || pathname === "/") {
+    return "/";
+  }
+
+  return pathname.endsWith("/") ? pathname.slice(0, -1) || "/" : pathname;
+}
+
 export function AppShell({ children }: { children: ReactNode }) {
-  const pathname = usePathname();
+  const pathname = normalizePathname(usePathname());
   const { logout, user } = useAuth();
   const { t } = useI18n();
   const profile = useUserSettings(user?.uid);

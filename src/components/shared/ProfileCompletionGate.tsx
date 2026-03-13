@@ -13,6 +13,14 @@ import type { SettingsRecord } from "@/types/finance";
 
 const onboardingRoutes = new Set(["/welcome", "/guide"]);
 
+function normalizePathname(pathname?: string | null) {
+  if (!pathname || pathname === "/") {
+    return "/";
+  }
+
+  return pathname.endsWith("/") ? pathname.slice(0, -1) || "/" : pathname;
+}
+
 export function ProfileCompletionGate({
   children,
   userId
@@ -29,7 +37,7 @@ export function ProfileCompletionGate({
     null as SettingsRecord | undefined | null
   );
   const profileComplete = settings === null ? false : isProfileComplete(settings);
-  const currentPath = pathname || "/dashboard";
+  const currentPath = normalizePathname(pathname) || "/dashboard";
   const currentPathAllowed = onboardingRoutes.has(currentPath);
 
   useEffect(() => {
