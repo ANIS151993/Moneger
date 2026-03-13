@@ -17,12 +17,13 @@ import { StatCard } from "@/components/ui/StatCard";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useDashboardData } from "@/lib/hooks/use-dashboard-data";
 import { pushReminderNotifications } from "@/lib/services/notification-service";
+import { formatDate, relativeDaysFromNow } from "@/lib/utils/date";
 import { convertFromCoreCurrency, formatCurrency } from "@/lib/utils/finance";
 
 export default function DashboardPage() {
   const { user } = useAuth();
   const { t } = useI18n();
-  const { snapshot, dataset, baseCurrency, comparisonCurrency, loading, rateHistory, rates, settings } = useDashboardData(
+  const { snapshot, dataset, baseCurrency, comparisonCurrency, loading, rates, settings } = useDashboardData(
     user?.uid
   );
   const hasWorkspaceData = Boolean(
@@ -56,9 +57,15 @@ export default function DashboardPage() {
     return formatSummaryValue(amountInUsd, comparisonCurrency);
   }
 
+  const nextDebtReminder = snapshot.reminders.find((item) => item.type === "debt");
+  const nextOwedReminder = snapshot.reminders.find((item) => item.type === "owed");
+  const priorityTimeline = [nextDebtReminder, nextOwedReminder].filter((item): item is NonNullable<typeof item> =>
+    Boolean(item)
+  );
+
   return (
     <div className="space-y-6">
-      <section className="grid gap-4 xl:grid-cols-[minmax(0,1.25fr)_minmax(320px,0.75fr)]">
+      <section>
         <Card className="fx-card-sheen relative overflow-hidden border-0 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.26),_transparent_34%),radial-gradient(circle_at_bottom_left,_rgba(16,185,129,0.2),_transparent_38%),linear-gradient(135deg,#020617_0%,#0f172a_52%,#064e3b_100%)] p-0 text-white shadow-[0_28px_80px_rgba(15,23,42,0.22)]">
           <div className="absolute -left-10 top-8 h-36 w-36 rounded-full bg-emerald-400/15 blur-3xl" />
           <div className="absolute right-0 top-0 h-28 w-28 rounded-full bg-sky-400/12 blur-3xl" />
@@ -95,17 +102,63 @@ export default function DashboardPage() {
                     </div>
                   </div>
                 ) : null}
+
+                <CurrencyComparisonCard
+                  baseCurrency={baseCurrency}
+                  comparisonCurrency={comparisonCurrency}
+                  rates={rates}
+                  className="mt-5"
+                />
               </div>
+
+              {priorityTimeline.length > 0 ? (
+                <div className="mt-5 grid gap-3 md:grid-cols-2">
+                  {priorityTimeline.map((item) => (
+                    <div
+                      key={item.id}
+                      className="rounded-[24px] border border-white/12 bg-white/[0.06] px-4 py-4 shadow-[inset_0_1px_0_rgba(255,255,255,0.05)] backdrop-blur"
+                    >
+                      <div className="flex items-center justify-between gap-3">
+                        <div className="min-w-0">
+                          <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-300">
+                            {t(`options.reminderTitle.${item.type}`)}
+                          </p>
+                          <p className="mt-2 truncate text-base font-semibold text-white">{item.subtitle}</p>
+                        </div>
+                        <Badge
+                          className="shrink-0 border-0 ring-0"
+                          tone={item.severity === "overdue" ? "danger" : "warning"}
+                        >
+                          {relativeDaysFromNow(item.dueDate)}
+                        </Badge>
+                      </div>
+                      <div className="mt-4 grid gap-2 sm:grid-cols-2">
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-3">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                            {t("common.amount")}
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-white">
+                            {formatCurrency(item.amount, item.currency)}
+                          </p>
+                        </div>
+                        <div className="rounded-2xl border border-white/10 bg-white/[0.05] px-3 py-3">
+                          <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">
+                            {t("common.date")}
+                          </p>
+                          <p className="mt-1 text-sm font-semibold text-white">{formatDate(item.dueDate)}</p>
+                        </div>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="mt-5 rounded-[24px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm text-slate-300">
+                  {t("dashboard.remindersEmpty")}
+                </div>
+              )}
             </div>
           </div>
         </Card>
-
-        <CurrencyComparisonCard
-          baseCurrency={baseCurrency}
-          comparisonCurrency={comparisonCurrency}
-          rates={rates}
-          history={rateHistory}
-        />
       </section>
 
       <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
