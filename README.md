@@ -59,6 +59,10 @@ cp .env.example .env.local
 
 3. Add Firebase values if you want real Firebase Auth. If you skip this, Moneger runs in local auth fallback mode.
 
+Optional:
+- Add `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` if you want live Google-backed bank name autocomplete in the bank form.
+- Enable the Google Maps JavaScript API and Places API for that key, then restrict the key to your domains.
+
 4. Start the app:
 
 ```bash

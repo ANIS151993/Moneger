@@ -1,9 +1,10 @@
 "use client";
 
 import { useState, useTransition } from "react";
-import { useForm } from "react-hook-form";
+import { Controller, useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 
+import { BankNameAutocomplete } from "@/components/forms/BankNameAutocomplete";
 import { useI18n } from "@/components/providers/LanguageProvider";
 import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
@@ -11,7 +12,7 @@ import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
-import { banks, currencyCatalog, supportedCurrencies } from "@/lib/constants/options";
+import { currencyCatalog, supportedCurrencies } from "@/lib/constants/options";
 import { ledgerService } from "@/lib/services/ledger-service";
 import { bankSchema, type BankFormValues, type BankInput } from "@/lib/validators/finance";
 import type { CurrencyCode } from "@/types/finance";
@@ -21,6 +22,7 @@ export function BankForm({ userId, defaultCurrency = "USD" }: { userId: string; 
   const [isPending, startTransition] = useTransition();
   const { t } = useI18n();
   const {
+    control,
     register,
     reset,
     handleSubmit,
@@ -28,7 +30,7 @@ export function BankForm({ userId, defaultCurrency = "USD" }: { userId: string; 
   } = useForm<BankFormValues, unknown, BankInput>({
     resolver: zodResolver(bankSchema),
     defaultValues: {
-      bankName: banks[0],
+      bankName: "",
       nickname: "",
       last4: "",
       currency: defaultCurrency,
@@ -44,6 +46,7 @@ export function BankForm({ userId, defaultCurrency = "USD" }: { userId: string; 
       setMessage(t("bankForm.saved"));
       reset({
         ...values,
+        bankName: values.bankName,
         nickname: "",
         last4: "",
         note: ""
@@ -57,13 +60,13 @@ export function BankForm({ userId, defaultCurrency = "USD" }: { userId: string; 
       <form className="mt-6 grid gap-4" onSubmit={handleSubmit(onSubmit)}>
         <div className="grid gap-4 md:grid-cols-2">
           <FormField label={t("bankForm.bankName")} error={errors.bankName?.message}>
-            <Select {...register("bankName")}>
-              {banks.map((bank) => (
-                <option key={bank} value={bank}>
-                  {bank}
-                </option>
-              ))}
-            </Select>
+            <Controller
+              control={control}
+              name="bankName"
+              render={({ field }) => (
+                <BankNameAutocomplete value={field.value} onBlur={field.onBlur} onChange={field.onChange} />
+              )}
+            />
           </FormField>
           <FormField label={t("bankForm.nickname")} error={errors.nickname?.message}>
             <Input placeholder={t("bankForm.nicknamePlaceholder")} {...register("nickname")} />
