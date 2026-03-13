@@ -183,7 +183,7 @@ export function ProfileForm({
 
   return (
     <Card className="overflow-hidden p-0">
-      <div className="relative overflow-hidden border-b border-white/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.35),_transparent_32%),linear-gradient(140deg,#0f172a_0%,#111827_46%,#065f46_100%)] px-6 py-6 text-white">
+      <div className="relative overflow-hidden border-b border-white/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.35),_transparent_32%),linear-gradient(140deg,#0f172a_0%,#111827_46%,#065f46_100%)] px-4 py-5 text-white sm:px-6 sm:py-6">
         <div className="absolute -right-8 -top-10 h-28 w-28 rounded-full bg-emerald-300/20 blur-3xl" />
         <div className="absolute left-6 top-4 h-24 w-24 rounded-full bg-sky-400/10 blur-3xl" />
         <div className="relative flex flex-col gap-5 lg:flex-row lg:items-center lg:justify-between">
@@ -191,12 +191,12 @@ export function ProfileForm({
             <ProfileAvatar imageUrl={avatarDataUrl} name={displayName} size="lg" />
             <div className="min-w-0">
               <p className="text-xs font-semibold uppercase tracking-[0.28em] text-emerald-200">{t("profile.title")}</p>
-              <h2 className="mt-3 truncate text-3xl font-semibold tracking-tight">{displayName}</h2>
+              <h2 className="mt-3 truncate text-2xl font-semibold tracking-tight sm:text-3xl">{displayName}</h2>
               <p className="mt-2 max-w-xl text-sm leading-6 text-slate-200">{summary}</p>
               <p className="mt-3 text-xs uppercase tracking-[0.22em] text-slate-300">{email || t("profile.localAccount")}</p>
             </div>
           </div>
-          <div className="rounded-[24px] border border-white/15 bg-white/10 px-4 py-4 shadow-lg backdrop-blur">
+          <div className="w-full rounded-[24px] border border-white/15 bg-white/10 px-4 py-4 shadow-lg backdrop-blur lg:w-auto">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
               {isOnboarding ? t("profile.onboardingTitle") : t("profile.storageTitle")}
             </p>
@@ -210,7 +210,7 @@ export function ProfileForm({
         </div>
       </div>
 
-      <form className="grid gap-5 p-6" onSubmit={handleSubmit(onSubmit)}>
+      <form className="grid gap-5 p-4 sm:p-6" onSubmit={handleSubmit(onSubmit)}>
         {isOnboarding ? (
           <div className="rounded-[24px] border border-emerald-100 bg-emerald-50 px-4 py-4 text-sm text-emerald-800">
             <p className="font-semibold">{t("profile.completeRequiredTitle")}</p>

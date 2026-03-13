@@ -64,7 +64,7 @@ export default function GuidePage() {
         title={content.title}
         description={content.description}
         actions={
-          <Card className="w-full rounded-[28px] border-slate-200 bg-white/90 p-4 md:max-w-[280px]">
+          <Card className="w-full rounded-[24px] border-slate-200 bg-white/90 p-4 md:max-w-[280px] md:rounded-[28px]">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-slate-500">
               {content.languageLabel}
             </p>
@@ -98,16 +98,16 @@ export default function GuidePage() {
               )}
             >
               <div className="absolute right-0 top-0 h-32 w-32 rounded-full bg-white/40 blur-3xl" />
-              <div className="relative grid gap-5 p-6 lg:grid-cols-[92px_minmax(0,1fr)_180px] lg:items-start">
-                <div className="rounded-[26px] border border-white/70 bg-white/80 px-4 py-5 text-center shadow-sm">
+              <div className="relative grid gap-5 p-4 sm:p-6 lg:grid-cols-[92px_minmax(0,1fr)_180px] lg:items-start">
+                <div className="rounded-[22px] border border-white/70 bg-white/80 px-4 py-4 text-center shadow-sm sm:rounded-[26px] sm:py-5">
                   <p className="text-[11px] font-semibold uppercase tracking-[0.22em] text-slate-500">
                     {section.stage}
                   </p>
-                  <p className="mt-3 text-4xl font-semibold tracking-tight text-slate-950">{index + 1}</p>
+                  <p className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 sm:text-4xl">{index + 1}</p>
                 </div>
 
                 <div>
-                  <h2 className="text-2xl font-semibold tracking-tight text-slate-950">{section.title}</h2>
+                  <h2 className="text-xl font-semibold tracking-tight text-slate-950 sm:text-2xl">{section.title}</h2>
                   <p className="mt-3 text-sm leading-6 text-slate-600">{section.summary}</p>
                   <div className="mt-5 grid gap-3">
                     {section.steps.map((step, stepIndex) => (
@@ -124,7 +124,7 @@ export default function GuidePage() {
                   </div>
                 </div>
 
-                <div className="relative overflow-hidden rounded-[26px] border border-slate-900/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.24),_transparent_34%),linear-gradient(160deg,#020617_0%,#0f172a_55%,#064e3b_100%)] px-5 py-5 text-white shadow-[0_18px_50px_rgba(15,23,42,0.2)]">
+                <div className="relative overflow-hidden rounded-[24px] border border-slate-900/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.24),_transparent_34%),linear-gradient(160deg,#020617_0%,#0f172a_55%,#064e3b_100%)] px-4 py-5 text-white shadow-[0_18px_50px_rgba(15,23,42,0.2)] sm:rounded-[26px] sm:px-5">
                   <div className="absolute -right-6 top-0 h-20 w-20 rounded-full bg-sky-300/15 blur-3xl" />
                   <div className="relative">
                     <p className="inline-flex rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.22em] text-emerald-200">

@@ -16,26 +16,26 @@ export default function LandingPage() {
   const heroTitleRemainder = heroTitleStartsWithBrand ? heroTitle.slice(brand.name.length).trimStart() : heroTitle;
 
   return (
-    <main className="px-4 py-4">
+    <main className="safe-shell px-3 pb-8 pt-3 sm:px-4 sm:py-4">
       <div className="mx-auto max-w-7xl">
-        <header className="glass flex items-center justify-between rounded-[30px] border border-white/80 px-6 py-4 shadow-[0_24px_80px_rgba(15,23,42,0.08)]">
+        <header className="glass flex flex-col gap-4 rounded-[26px] border border-white/80 px-4 py-4 shadow-[0_24px_80px_rgba(15,23,42,0.08)] sm:flex-row sm:items-center sm:justify-between sm:px-6">
           <BrandLogo />
-          <div className="flex items-center gap-3">
-            <Link className={buttonClassName({ variant: "ghost" })} href="/login">
+          <div className="grid w-full gap-3 sm:flex sm:w-auto sm:items-center">
+            <Link className={buttonClassName({ className: "w-full sm:w-auto", variant: "ghost" })} href="/login">
               {t("landing.login")}
             </Link>
-            <Link className={buttonClassName({})} href="/signup">
+            <Link className={buttonClassName({ className: "w-full sm:w-auto" })} href="/signup">
               {t("landing.createAccount")}
             </Link>
           </div>
         </header>
 
-        <section className="grid gap-8 px-2 py-10 lg:grid-cols-[1.12fr_0.88fr] lg:items-center lg:py-16">
+        <section className="grid gap-8 px-1 py-8 sm:px-2 sm:py-10 lg:grid-cols-[1.12fr_0.88fr] lg:items-center lg:py-16">
           <div>
             <p className="text-sm font-semibold uppercase tracking-[0.28em] text-emerald-600">
               {t("landing.privacyTag")}
             </p>
-            <h1 className="mt-5 max-w-4xl text-5xl font-semibold tracking-tight text-slate-950 md:text-7xl">
+            <h1 className="mt-5 max-w-4xl text-4xl font-semibold tracking-tight text-slate-950 sm:text-5xl md:text-7xl">
               {heroTitleStartsWithBrand ? (
                 <>
                   <span className="gradient-text">{brand.name}</span>{" "}
@@ -45,14 +45,14 @@ export default function LandingPage() {
                 heroTitle
               )}
             </h1>
-            <p className="mt-6 max-w-2xl text-lg leading-8 text-slate-600">
+            <p className="mt-6 max-w-2xl text-base leading-7 text-slate-600 sm:text-lg sm:leading-8">
               {t("landing.heroDescription")}
             </p>
-            <div className="mt-8 flex flex-wrap gap-4">
-              <Link className={buttonClassName({ className: "px-6 py-4 text-base" })} href="/signup">
+            <div className="mt-8 grid gap-3 sm:flex sm:flex-wrap sm:gap-4">
+              <Link className={buttonClassName({ className: "w-full px-6 py-4 text-base sm:w-auto" })} href="/signup">
                 {t("landing.startUsing")}
               </Link>
-              <Link className={buttonClassName({ className: "px-6 py-4 text-base", variant: "ghost" })} href="/dashboard">
+              <Link className={buttonClassName({ className: "w-full px-6 py-4 text-base sm:w-auto", variant: "ghost" })} href="/dashboard">
                 {t("landing.openDashboard")}
               </Link>
             </div>
@@ -65,12 +65,12 @@ export default function LandingPage() {
             </div>
           </div>
 
-          <Card className="overflow-hidden rounded-[34px] bg-slate-950 p-0 text-white">
-            <div className="border-b border-white/10 p-6">
+          <Card className="overflow-hidden rounded-[28px] bg-slate-950 p-0 text-white lg:rounded-[34px]">
+            <div className="border-b border-white/10 p-5 sm:p-6">
               <p className="text-xs uppercase tracking-[0.24em] text-emerald-300">{t("landing.previewEyebrow")}</p>
-              <h2 className="mt-3 text-3xl font-semibold tracking-tight">{t("landing.previewTitle")}</h2>
+              <h2 className="mt-3 text-2xl font-semibold tracking-tight sm:text-3xl">{t("landing.previewTitle")}</h2>
             </div>
-            <div className="grid gap-4 p-6">
+            <div className="grid gap-4 p-4 sm:p-6">
               <div className="grid gap-4 sm:grid-cols-2">
                 {[
                   [t("landing.previewNetBalance"), "$4,260"],

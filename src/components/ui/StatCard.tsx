@@ -16,7 +16,7 @@ export function StatCard({
   return (
     <Card className="bg-gradient-to-br from-white to-slate-50">
       <p className="text-xs uppercase tracking-[0.24em] text-slate-400">{label}</p>
-      <h3 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{value}</h3>
+      <h3 className="mt-3 break-words text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">{value}</h3>
       {comparisonValue ? (
         <div className="mt-3 inline-flex rounded-2xl border border-emerald-100 bg-emerald-50 px-3 py-2">
           <div>
@@ -25,7 +25,7 @@ export function StatCard({
           </div>
         </div>
       ) : null}
-      <p className="mt-2 text-sm text-slate-500">{detail}</p>
+      <p className="mt-2 text-sm leading-6 text-slate-500">{detail}</p>
     </Card>
   );
 }

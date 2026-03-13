@@ -27,7 +27,7 @@ export function buttonClassName({
   variant?: ButtonVariant;
 }) {
   return cn(
-    "inline-flex items-center justify-center rounded-2xl px-4 py-3 text-sm font-semibold transition duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
+    "inline-flex min-h-11 items-center justify-center rounded-[18px] px-4 py-3 text-sm font-semibold transition duration-200 active:scale-[0.99] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2",
     "disabled:cursor-not-allowed disabled:opacity-60",
     variantClasses[variant],
     className

@@ -21,11 +21,23 @@ export function SimpleTable<T>({
 }) {
   return (
     <Card className="overflow-hidden p-0">
-      <div className="border-b border-slate-100 px-6 py-5">
+      <div className="border-b border-slate-100 px-4 py-4 sm:px-6 sm:py-5">
         <h2 className="text-xl font-semibold tracking-tight text-slate-950">{title}</h2>
         <p className="mt-1 text-sm text-slate-500">{description}</p>
       </div>
-      <div className="overflow-x-auto">
+      <div className="divide-y divide-slate-100 md:hidden">
+        {rows.map((row, index) => (
+          <div key={index} className="grid gap-3 bg-white/80 px-4 py-4">
+            {columns.map((column) => (
+              <div key={column.key} className="grid gap-1">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.22em] text-slate-400">{column.header}</p>
+                <div className="text-sm text-slate-700">{column.render(row)}</div>
+              </div>
+            ))}
+          </div>
+        ))}
+      </div>
+      <div className="hidden overflow-x-auto md:block">
         <table className="min-w-full divide-y divide-slate-100 text-start">
           <thead className="bg-slate-50/80">
             <tr>

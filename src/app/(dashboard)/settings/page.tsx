@@ -51,11 +51,11 @@ export default function SettingsPage() {
       <div className="grid gap-6 xl:grid-cols-[260px_minmax(0,1fr)]">
         <Card className="h-fit xl:sticky xl:top-6">
           <p className="text-xs font-semibold uppercase tracking-[0.24em] text-slate-500">{t("settingsPage.menuTitle")}</p>
-          <div className="mt-5 grid gap-2">
+          <div className="mt-5 flex gap-2 overflow-x-auto pb-1 xl:grid">
             {settingsSections.map((section) => (
               <a
                 key={section.id}
-                className="rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-emerald-300 hover:bg-emerald-50"
+                className="min-w-[220px] rounded-2xl border border-slate-200 bg-slate-50 px-4 py-3 transition hover:border-emerald-300 hover:bg-emerald-50 xl:min-w-0"
                 href={`#${section.id}`}
               >
                 <p className="text-sm font-semibold text-slate-900">{t(section.labelKey)}</p>

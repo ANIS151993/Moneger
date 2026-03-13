@@ -46,7 +46,7 @@ export default function WelcomePage() {
         title={t("onboarding.title")}
         description={t("onboarding.description")}
         actions={
-          <Card className="w-full rounded-[28px] border-emerald-100 bg-emerald-50 p-4 md:max-w-[320px]">
+          <Card className="w-full rounded-[24px] border-emerald-100 bg-emerald-50 p-4 md:max-w-[320px] md:rounded-[28px]">
             <p className="text-xs font-semibold uppercase tracking-[0.22em] text-emerald-700">
               {t("onboarding.unlockTitle")}
             </p>

@@ -37,6 +37,7 @@
 
 html {
   scroll-behavior: smooth;
+  -webkit-text-size-adjust: 100%;
 }
 
 html[dir="rtl"] body {
@@ -51,6 +52,7 @@ body {
     radial-gradient(circle at top right, rgba(56, 189, 248, 0.16), transparent 28rem),
     linear-gradient(180deg, var(--background) 0%, var(--background-soft) 100%);
   color: var(--foreground);
+  overflow-x: hidden;
 }
 
 body::before {
@@ -75,6 +77,11 @@ input,
 textarea,
 select {
   font: inherit;
+}
+
+button,
+[role="button"] {
+  touch-action: manipulation;
 }
 
 .glass {
@@ -148,4 +155,18 @@ select {
 
 .developer-ribbon {
   animation: fxFloat 6.5s ease-in-out infinite;
+}
+
+.safe-shell {
+  padding-top: max(0.75rem, env(safe-area-inset-top));
+  padding-right: max(0.75rem, env(safe-area-inset-right));
+  padding-left: max(0.75rem, env(safe-area-inset-left));
+}
+
+@media (min-width: 1024px) {
+  .safe-shell {
+    padding-top: 1rem;
+    padding-right: 1.5rem;
+    padding-left: 1.5rem;
+  }
 }

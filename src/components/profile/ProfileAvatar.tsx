@@ -10,6 +10,12 @@ const avatarSizes = {
   lg: "h-24 w-24 rounded-[30px] text-2xl"
 } as const;
 
+const avatarBadgeSizes = {
+  sm: "px-1.5 py-0.5 text-[8px]",
+  md: "px-2 py-1 text-[10px]",
+  lg: "px-2 py-1 text-[10px]"
+} as const;
+
 export function ProfileAvatar({
   name,
   imageUrl,
@@ -40,7 +46,12 @@ export function ProfileAvatar({
           </div>
         )}
       </div>
-      <div className="absolute -bottom-1 -right-1 rounded-full border border-white/70 bg-emerald-400 px-2 py-1 text-[10px] font-black uppercase tracking-[0.2em] text-slate-950 shadow-lg">
+      <div
+        className={cn(
+          "absolute -bottom-1 -right-1 rounded-full border border-white/70 bg-emerald-400 font-black uppercase tracking-[0.2em] text-slate-950 shadow-lg",
+          avatarBadgeSizes[size]
+        )}
+      >
         Live
       </div>
     </div>

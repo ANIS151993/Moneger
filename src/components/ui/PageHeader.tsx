@@ -12,13 +12,13 @@ export function PageHeader({
   actions?: ReactNode;
 }) {
   return (
-    <div className="flex flex-col gap-4 md:flex-row md:items-end md:justify-between">
-      <div>
+    <div className="flex flex-col gap-4 lg:flex-row lg:items-end lg:justify-between">
+      <div className="min-w-0">
         <p className="text-xs font-semibold uppercase tracking-[0.26em] text-emerald-600">{eyebrow}</p>
-        <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950 md:text-4xl">{title}</h1>
-        <p className="mt-3 max-w-2xl text-sm text-slate-500 md:text-base">{description}</p>
+        <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl md:text-4xl">{title}</h1>
+        <p className="mt-3 max-w-2xl text-sm leading-6 text-slate-500 sm:text-base">{description}</p>
       </div>
-      {actions}
+      {actions ? <div className="w-full lg:w-auto lg:max-w-[42rem]">{actions}</div> : null}
     </div>
   );
 }

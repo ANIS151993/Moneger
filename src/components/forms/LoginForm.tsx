@@ -50,9 +50,9 @@ export function LoginForm() {
   }
 
   return (
-    <Card className="rounded-[32px] p-8">
+    <Card className="rounded-[28px] p-5 sm:p-8 lg:rounded-[32px]">
       <p className="text-xs font-semibold uppercase tracking-[0.24em] text-emerald-600">{t("auth.welcomeBack")}</p>
-      <h1 className="mt-3 text-3xl font-semibold tracking-tight text-slate-950">{t("auth.signInTitle")}</h1>
+      <h1 className="mt-3 text-2xl font-semibold tracking-tight text-slate-950 sm:text-3xl">{t("auth.signInTitle")}</h1>
       <p className="mt-3 text-sm text-slate-500">
         {isConfigured
           ? t("auth.signInFirebaseDescription")
@@ -72,7 +72,7 @@ export function LoginForm() {
         </Button>
       </form>
 
-      <div className="mt-6 flex items-center justify-between text-sm text-slate-500">
+      <div className="mt-6 flex flex-col gap-3 text-sm text-slate-500 sm:flex-row sm:items-center sm:justify-between">
         <Link className="font-medium text-emerald-600" href="/forgot-password">
           {t("auth.forgotPassword")}
         </Link>
