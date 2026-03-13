@@ -26,6 +26,16 @@ const FALLBACK_USD_RATES: Record<CurrencyCode, number> = {
   AUD: 1.53
 };
 
+function normalizeFetchedAt(value?: string) {
+  if (!value) {
+    return new Date().toISOString();
+  }
+
+  const parsed = new Date(value);
+
+  return Number.isNaN(parsed.getTime()) ? new Date().toISOString() : parsed.toISOString();
+}
+
 function toRateMap(
   rawRates: Partial<Record<CurrencyCode, number>> | undefined,
   updatedAt: string | null
@@ -108,10 +118,10 @@ export async function refreshRates(userId: string): Promise<CurrencyRateMap> {
           return [currency, rate];
         })
       ) as Partial<Record<CurrencyCode, number>>,
-      payload.time_last_update_utc || new Date().toISOString()
+      normalizeFetchedAt(payload.time_last_update_utc)
     );
 
-    const fetchedAt = payload.time_last_update_utc || new Date().toISOString();
+    const fetchedAt = normalizeFetchedAt(payload.time_last_update_utc);
 
     await Promise.all(
       supportedCurrencies

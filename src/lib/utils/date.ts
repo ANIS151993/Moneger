@@ -1,4 +1,4 @@
-import { isAfter, isBefore, parseISO } from "date-fns";
+import { isAfter, isBefore, isValid, parseISO } from "date-fns";
 
 import { getLanguageDefinition } from "@/lib/i18n/config";
 import { getRuntimeLanguage } from "@/lib/i18n/messages";
@@ -7,8 +7,30 @@ function getCurrentLocale() {
   return getLanguageDefinition(getRuntimeLanguage()).locale;
 }
 
+function parseDateValue(value: string | Date) {
+  if (value instanceof Date) {
+    return isValid(value) ? value : null;
+  }
+
+  const isoDate = parseISO(value);
+
+  if (isValid(isoDate)) {
+    return isoDate;
+  }
+
+  const fallbackDate = new Date(value);
+
+  return isValid(fallbackDate) ? fallbackDate : null;
+}
+
 function formatWithLocale(value: string, options: Intl.DateTimeFormatOptions) {
-  return new Intl.DateTimeFormat(getCurrentLocale(), options).format(parseISO(value));
+  const parsed = parseDateValue(value);
+
+  if (!parsed) {
+    return value;
+  }
+
+  return new Intl.DateTimeFormat(getCurrentLocale(), options).format(parsed);
 }
 
 export function formatDate(value: string) {
@@ -37,8 +59,14 @@ export function formatDateTime(value: string) {
 }
 
 export function relativeFromNow(value: string) {
+  const parsed = parseDateValue(value);
+
+  if (!parsed) {
+    return new Intl.RelativeTimeFormat(getCurrentLocale(), { numeric: "auto" }).format(0, "minute");
+  }
+
   const now = Date.now();
-  const target = parseISO(value).getTime();
+  const target = parsed.getTime();
   const diffMs = target - now;
   const absoluteMs = Math.abs(diffMs);
   const formatter = new Intl.RelativeTimeFormat(getCurrentLocale(), { numeric: "auto" });
@@ -61,21 +89,35 @@ export function relativeFromNow(value: string) {
 }
 
 export function formatMonthLabel(value: string | Date) {
-  const date = typeof value === "string" ? parseISO(value) : value;
+  const date = parseDateValue(value);
+
+  if (!date) {
+    return "";
+  }
 
   return new Intl.DateTimeFormat(getCurrentLocale(), { month: "short" }).format(date);
 }
 
 export function relativeDaysFromNow(value: string) {
-  const diffDays = Math.round((parseISO(value).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
+  const parsed = parseDateValue(value);
+
+  if (!parsed) {
+    return new Intl.RelativeTimeFormat(getCurrentLocale(), { numeric: "auto" }).format(0, "day");
+  }
+
+  const diffDays = Math.round((parsed.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 
   return new Intl.RelativeTimeFormat(getCurrentLocale(), { numeric: "auto" }).format(diffDays, "day");
 }
 
 export function isPastDate(value: string) {
-  return isBefore(parseISO(value), new Date());
+  const parsed = parseDateValue(value);
+
+  return parsed ? isBefore(parsed, new Date()) : false;
 }
 
 export function isFutureDate(value: string) {
-  return isAfter(parseISO(value), new Date());
+  const parsed = parseDateValue(value);
+
+  return parsed ? isAfter(parsed, new Date()) : false;
 }
