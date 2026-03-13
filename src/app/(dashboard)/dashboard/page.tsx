@@ -163,55 +163,65 @@ export default function DashboardPage() {
         />
       </section>
 
-      <section className="grid gap-4 md:grid-cols-2 xl:grid-cols-4">
-        <StatCard
-          label={t("dashboard.totalIncome")}
-          value={formatSummaryValue(snapshot.totalIncome, baseCurrency)}
-          comparisonLabel={
-            comparisonCurrency && comparisonCurrency !== baseCurrency
-              ? t("dashboard.comparisonValue", { currency: comparisonCurrency })
-              : undefined
-          }
-          comparisonValue={getComparisonValue(snapshot.totalIncome)}
-          detail={t("dashboard.totalIncomeDetail", { currency: baseCurrency })}
-          tone="emerald"
-        />
-        <StatCard
-          label={t("dashboard.totalExpenses")}
-          value={formatSummaryValue(snapshot.totalExpenses, baseCurrency)}
-          comparisonLabel={
-            comparisonCurrency && comparisonCurrency !== baseCurrency
-              ? t("dashboard.comparisonValue", { currency: comparisonCurrency })
-              : undefined
-          }
-          comparisonValue={getComparisonValue(snapshot.totalExpenses)}
-          detail={t("dashboard.totalExpensesDetail")}
-          tone="sky"
-        />
-        <StatCard
-          label={t("dashboard.totalDebt")}
-          value={formatSummaryValue(snapshot.totalDebt, baseCurrency)}
-          comparisonLabel={
-            comparisonCurrency && comparisonCurrency !== baseCurrency
-              ? t("dashboard.comparisonValue", { currency: comparisonCurrency })
-              : undefined
-          }
-          comparisonValue={getComparisonValue(snapshot.totalDebt)}
-          detail={t("dashboard.totalDebtDetail")}
-          tone="rose"
-        />
-        <StatCard
-          label={t("dashboard.moneyOwed")}
-          value={formatSummaryValue(snapshot.totalOwed, baseCurrency)}
-          comparisonLabel={
-            comparisonCurrency && comparisonCurrency !== baseCurrency
-              ? t("dashboard.comparisonValue", { currency: comparisonCurrency })
-              : undefined
-          }
-          comparisonValue={getComparisonValue(snapshot.totalOwed)}
-          detail={t("dashboard.moneyOwedDetail")}
-          tone="amber"
-        />
+      <section>
+        <div className="mobile-scroll-row -mx-1 flex snap-x snap-mandatory gap-3 overflow-x-auto px-1 pb-2 md:mx-0 md:grid md:grid-cols-2 md:gap-4 md:overflow-visible md:px-0 md:pb-0 xl:grid-cols-4">
+          <div className="min-w-[84%] snap-start md:min-w-0">
+            <StatCard
+              label={t("dashboard.totalIncome")}
+              value={formatSummaryValue(snapshot.totalIncome, baseCurrency)}
+              comparisonLabel={
+                comparisonCurrency && comparisonCurrency !== baseCurrency
+                  ? t("dashboard.comparisonValue", { currency: comparisonCurrency })
+                  : undefined
+              }
+              comparisonValue={getComparisonValue(snapshot.totalIncome)}
+              detail={t("dashboard.totalIncomeDetail", { currency: baseCurrency })}
+              tone="emerald"
+            />
+          </div>
+          <div className="min-w-[84%] snap-start md:min-w-0">
+            <StatCard
+              label={t("dashboard.totalExpenses")}
+              value={formatSummaryValue(snapshot.totalExpenses, baseCurrency)}
+              comparisonLabel={
+                comparisonCurrency && comparisonCurrency !== baseCurrency
+                  ? t("dashboard.comparisonValue", { currency: comparisonCurrency })
+                  : undefined
+              }
+              comparisonValue={getComparisonValue(snapshot.totalExpenses)}
+              detail={t("dashboard.totalExpensesDetail")}
+              tone="sky"
+            />
+          </div>
+          <div className="min-w-[84%] snap-start md:min-w-0">
+            <StatCard
+              label={t("dashboard.totalDebt")}
+              value={formatSummaryValue(snapshot.totalDebt, baseCurrency)}
+              comparisonLabel={
+                comparisonCurrency && comparisonCurrency !== baseCurrency
+                  ? t("dashboard.comparisonValue", { currency: comparisonCurrency })
+                  : undefined
+              }
+              comparisonValue={getComparisonValue(snapshot.totalDebt)}
+              detail={t("dashboard.totalDebtDetail")}
+              tone="rose"
+            />
+          </div>
+          <div className="min-w-[84%] snap-start md:min-w-0">
+            <StatCard
+              label={t("dashboard.moneyOwed")}
+              value={formatSummaryValue(snapshot.totalOwed, baseCurrency)}
+              comparisonLabel={
+                comparisonCurrency && comparisonCurrency !== baseCurrency
+                  ? t("dashboard.comparisonValue", { currency: comparisonCurrency })
+                  : undefined
+              }
+              comparisonValue={getComparisonValue(snapshot.totalOwed)}
+              detail={t("dashboard.moneyOwedDetail")}
+              tone="amber"
+            />
+          </div>
+        </div>
       </section>
 
       {!hasWorkspaceData ? (

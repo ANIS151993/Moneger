@@ -130,6 +130,31 @@ button,
   }
 }
 
+@keyframes mobileFabFloat {
+  0%,
+  100% {
+    transform: translateY(0);
+  }
+
+  50% {
+    transform: translateY(-2px);
+  }
+}
+
+@keyframes mobilePulseRing {
+  0% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.26);
+  }
+
+  70% {
+    box-shadow: 0 0 0 14px rgba(16, 185, 129, 0);
+  }
+
+  100% {
+    box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
+  }
+}
+
 .fx-card-sheen::after {
   content: "";
   position: absolute;
@@ -155,6 +180,30 @@ button,
 
 .developer-ribbon {
   animation: fxFloat 6.5s ease-in-out infinite;
+}
+
+.mobile-fab {
+  animation: mobileFabFloat 4.4s ease-in-out infinite, mobilePulseRing 3.2s ease-out infinite;
+}
+
+.mobile-dock {
+  box-shadow:
+    0 20px 60px rgba(15, 23, 42, 0.18),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.mobile-sheet {
+  box-shadow:
+    0 24px 80px rgba(2, 6, 23, 0.4),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06);
+}
+
+.mobile-scroll-row {
+  scrollbar-width: none;
+}
+
+.mobile-scroll-row::-webkit-scrollbar {
+  display: none;
 }
 
 .safe-shell {
