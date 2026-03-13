@@ -32,6 +32,7 @@ export function AppShell({ children }: { children: ReactNode }) {
   const profileComplete = isProfileComplete(profile);
   const navigation = profileComplete ? dashboardNavigation : onboardingNavigation;
   const profileHref = profileComplete ? "/settings" : "/welcome";
+  const guideActive = pathname === "/guide";
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(22,163,74,0.12),_transparent_24rem),linear-gradient(180deg,#f8fafc_0%,#eef6ff_100%)]">
@@ -54,7 +55,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </Link>
           <nav className="mt-6 grid gap-2">
-            {navigation.map((item) => {
+            {navigation.map((item, index) => {
               const active = pathname === item.href;
 
               return (
@@ -62,36 +63,71 @@ export function AppShell({ children }: { children: ReactNode }) {
                   key={item.href}
                   href={item.href}
                   className={cn(
-                    "rounded-2xl px-4 py-3 text-sm font-medium transition",
-                    active ? "bg-white text-slate-950" : "text-slate-400 hover:bg-white/5 hover:text-white"
+                    "group relative overflow-hidden rounded-[24px] border px-4 py-3 text-sm font-medium transition duration-300",
+                    active
+                      ? "border-emerald-300/[0.35] bg-[radial-gradient(circle_at_right,_rgba(56,189,248,0.3),_transparent_38%),linear-gradient(135deg,rgba(15,23,42,0.96),rgba(5,150,105,0.9))] text-white shadow-[0_16px_42px_rgba(8,47,73,0.3)]"
+                      : "border-white/10 bg-white/[0.04] text-slate-300 hover:-translate-y-0.5 hover:border-sky-300/[0.25] hover:bg-white/[0.09] hover:text-white"
                   )}
                 >
-                  {t(item.labelKey)}
+                  <div
+                    className={cn(
+                      "absolute inset-y-2 left-2 w-1 rounded-full transition duration-300",
+                      active ? "bg-[linear-gradient(180deg,#86efac_0%,#38bdf8_100%)]" : "bg-transparent group-hover:bg-emerald-300/60"
+                    )}
+                  />
+                  <div
+                    className={cn(
+                      "absolute inset-0 opacity-0 transition duration-300",
+                      active ? "opacity-100" : "group-hover:opacity-100"
+                    )}
+                  >
+                    <div className="absolute right-4 top-1/2 h-10 w-10 -translate-y-1/2 rounded-full bg-white/[0.08] blur-xl" />
+                  </div>
+                  <div className="relative flex items-center justify-between gap-3 pl-3">
+                    <span>{t(item.labelKey)}</span>
+                    <span
+                      className={cn(
+                        "rounded-full px-2 py-1 text-[10px] font-semibold tracking-[0.18em]",
+                        active ? "bg-white/[0.12] text-white" : "bg-white/[0.08] text-slate-400 group-hover:text-slate-200"
+                      )}
+                    >
+                      {String(index + 1).padStart(2, "0")}
+                    </span>
+                  </div>
                 </Link>
               );
             })}
           </nav>
 
-          <div className="mt-6 overflow-hidden rounded-[28px] border border-emerald-300/20 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.24),_transparent_32%),linear-gradient(150deg,rgba(16,185,129,0.2),rgba(15,23,42,0.18))] p-4 shadow-[0_18px_54px_rgba(2,6,23,0.24)]">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
-              {t("layout.guideSpotlightEyebrow")}
-            </p>
-            <h2 className="mt-3 text-xl font-semibold tracking-tight text-white">
-              {t("layout.guideSpotlightTitle")}
-            </h2>
-            <p className="mt-3 text-sm leading-6 text-slate-200">
-              {profileComplete ? t("layout.guideSpotlightDescription") : t("layout.guideSpotlightOnboardingDescription")}
-            </p>
-            <Link
-              className={buttonClassName({
-                className: "mt-5 w-full",
-                variant: "ghost"
-              })}
-              href="/guide"
-            >
-              {t("layout.guideSpotlightAction")}
-            </Link>
-          </div>
+          <Link
+            className={cn(
+              "group relative mt-4 block overflow-hidden rounded-[26px] border p-4 shadow-[0_18px_54px_rgba(2,6,23,0.24)] transition duration-300 hover:-translate-y-0.5",
+              guideActive
+                ? "border-sky-300/[0.35] bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.3),_transparent_34%),linear-gradient(150deg,rgba(14,116,144,0.92),rgba(15,23,42,0.96))]"
+                : "border-emerald-300/20 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.24),_transparent_32%),linear-gradient(150deg,rgba(16,185,129,0.2),rgba(15,23,42,0.18))] hover:border-sky-300/[0.25]"
+            )}
+            href="/guide"
+          >
+            <div className="absolute -right-4 top-0 h-16 w-16 rounded-full bg-sky-300/20 blur-2xl transition duration-300 group-hover:scale-110" />
+            <div className="relative flex items-start justify-between gap-3">
+              <div className="min-w-0">
+                <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
+                  {t("layout.guideSpotlightEyebrow")}
+                </p>
+                <h2 className="mt-2 text-sm font-semibold tracking-tight text-white">
+                  {t("layout.guideSpotlightTitle")}
+                </h2>
+                <p className="mt-2 text-xs leading-5 text-slate-200">
+                  {profileComplete
+                    ? t("layout.guideSpotlightDescription")
+                    : t("layout.guideSpotlightOnboardingDescription")}
+                </p>
+              </div>
+              <span className="rounded-full border border-white/[0.12] bg-white/10 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-white">
+                {t("layout.guideSpotlightAction")}
+              </span>
+            </div>
+          </Link>
 
           <div className="mt-8 rounded-3xl border border-white/10 bg-white/5 p-4">
             <p className="text-xs uppercase tracking-[0.22em] text-slate-400">{t("layout.privacyMode")}</p>
@@ -104,14 +140,18 @@ export function AppShell({ children }: { children: ReactNode }) {
             <p className="text-sm font-medium text-white">{displayName}</p>
             <p className="mt-1 truncate text-xs text-slate-400">{compactMeta}</p>
             <p className="mt-3 text-xs text-slate-400">{t("layout.dataStoreIsolated")}</p>
-            <Button className="mt-4 w-full" variant="ghost" onClick={() => void logout()}>
+            <Button
+              className="mt-4 w-full border-white/[0.15] bg-white/[0.07] text-white hover:border-rose-300/[0.25] hover:bg-rose-400/10 hover:text-rose-100"
+              variant="ghost"
+              onClick={() => void logout()}
+            >
               {t("layout.signOut")}
             </Button>
           </div>
         </aside>
 
         <div className="flex min-h-screen flex-1 flex-col gap-6">
-          <header className="flex flex-col gap-4 rounded-[32px] border border-white/80 bg-white/70 px-6 py-5 backdrop-blur md:flex-row md:items-start md:justify-between">
+          <header className="flex flex-col gap-4 rounded-[32px] border border-white/80 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.12),_transparent_28%),linear-gradient(145deg,rgba(255,255,255,0.82),rgba(241,245,249,0.74))] px-6 py-5 shadow-[0_18px_52px_rgba(15,23,42,0.08)] backdrop-blur md:flex-row md:items-start md:justify-between">
             <div>
               <p className="text-xs uppercase tracking-[0.22em] text-emerald-600">
                 {profileComplete ? t("layout.workspaceTag") : t("layout.onboardingTag")}
@@ -125,7 +165,7 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </header>
           <main className="pb-8">
-            <div className="space-y-6">
+            <div className="space-y-6 rounded-[34px] bg-[radial-gradient(circle_at_top_left,_rgba(255,255,255,0.42),_transparent_32%),linear-gradient(180deg,rgba(255,255,255,0.14),rgba(255,255,255,0.02))] p-1">
               {children}
               <DeveloperSignatureCard />
             </div>

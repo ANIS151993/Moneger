@@ -83,64 +83,84 @@ export function CurrencyComparisonCard({
 
   if (!comparisonCurrency) {
     return (
-      <Card className="group relative w-full overflow-hidden rounded-[28px] border border-emerald-100 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.28),_transparent_42%),linear-gradient(145deg,#ffffff_0%,#ecfdf5_58%,#dcfce7_100%)] p-5 shadow-[0_20px_70px_rgba(22,163,74,0.12)] transition hover:-translate-y-0.5 md:max-w-[380px]">
+      <Card className="group relative w-full overflow-hidden rounded-[28px] border border-emerald-100 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.24),_transparent_40%),linear-gradient(145deg,#ffffff_0%,#ecfdf5_55%,#dcfce7_100%)] px-4 py-4 shadow-[0_18px_54px_rgba(22,163,74,0.12)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_60px_rgba(22,163,74,0.18)] md:max-w-[420px]">
         <div className="absolute -right-8 -top-8 h-24 w-24 rounded-full bg-emerald-300/30 blur-2xl" />
-        <p className="relative text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-700">
-          {t("dashboard.ratePanelTitle")}
-        </p>
-        <h3 className="relative mt-3 text-xl font-semibold tracking-tight text-slate-950">
-          {t("dashboard.ratePanelPromptTitle")}
-        </h3>
-        <p className="relative mt-2 text-sm leading-6 text-slate-600">
-          {t("dashboard.ratePanelPromptDescription")}
-        </p>
+        <div className="relative flex items-center justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-700">
+              {t("dashboard.ratePanelTitle")}
+            </p>
+            <div className="mt-2 flex flex-wrap items-center gap-2">
+              <span className="rounded-full border border-emerald-200 bg-white/80 px-2.5 py-1 text-[11px] font-semibold text-slate-900">
+                USD / FX
+              </span>
+              <p className="truncate text-sm font-semibold text-slate-950">
+                {t("dashboard.ratePanelPromptTitle")}
+              </p>
+            </div>
+            <p className="mt-2 text-xs leading-5 text-slate-600">
+              {t("dashboard.ratePanelPromptDescription")}
+            </p>
+          </div>
+
+          <div className="rounded-full border border-emerald-200 bg-white/80 px-3 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
+            {t("dashboard.ratePanelLive")}
+          </div>
+        </div>
       </Card>
     );
   }
 
   const currentRate = getCurrencyComparisonRate(baseCurrency, comparisonCurrency, rates);
   const values = pairHistory.map((point) => point.rate);
-  const { line, area } = buildSparkline(values, 300, 92);
-  const high = Math.max(...values);
-  const low = Math.min(...values);
+  const { line, area } = buildSparkline(values, 132, 56);
+  const rateTrend = values.at(-1) && values[0] ? values.at(-1)! - values[0]! : 0;
+  const trendTone =
+    rateTrend >= 0
+      ? "border-emerald-300/30 bg-emerald-400/10 text-emerald-200"
+      : "border-rose-300/30 bg-rose-400/10 text-rose-200";
+  const trendLabel = `${rateTrend >= 0 ? "+" : ""}${formatExchangeRate(Math.abs(rateTrend))}`;
 
   return (
-    <Card className="group relative w-full overflow-hidden rounded-[28px] border border-slate-900/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.28),_transparent_38%),radial-gradient(circle_at_bottom_left,_rgba(22,163,74,0.18),_transparent_42%),linear-gradient(155deg,#0f172a_0%,#111827_54%,#052e16_100%)] p-5 text-white shadow-[0_24px_80px_rgba(15,23,42,0.24)] transition hover:-translate-y-0.5 md:max-w-[420px]">
-      <div className="absolute -left-8 bottom-0 h-24 w-24 rounded-full bg-emerald-400/20 blur-3xl transition group-hover:scale-110" />
-      <div className="absolute -right-10 top-0 h-28 w-28 rounded-full bg-sky-400/15 blur-3xl transition group-hover:scale-110" />
-      <div className="relative">
-        <div className="flex items-start justify-between gap-4">
-          <div>
-            <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-emerald-200">
-              {t("dashboard.ratePanelTitle")}
+    <Card className="group relative w-full overflow-hidden rounded-[28px] border border-slate-900/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.26),_transparent_38%),radial-gradient(circle_at_bottom_left,_rgba(22,163,74,0.18),_transparent_42%),linear-gradient(150deg,#0f172a_0%,#111827_58%,#052e16_100%)] px-4 py-4 text-white shadow-[0_20px_64px_rgba(15,23,42,0.24)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_28px_72px_rgba(15,23,42,0.3)] md:max-w-[520px]">
+      <div className="absolute -left-8 bottom-0 h-24 w-24 rounded-full bg-emerald-400/20 blur-3xl transition duration-300 group-hover:scale-110" />
+      <div className="absolute -right-10 top-0 h-28 w-28 rounded-full bg-sky-400/15 blur-3xl transition duration-300 group-hover:scale-110" />
+      <div className="relative flex items-center gap-4">
+        <div className="min-w-0 flex-1">
+          <div className="flex flex-wrap items-center gap-2">
+            <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
+              <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(110,231,183,0.9)]" />
+              {t("dashboard.ratePanelLive")}
+            </span>
+            <span className="rounded-full border border-white/10 bg-white/10 px-2.5 py-1 text-[11px] font-semibold text-white">
+              {baseCurrency}/{comparisonCurrency}
+            </span>
+            <span className={`rounded-full border px-2.5 py-1 text-[10px] font-semibold ${trendTone}`}>
+              {trendLabel}
+            </span>
+          </div>
+
+          <div className="mt-3 flex flex-wrap items-center gap-2">
+            <p className="truncate text-sm font-semibold text-white/95">
+              {t("dashboard.ratePanelTitle")}:
             </p>
-            <div className="mt-3 flex flex-wrap items-center gap-2">
-              <span className="rounded-full border border-white/10 bg-white/10 px-3 py-1 text-xs font-semibold text-white">
-                {baseCurrency}
-              </span>
-              <span className="text-slate-400">/</span>
-              <span className="rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-xs font-semibold text-emerald-200">
-                {comparisonCurrency}
-              </span>
-            </div>
+            <p className="truncate text-sm text-slate-200">
+              1 {baseCurrency} = {formatExchangeRate(currentRate)} {comparisonCurrency}
+            </p>
           </div>
-          <div className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-3 py-1 text-[11px] font-semibold uppercase tracking-[0.18em] text-emerald-200">
-            <span className="h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_12px_rgba(110,231,183,0.9)]" />
-            {t("dashboard.ratePanelLive")}
+
+          <div className="mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-300">
+            <span>
+              {rates.updatedAt
+                ? t("dashboard.ratePanelUpdated", { time: relativeFromNow(rates.updatedAt) })
+                : t("dashboard.ratePanelSource")}
+            </span>
+            {rates.updatedAt ? <span>{formatDateTime(rates.updatedAt)}</span> : null}
           </div>
         </div>
 
-        <div className="mt-5">
-          <p className="text-sm text-slate-300">
-            1 {baseCurrency} = {formatExchangeRate(currentRate)} {comparisonCurrency}
-          </p>
-          <p className="mt-2 text-xs text-slate-400">
-            {rates.updatedAt ? t("dashboard.ratePanelUpdated", { time: relativeFromNow(rates.updatedAt) }) : t("dashboard.ratePanelSource")}
-          </p>
-        </div>
-
-        <div className="mt-5 rounded-[24px] border border-white/10 bg-white/5 p-3 backdrop-blur">
-          <svg className="h-[110px] w-full" viewBox="0 0 300 92" preserveAspectRatio="none" aria-hidden="true">
+        <div className="min-w-[120px] rounded-[22px] border border-white/10 bg-white/[0.06] p-2.5 shadow-inner shadow-black/10 backdrop-blur">
+          <svg className="h-[56px] w-[132px]" viewBox="0 0 132 56" preserveAspectRatio="none" aria-hidden="true">
             <defs>
               <linearGradient id="fx-area-fill" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="0%" stopColor="rgba(52,211,153,0.45)" />
@@ -159,30 +179,13 @@ export function CurrencyComparisonCard({
                 stroke="url(#fx-line-stroke)"
                 strokeLinecap="round"
                 strokeLinejoin="round"
-                strokeWidth="4"
+                strokeWidth="3.5"
               />
             ) : null}
           </svg>
-        </div>
-
-        <div className="mt-4 grid gap-3 sm:grid-cols-2">
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-              {t("dashboard.ratePanelHigh")}
-            </p>
-            <p className="mt-2 text-sm font-semibold text-white">{formatExchangeRate(high)}</p>
-          </div>
-          <div className="rounded-2xl border border-white/10 bg-white/5 px-4 py-3">
-            <p className="text-[10px] font-semibold uppercase tracking-[0.2em] text-slate-400">
-              {t("dashboard.ratePanelLow")}
-            </p>
-            <p className="mt-2 text-sm font-semibold text-white">{formatExchangeRate(low)}</p>
-          </div>
-        </div>
-
-        <div className="mt-4 flex items-center justify-between gap-3 text-xs text-slate-400">
-          <p>{t("dashboard.ratePanelSource")}</p>
-          {rates.updatedAt ? <p>{formatDateTime(rates.updatedAt)}</p> : null}
+          <p className="mt-2 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
+            {t("dashboard.ratePanelSource")}
+          </p>
         </div>
       </div>
     </Card>
