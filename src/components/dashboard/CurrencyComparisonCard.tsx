@@ -83,9 +83,9 @@ export function CurrencyComparisonCard({
 
   if (!comparisonCurrency) {
     return (
-      <Card className="fx-card-sheen group relative w-full overflow-hidden rounded-[26px] border border-emerald-100 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.16),_transparent_38%),linear-gradient(135deg,#ffffff_0%,#f0fdf4_58%,#dcfce7_100%)] px-4 py-3 shadow-[0_16px_42px_rgba(22,163,74,0.12)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_54px_rgba(22,163,74,0.18)] md:max-w-[520px]">
-        <div className="absolute inset-y-0 right-0 w-28 bg-[radial-gradient(circle_at_left,_rgba(16,185,129,0.14),_transparent_68%)]" />
-        <div className="relative flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+      <Card className="fx-card-sheen group relative w-full overflow-hidden rounded-[24px] border border-emerald-100 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.14),_transparent_36%),linear-gradient(135deg,#ffffff_0%,#f0fdf4_58%,#dcfce7_100%)] px-4 py-2.5 shadow-[0_14px_36px_rgba(22,163,74,0.12)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_20px_46px_rgba(22,163,74,0.18)] md:max-w-[500px]">
+        <div className="absolute inset-y-0 right-0 w-24 bg-[radial-gradient(circle_at_left,_rgba(16,185,129,0.12),_transparent_68%)]" />
+        <div className="relative flex flex-col gap-2 md:flex-row md:items-center md:gap-3">
           <div className="flex flex-wrap items-center gap-2">
             <span className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-white/85 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
               <span className="fx-live-dot h-2 w-2 rounded-full bg-emerald-500" />
@@ -100,7 +100,7 @@ export function CurrencyComparisonCard({
             <p className="truncate text-sm font-semibold tracking-tight text-slate-950">
               {t("dashboard.ratePanelPromptTitle")}
             </p>
-            <p className="mt-1 truncate text-[11px] text-slate-600">
+            <p className="mt-0.5 truncate text-[10px] text-slate-600">
               {t("dashboard.ratePanelPromptDescription")}
             </p>
           </div>
@@ -120,10 +120,10 @@ export function CurrencyComparisonCard({
   const trendLabel = `${rateTrend >= 0 ? "+" : ""}${formatExchangeRate(Math.abs(rateTrend))}`;
 
   return (
-    <Card className="fx-card-sheen group relative w-full overflow-hidden rounded-[26px] border border-cyan-400/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.18),_transparent_36%),radial-gradient(circle_at_bottom_left,_rgba(16,185,129,0.16),_transparent_42%),linear-gradient(135deg,#020617_0%,#0f172a_52%,#062c2c_100%)] px-4 py-3 text-white shadow-[0_18px_54px_rgba(15,23,42,0.28)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_24px_64px_rgba(15,23,42,0.34)] md:max-w-[560px]">
-      <div className="absolute -left-6 top-1/2 h-20 w-20 -translate-y-1/2 rounded-full bg-emerald-400/12 blur-3xl transition duration-300 group-hover:scale-110" />
-      <div className="absolute -right-8 top-0 h-24 w-24 rounded-full bg-sky-400/12 blur-3xl transition duration-300 group-hover:scale-110" />
-      <div className="relative flex flex-col gap-3 md:flex-row md:items-center md:gap-4">
+    <Card className="fx-card-sheen group relative w-full overflow-hidden rounded-[24px] border border-cyan-400/10 bg-[radial-gradient(circle_at_top_right,_rgba(56,189,248,0.16),_transparent_34%),radial-gradient(circle_at_bottom_left,_rgba(16,185,129,0.14),_transparent_40%),linear-gradient(135deg,#020617_0%,#0f172a_52%,#062c2c_100%)] px-4 py-2.5 text-white shadow-[0_16px_44px_rgba(15,23,42,0.26)] transition duration-300 hover:-translate-y-0.5 hover:shadow-[0_22px_54px_rgba(15,23,42,0.32)] md:max-w-[540px]">
+      <div className="absolute -left-6 top-1/2 h-18 w-18 -translate-y-1/2 rounded-full bg-emerald-400/12 blur-3xl transition duration-300 group-hover:scale-110" />
+      <div className="absolute -right-8 top-0 h-20 w-20 rounded-full bg-sky-400/12 blur-3xl transition duration-300 group-hover:scale-110" />
+      <div className="relative flex flex-col gap-2.5 md:flex-row md:items-center md:gap-3">
         <div className="flex flex-wrap items-center gap-2 md:min-w-fit">
           <span className="inline-flex items-center gap-2 rounded-full border border-emerald-300/20 bg-emerald-400/10 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-200">
             <span className="fx-live-dot h-2 w-2 rounded-full bg-emerald-300 shadow-[0_0_14px_rgba(110,231,183,0.9)]" />
@@ -138,22 +138,21 @@ export function CurrencyComparisonCard({
         </div>
 
         <div className="min-w-0 flex-1">
-          <p className="truncate text-base font-semibold tracking-tight text-white md:text-[15px]">
+          <p className="truncate text-[15px] font-semibold tracking-tight text-white">
             1 {baseCurrency} = {formatExchangeRate(currentRate)} {comparisonCurrency}
           </p>
-          <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-slate-300">
-            <span className="truncate">{t("dashboard.ratePanelTitle")}</span>
+          <div className="mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1 text-[10px] text-slate-300">
             <span>
               {rates.updatedAt
                 ? t("dashboard.ratePanelUpdated", { time: relativeFromNow(rates.updatedAt) })
-                : t("dashboard.ratePanelSource")}
+                : t("dashboard.ratePanelLive")}
             </span>
             {rates.updatedAt ? <span className="text-slate-400">{formatDateTime(rates.updatedAt)}</span> : null}
           </div>
         </div>
 
-        <div className="fx-sparkline-panel min-w-[132px] rounded-[22px] border border-white/10 bg-white/[0.06] p-2 shadow-inner shadow-black/10 backdrop-blur md:ml-auto">
-          <svg className="h-[50px] w-[132px]" viewBox="0 0 132 56" preserveAspectRatio="none" aria-hidden="true">
+        <div className="fx-sparkline-panel min-w-[108px] rounded-[18px] border border-white/10 bg-white/[0.06] p-1.5 shadow-inner shadow-black/10 backdrop-blur md:ml-auto">
+          <svg className="h-[38px] w-[108px]" viewBox="0 0 132 56" preserveAspectRatio="none" aria-hidden="true">
             <defs>
               <linearGradient id="fx-area-fill" x1="0" x2="0" y1="0" y2="1">
                 <stop offset="0%" stopColor="rgba(52,211,153,0.45)" />
@@ -176,9 +175,6 @@ export function CurrencyComparisonCard({
               />
             ) : null}
           </svg>
-          <p className="mt-1 text-[10px] font-semibold uppercase tracking-[0.18em] text-slate-400">
-            {t("dashboard.ratePanelSource")}
-          </p>
         </div>
       </div>
     </Card>
