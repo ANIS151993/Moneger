@@ -10,6 +10,7 @@ export type CurrencyCode =
   | "NPR"
   | "CAD"
   | "AUD";
+export type CountryCode = "US" | "BD" | "IN" | "PK" | "SA" | "RU" | "KG" | "FR" | "DE" | "NP" | "CA" | "AU";
 export type Gender = "" | "male" | "female" | "non-binary" | "other" | "prefer-not-to-say";
 export type LanguagePreference = "en" | "bn" | "hi" | "ur" | "ar" | "ru" | "ky" | "fr" | "de" | "ne";
 export type MaritalStatus = "" | "single" | "married" | "engaged" | "separated" | "divorced" | "widowed" | "prefer-not-to-say";
@@ -47,6 +48,7 @@ export interface ExpenseRecord extends BaseEntity {
 }
 
 export interface BankRecord extends BaseEntity {
+  country: CountryCode;
   bankName: string;
   nickname: string;
   last4: string;

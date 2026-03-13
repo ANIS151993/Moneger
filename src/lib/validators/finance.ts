@@ -1,6 +1,7 @@
 import { z } from "zod";
 
 import {
+  supportedBankCountries,
   debtStatuses,
   expenseCategories,
   genders,
@@ -22,6 +23,9 @@ const languagePreferenceSchema = z.enum(
   ]
 );
 const maritalStatusSchema = z.enum(["", ...maritalStatuses] as const);
+const countrySchema = z.enum(
+  supportedBankCountries as [typeof supportedBankCountries[number], ...typeof supportedBankCountries[number][]]
+);
 
 export const incomeSchema = z.object({
   amount: z.coerce.number().positive("Amount must be greater than zero"),
@@ -67,6 +71,7 @@ export const owedSchema = z.object({
 });
 
 export const bankSchema = z.object({
+  country: countrySchema,
   bankName: z.string().min(2, "Bank name is required"),
   nickname: z.string().min(2, "Nickname is required"),
   last4: z

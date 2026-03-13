@@ -11,6 +11,7 @@ import { PageHeader } from "@/components/ui/PageHeader";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { getUserDatabase } from "@/lib/db/moneger-db";
 import { useUserSettings } from "@/lib/hooks/use-user-settings";
+import { bankCountryCatalog } from "@/lib/constants/options";
 import { ledgerService } from "@/lib/services/ledger-service";
 
 export default function BanksPage() {
@@ -61,9 +62,16 @@ export default function BanksPage() {
                 render: (item) => (
                   <div>
                     <p className="font-medium text-slate-900">{item.bankName}</p>
-                    <p className="text-xs text-slate-400">{item.nickname}</p>
+                    <p className="text-xs text-slate-400">
+                      {bankCountryCatalog[item.country]?.label || item.country} · {item.nickname}
+                    </p>
                   </div>
                 )
+              },
+              {
+                key: "country",
+                header: t("common.country"),
+                render: (item) => bankCountryCatalog[item.country]?.label || item.country
               },
               {
                 key: "last4",

@@ -4,13 +4,14 @@ import { useDeferredValue, useEffect, useMemo, useRef, useState } from "react";
 
 import { useI18n } from "@/components/providers/LanguageProvider";
 import { Input } from "@/components/ui/Input";
-import { banks } from "@/lib/constants/options";
+import { bankCountryCatalog } from "@/lib/constants/options";
 import { getLanguageDefinition } from "@/lib/i18n/config";
 import {
   googlePlacesAutocompleteEnabled,
   loadGooglePlacesLibrary
 } from "@/lib/services/google-places";
 import { cn } from "@/lib/utils/cn";
+import type { CountryCode } from "@/types/finance";
 
 type BankSuggestion = {
   id: string;
@@ -21,14 +22,15 @@ type BankSuggestion = {
 
 const MAX_SUGGESTIONS = 8;
 
-function rankBanks(query: string) {
+function rankBanks(query: string, country: CountryCode) {
+  const bankList = bankCountryCatalog[country].banks;
   const normalizedQuery = query.trim().toLowerCase();
 
   if (!normalizedQuery) {
-    return banks.slice(0, MAX_SUGGESTIONS);
+    return bankList.slice(0, MAX_SUGGESTIONS);
   }
 
-  return [...banks]
+  return [...bankList]
     .filter((bank) => bank.toLowerCase().includes(normalizedQuery))
     .sort((left, right) => {
       const leftLower = left.toLowerCase();
@@ -45,8 +47,8 @@ function rankBanks(query: string) {
     .slice(0, MAX_SUGGESTIONS);
 }
 
-function buildLocalSuggestions(query: string): BankSuggestion[] {
-  return rankBanks(query).map((bank) => ({
+function buildLocalSuggestions(query: string, country: CountryCode): BankSuggestion[] {
+  return rankBanks(query, country).map((bank) => ({
     id: `local_${bank}`,
     label: bank,
     source: "local" as const
@@ -68,18 +70,21 @@ function mergeSuggestions(localSuggestions: BankSuggestion[], googleSuggestions:
 }
 
 export function BankNameAutocomplete({
+  country,
   value,
   onChange,
   onBlur
 }: {
+  country: CountryCode;
   value: string;
   onChange: (value: string) => void;
   onBlur?: () => void;
 }) {
   const { language, t } = useI18n();
   const locale = getLanguageDefinition(language).locale;
+  const selectedCountry = bankCountryCatalog[country];
   const deferredValue = useDeferredValue(value);
-  const [suggestions, setSuggestions] = useState<BankSuggestion[]>(() => buildLocalSuggestions(""));
+  const [suggestions, setSuggestions] = useState<BankSuggestion[]>(() => buildLocalSuggestions("", country));
   const [showSuggestions, setShowSuggestions] = useState(false);
   const [googleAttributionVisible, setGoogleAttributionVisible] = useState(false);
   const [loadingGoogleSuggestions, setLoadingGoogleSuggestions] = useState(false);
@@ -89,13 +94,13 @@ export function BankNameAutocomplete({
 
   const helperText = useMemo(() => {
     return googlePlacesAutocompleteEnabled
-      ? t("bankForm.bankSearchHintGoogle")
-      : t("bankForm.bankSearchHintLocal");
-  }, [t]);
+      ? t("bankForm.bankSearchHintGoogle", { country: selectedCountry.label })
+      : t("bankForm.bankSearchHintLocal", { country: selectedCountry.label });
+  }, [selectedCountry.label, t]);
 
   useEffect(() => {
     const query = deferredValue.trim();
-    const localSuggestions = buildLocalSuggestions(query);
+    const localSuggestions = buildLocalSuggestions(query, country);
     const activeRequestId = ++requestIdRef.current;
 
     setSuggestions(localSuggestions);
@@ -123,9 +128,9 @@ export function BankNameAutocomplete({
         const request = {
           input: query,
           includedPrimaryTypes: ["bank"],
-          includedRegionCodes: ["us"],
+          includedRegionCodes: [selectedCountry.googleRegionCode],
           language: locale,
-          region: "us",
+          region: selectedCountry.googleRegionCode,
           sessionToken: googleSessionTokenRef.current
         };
         const response = await placesLibrary.AutocompleteSuggestion.fetchAutocompleteSuggestions(request);
@@ -175,7 +180,14 @@ export function BankNameAutocomplete({
     return () => {
       cancelled = true;
     };
-  }, [deferredValue, locale]);
+  }, [country, deferredValue, locale, selectedCountry.googleRegionCode]);
+
+  useEffect(() => {
+    setSuggestions(buildLocalSuggestions("", country));
+    setGoogleAttributionVisible(false);
+    setLoadingGoogleSuggestions(false);
+    googleSessionTokenRef.current = null;
+  }, [country]);
 
   useEffect(() => {
     return () => {
@@ -220,7 +232,7 @@ export function BankNameAutocomplete({
             <span className="h-2 w-2 rounded-full bg-sky-500 animate-pulse" />
           ) : null}
           <span className="rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-slate-500">
-            US
+            {country}
           </span>
         </div>
       </div>
@@ -255,12 +267,14 @@ export function BankNameAutocomplete({
                         : "border border-emerald-200 bg-emerald-50 text-emerald-700"
                     )}
                   >
-                    {suggestion.source === "google" ? "Google" : "Top US"}
+                    {suggestion.source === "google" ? "Google" : `Top ${country}`}
                   </span>
                 </button>
               ))
             ) : (
-              <div className="px-3 py-4 text-sm text-slate-500">{t("bankForm.bankSearchEmpty")}</div>
+              <div className="px-3 py-4 text-sm text-slate-500">
+                {t("bankForm.bankSearchEmpty", { country: selectedCountry.label })}
+              </div>
             )}
           </div>
 

@@ -2,6 +2,7 @@
 
 import Dexie, { type Table } from "dexie";
 
+import { inferBankCountry } from "@/lib/constants/options";
 import type {
   BankRecord,
   DebtRecord,
@@ -50,6 +51,31 @@ export class MonegerDatabase extends Dexie {
       syncQueue: "id, userId, entityType, status, createdAt, updatedAt",
       settings: "id, userId, updatedAt"
     });
+
+    this.version(3)
+      .stores({
+        incomes: "id, userId, date, category, source, createdAt, updatedAt",
+        expenses: "id, userId, date, category, source, createdAt, updatedAt",
+        debts: "id, userId, settlementDate, status, creditorName, createdAt, updatedAt",
+        owed: "id, userId, settlementDate, status, debtorName, createdAt, updatedAt",
+        banks: "id, userId, country, bankName, nickname, createdAt, updatedAt",
+        exchangeRates: "pair, userId, fetchedAt, updatedAt",
+        exchangeRateSnapshots: "id, userId, fetchedAt, updatedAt",
+        syncQueue: "id, userId, entityType, status, createdAt, updatedAt",
+        settings: "id, userId, updatedAt"
+      })
+      .upgrade(async (transaction) => {
+        await transaction
+          .table("banks")
+          .toCollection()
+          .modify((record: { bankName?: string; currency?: BankRecord["currency"]; country?: BankRecord["country"] }) => {
+            if (record.country) {
+              return;
+            }
+
+            record.country = inferBankCountry(record.bankName || "", record.currency || "USD");
+          });
+      });
   }
 }
 
