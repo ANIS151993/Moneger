@@ -30,15 +30,36 @@ export function findServiceAccountPath() {
     return path.resolve(process.cwd(), explicitPath);
   }
 
-  const candidate = readdirSync(process.cwd()).find((entry) => SERVICE_ACCOUNT_PATTERN.test(entry));
+  const candidates = readdirSync(process.cwd()).filter((entry) => SERVICE_ACCOUNT_PATTERN.test(entry));
 
-  if (!candidate) {
+  if (candidates.length === 0) {
     throw new Error(
       "No Firebase service account file found. Set FIREBASE_SERVICE_ACCOUNT_PATH or add a *firebase-adminsdk*.json file in the repo root."
     );
   }
 
-  return path.resolve(process.cwd(), candidate);
+  if (candidates.length === 1) {
+    return path.resolve(process.cwd(), candidates[0]);
+  }
+
+  const { projectId } = loadClientProjectId();
+
+  if (projectId) {
+    const projectMatch = candidates.find((entry) => {
+      const fullPath = path.resolve(process.cwd(), entry);
+      const raw = JSON.parse(readFileSync(fullPath, "utf8"));
+
+      return raw.project_id === projectId;
+    });
+
+    if (projectMatch) {
+      return path.resolve(process.cwd(), projectMatch);
+    }
+  }
+
+  throw new Error(
+    `Multiple Firebase service account files were found (${candidates.join(", ")}). Set FIREBASE_SERVICE_ACCOUNT_PATH or keep only the key that matches NEXT_PUBLIC_FIREBASE_PROJECT_ID.`
+  );
 }
 
 export function loadServiceAccountSummary() {
