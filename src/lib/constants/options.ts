@@ -4,6 +4,7 @@ import type {
   DebtStatus,
   Gender,
   IncomeFrequency,
+  InstallmentFrequency,
   LanguagePreference,
   MaritalStatus,
   OwedStatus
@@ -75,6 +76,13 @@ export const expenseCategories = [
 export const debtStatuses: DebtStatus[] = ["unpaid", "partial", "paid", "overdue"];
 
 export const owedStatuses: OwedStatus[] = ["pending", "partial", "settled", "overdue"];
+
+export const installmentFrequencies: InstallmentFrequency[] = [
+  "weekly",
+  "biweekly",
+  "monthly",
+  "custom"
+];
 
 export const genders = [
   "male",

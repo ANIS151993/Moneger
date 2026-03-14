@@ -43,6 +43,11 @@ export const ledgerService = {
     await queueSync(userId, "income", "create", record.id);
     return record;
   },
+  async updateIncome(userId: string, id: string, input: IncomeInput) {
+    const record = await incomeRepository.update(userId, id, input);
+    await queueSync(userId, "income", "update", record.id);
+    return record;
+  },
   async deleteIncome(userId: string, id: string) {
     await incomeRepository.remove(userId, id);
     await queueSync(userId, "income", "delete", id);
@@ -50,6 +55,11 @@ export const ledgerService = {
   async createExpense(userId: string, input: ExpenseInput) {
     const record = await expenseRepository.create(userId, input);
     await queueSync(userId, "expense", "create", record.id);
+    return record;
+  },
+  async updateExpense(userId: string, id: string, input: ExpenseInput) {
+    const record = await expenseRepository.update(userId, id, input);
+    await queueSync(userId, "expense", "update", record.id);
     return record;
   },
   async deleteExpense(userId: string, id: string) {
@@ -61,6 +71,11 @@ export const ledgerService = {
     await queueSync(userId, "debt", "create", record.id);
     return record;
   },
+  async updateDebt(userId: string, id: string, input: DebtInput) {
+    const record = await debtRepository.update(userId, id, input);
+    await queueSync(userId, "debt", "update", record.id);
+    return record;
+  },
   async deleteDebt(userId: string, id: string) {
     await debtRepository.remove(userId, id);
     await queueSync(userId, "debt", "delete", id);
@@ -68,6 +83,11 @@ export const ledgerService = {
   async createOwed(userId: string, input: OwedInput) {
     const record = await owedRepository.create(userId, input);
     await queueSync(userId, "owed", "create", record.id);
+    return record;
+  },
+  async updateOwed(userId: string, id: string, input: OwedInput) {
+    const record = await owedRepository.update(userId, id, input);
+    await queueSync(userId, "owed", "update", record.id);
     return record;
   },
   async deleteOwed(userId: string, id: string) {

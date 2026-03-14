@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { OwedForm } from "@/components/forms/OwedForm";
@@ -15,10 +16,16 @@ import { useUserSettings } from "@/lib/hooks/use-user-settings";
 import { ledgerService } from "@/lib/services/ledger-service";
 import { formatDate } from "@/lib/utils/date";
 import { formatCurrency } from "@/lib/utils/finance";
+import {
+  getInstallmentProgress,
+  getNextPendingInstallment,
+  getOutstandingScheduledAmount
+} from "@/lib/utils/installments";
 
 export default function OwedPage() {
   const { user } = useAuth();
   const { t } = useI18n();
+  const [editingId, setEditingId] = useState<string | null>(null);
   const settings = useUserSettings(user?.uid);
   const baseCurrency = settings?.baseCurrency || "USD";
   const owed = useLiveQuery(
@@ -33,6 +40,14 @@ export default function OwedPage() {
     []
   );
 
+  const editingOwed = owed.find((item) => item.id === editingId);
+
+  useEffect(() => {
+    if (editingId && !editingOwed) {
+      setEditingId(null);
+    }
+  }, [editingId, editingOwed]);
+
   if (!user) {
     return null;
   }
@@ -46,7 +61,13 @@ export default function OwedPage() {
       />
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <OwedForm key={baseCurrency} userId={user.uid} defaultCurrency={baseCurrency} />
+        <OwedForm
+          defaultCurrency={baseCurrency}
+          onCancel={() => setEditingId(null)}
+          onSaved={() => setEditingId(null)}
+          record={editingOwed}
+          userId={user.uid}
+        />
         {owed.length === 0 ? (
           <EmptyState
             title={t("owedPage.emptyTitle")}
@@ -71,12 +92,43 @@ export default function OwedPage() {
               {
                 key: "amount",
                 header: t("common.amount"),
-                render: (item) => formatCurrency(item.amount, item.currency)
+                render: (item) => {
+                  const progress = getInstallmentProgress(item.installments);
+                  const outstandingAmount = getOutstandingScheduledAmount(item.amount, item.installments);
+
+                  return (
+                    <div>
+                      <p className="font-medium text-slate-900">{formatCurrency(item.amount, item.currency)}</p>
+                      <p className="text-xs text-slate-400">
+                        {progress.total
+                          ? `${t("installments.summary", { settled: progress.settled, total: progress.total })} · ${t("installments.remaining", { amount: formatCurrency(outstandingAmount, item.currency) })}`
+                          : t("installments.none")}
+                      </p>
+                    </div>
+                  );
+                }
               },
               {
                 key: "settlement",
                 header: t("owedPage.settlement"),
-                render: (item) => formatDate(item.settlementDate)
+                render: (item) => {
+                  const nextInstallment = getNextPendingInstallment(item.installments);
+
+                  return (
+                    <div>
+                      <p className="font-medium text-slate-900">
+                        {formatDate(nextInstallment?.dueDate || item.settlementDate)}
+                      </p>
+                      <p className="text-xs text-slate-400">
+                        {nextInstallment
+                          ? `${t("installments.nextDue", { date: formatDate(nextInstallment.dueDate) })} · ${formatCurrency(nextInstallment.amount, item.currency)}`
+                          : item.installments?.length
+                            ? t("installments.complete")
+                            : t("installments.none")}
+                      </p>
+                    </div>
+                  );
+                }
               },
               {
                 key: "status",
@@ -91,9 +143,14 @@ export default function OwedPage() {
                 key: "actions",
                 header: t("common.actions"),
                 render: (item) => (
-                  <Button variant="ghost" onClick={() => void ledgerService.deleteOwed(user.uid, item.id)}>
-                    {t("common.delete")}
-                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="ghost" onClick={() => setEditingId(item.id)}>
+                      {t("common.edit")}
+                    </Button>
+                    <Button variant="ghost" onClick={() => void ledgerService.deleteOwed(user.uid, item.id)}>
+                      {t("common.delete")}
+                    </Button>
+                  </div>
                 )
               }
             ]}

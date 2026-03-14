@@ -11,11 +11,25 @@ import type {
 } from "@/types/finance";
 import { convertFromCoreCurrency, normalizeToCoreCurrency, roundCurrency } from "@/lib/utils/finance";
 import { formatMonthLabel } from "@/lib/utils/date";
+import { getNextPendingInstallment, getOutstandingScheduledAmount } from "@/lib/utils/installments";
 import { buildReminders } from "@/lib/services/reminders";
 
 function sumRecordsInUsd(items: Array<{ amount: number; currency: CurrencyCode }>, rates: CurrencyRateMap) {
   return roundCurrency(
     items.reduce((total, item) => total + normalizeToCoreCurrency(item.amount, item.currency, rates), 0)
+  );
+}
+
+function sumScheduledRecordsInUsd(
+  items: Array<{ amount: number; currency: CurrencyCode; installments?: DebtRecord["installments"] }>,
+  rates: CurrencyRateMap
+) {
+  return roundCurrency(
+    items.reduce(
+      (total, item) =>
+        total + normalizeToCoreCurrency(getOutstandingScheduledAmount(item.amount, item.installments), item.currency, rates),
+      0
+    )
   );
 }
 
@@ -50,7 +64,7 @@ function buildActivity(
       description: item.status,
       amount: item.amount,
       currency: item.currency,
-      date: item.settlementDate,
+      date: getNextPendingInstallment(item.installments)?.dueDate || item.settlementDate,
       tone: "debt" as const
     })),
     ...owed.map((item) => ({
@@ -59,7 +73,7 @@ function buildActivity(
       description: item.status,
       amount: item.amount,
       currency: item.currency,
-      date: item.settlementDate,
+      date: getNextPendingInstallment(item.installments)?.dueDate || item.settlementDate,
       tone: "owed" as const
     }))
   ];
@@ -128,8 +142,8 @@ export function createDashboardSnapshot(params: {
   const { incomes, expenses, debts, owed, baseCurrency, rates } = params;
   const totalIncome = sumRecordsInUsd(incomes, rates);
   const totalExpenses = sumRecordsInUsd(expenses, rates);
-  const totalDebt = sumRecordsInUsd(debts, rates);
-  const totalOwed = sumRecordsInUsd(owed, rates);
+  const totalDebt = sumScheduledRecordsInUsd(debts, rates);
+  const totalOwed = sumScheduledRecordsInUsd(owed, rates);
 
   return {
     totalIncome,

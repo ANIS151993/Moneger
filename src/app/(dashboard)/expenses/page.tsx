@@ -1,5 +1,6 @@
 "use client";
 
+import { useEffect, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { ExpenseForm } from "@/components/forms/ExpenseForm";
@@ -18,6 +19,7 @@ import { formatCurrency } from "@/lib/utils/finance";
 export default function ExpensesPage() {
   const { user } = useAuth();
   const { t } = useI18n();
+  const [editingId, setEditingId] = useState<string | null>(null);
   const settings = useUserSettings(user?.uid);
   const baseCurrency = settings?.baseCurrency || "USD";
   const expenses = useLiveQuery(
@@ -32,6 +34,14 @@ export default function ExpensesPage() {
     []
   );
 
+  const editingExpense = expenses.find((item) => item.id === editingId);
+
+  useEffect(() => {
+    if (editingId && !editingExpense) {
+      setEditingId(null);
+    }
+  }, [editingExpense, editingId]);
+
   if (!user) {
     return null;
   }
@@ -45,7 +55,13 @@ export default function ExpensesPage() {
       />
 
       <div className="grid gap-6 xl:grid-cols-[0.95fr_1.05fr]">
-        <ExpenseForm key={baseCurrency} userId={user.uid} defaultCurrency={baseCurrency} />
+        <ExpenseForm
+          defaultCurrency={baseCurrency}
+          onCancel={() => setEditingId(null)}
+          onSaved={() => setEditingId(null)}
+          record={editingExpense}
+          userId={user.uid}
+        />
         {expenses.length === 0 ? (
           <EmptyState
             title={t("expensesPage.emptyTitle")}
@@ -86,9 +102,14 @@ export default function ExpensesPage() {
                 key: "actions",
                 header: t("common.actions"),
                 render: (item) => (
-                  <Button variant="ghost" onClick={() => void ledgerService.deleteExpense(user.uid, item.id)}>
-                    {t("common.delete")}
-                  </Button>
+                  <div className="flex flex-wrap gap-2">
+                    <Button variant="ghost" onClick={() => setEditingId(item.id)}>
+                      {t("common.edit")}
+                    </Button>
+                    <Button variant="ghost" onClick={() => void ledgerService.deleteExpense(user.uid, item.id)}>
+                      {t("common.delete")}
+                    </Button>
+                  </div>
                 )
               }
             ]}

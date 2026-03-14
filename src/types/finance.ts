@@ -18,6 +18,7 @@ export type MaritalStatus = "" | "single" | "married" | "engaged" | "separated" 
 export type IncomeFrequency = "daily" | "weekly" | "monthly" | "one-time";
 export type DebtStatus = "unpaid" | "partial" | "paid" | "overdue";
 export type OwedStatus = "pending" | "partial" | "settled" | "overdue";
+export type InstallmentFrequency = "weekly" | "biweekly" | "monthly" | "custom";
 export type SyncAction = "create" | "update" | "delete";
 export type SyncStatus = "queued" | "encrypted" | "uploaded" | "failed";
 
@@ -47,6 +48,14 @@ export interface ExpenseRecord extends BaseEntity {
   date: string;
 }
 
+export interface InstallmentScheduleItem {
+  dueDate: string;
+  amount: number;
+  settled: boolean;
+  note: string;
+  frequency: InstallmentFrequency;
+}
+
 export interface BankRecord extends BaseEntity {
   country: CountryCode;
   bankName: string;
@@ -66,6 +75,7 @@ export interface DebtRecord extends BaseEntity {
   createdDate: string;
   settlementDate: string;
   status: DebtStatus;
+  installments?: InstallmentScheduleItem[];
 }
 
 export interface OwedRecord extends BaseEntity {
@@ -78,6 +88,7 @@ export interface OwedRecord extends BaseEntity {
   createdDate: string;
   settlementDate: string;
   status: OwedStatus;
+  installments?: InstallmentScheduleItem[];
 }
 
 export interface ExchangeRateRecord extends BaseEntity {

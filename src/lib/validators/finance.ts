@@ -7,6 +7,7 @@ import {
   genders,
   incomeCategories,
   incomeFrequencies,
+  installmentFrequencies,
   languagePreferences,
   maritalStatuses,
   owedStatuses,
@@ -46,6 +47,14 @@ export const expenseSchema = z.object({
   date: z.string().min(1, "Date is required")
 });
 
+const installmentSchema = z.object({
+  dueDate: z.string().min(1, "Installment due date is required"),
+  amount: z.coerce.number().positive("Installment amount must be greater than zero"),
+  settled: z.boolean().default(false),
+  note: z.string().max(120).default(""),
+  frequency: z.enum(installmentFrequencies)
+});
+
 export const debtSchema = z.object({
   creditorName: z.string().min(2, "Creditor name is required"),
   creditorEmail: z.string().email("Enter a valid email").or(z.literal("")),
@@ -55,7 +64,18 @@ export const debtSchema = z.object({
   note: z.string().max(200).default(""),
   createdDate: z.string().min(1, "Created date is required"),
   settlementDate: z.string().min(1, "Settlement date is required"),
-  status: z.enum(debtStatuses)
+  status: z.enum(debtStatuses),
+  installments: z.array(installmentSchema).default([])
+}).superRefine((value, ctx) => {
+  const scheduledAmount = value.installments.reduce((total, item) => total + item.amount, 0);
+
+  if (value.installments.length > 0 && Math.abs(scheduledAmount - value.amount) > 0.01) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Installment total must match the full amount",
+      path: ["installments"]
+    });
+  }
 });
 
 export const owedSchema = z.object({
@@ -67,7 +87,18 @@ export const owedSchema = z.object({
   note: z.string().max(200).default(""),
   createdDate: z.string().min(1, "Created date is required"),
   settlementDate: z.string().min(1, "Settlement date is required"),
-  status: z.enum(owedStatuses)
+  status: z.enum(owedStatuses),
+  installments: z.array(installmentSchema).default([])
+}).superRefine((value, ctx) => {
+  const scheduledAmount = value.installments.reduce((total, item) => total + item.amount, 0);
+
+  if (value.installments.length > 0 && Math.abs(scheduledAmount - value.amount) > 0.01) {
+    ctx.addIssue({
+      code: z.ZodIssueCode.custom,
+      message: "Installment total must match the full amount",
+      path: ["installments"]
+    });
+  }
 });
 
 export const bankSchema = z.object({

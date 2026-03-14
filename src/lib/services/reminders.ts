@@ -1,6 +1,7 @@
 import { differenceInCalendarDays, parseISO } from "date-fns";
 
 import type { CurrencyCode, DebtRecord, OwedRecord, ReminderItem } from "@/types/finance";
+import { getNextPendingInstallment } from "@/lib/utils/installments";
 
 function buildReminder(
   id: string,
@@ -32,7 +33,15 @@ export function buildReminders(debts: DebtRecord[], owed: OwedRecord[]) {
       continue;
     }
 
-    const days = differenceInCalendarDays(parseISO(item.settlementDate), new Date());
+    const nextInstallment = getNextPendingInstallment(item.installments);
+    const dueDate = nextInstallment?.dueDate || item.settlementDate;
+    const amount = nextInstallment?.amount || item.amount;
+
+    if (item.installments?.length && !nextInstallment) {
+      continue;
+    }
+
+    const days = differenceInCalendarDays(parseISO(dueDate), new Date());
     if (days < 0 || days <= 7) {
       reminders.push(
         buildReminder(
@@ -40,9 +49,9 @@ export function buildReminders(debts: DebtRecord[], owed: OwedRecord[]) {
           "debt",
           "Debt settlement due",
           item.creditorName,
-          item.amount,
+          amount,
           item.currency,
-          item.settlementDate,
+          dueDate,
           days < 0 ? "overdue" : "upcoming"
         )
       );
@@ -54,7 +63,15 @@ export function buildReminders(debts: DebtRecord[], owed: OwedRecord[]) {
       continue;
     }
 
-    const days = differenceInCalendarDays(parseISO(item.settlementDate), new Date());
+    const nextInstallment = getNextPendingInstallment(item.installments);
+    const dueDate = nextInstallment?.dueDate || item.settlementDate;
+    const amount = nextInstallment?.amount || item.amount;
+
+    if (item.installments?.length && !nextInstallment) {
+      continue;
+    }
+
+    const days = differenceInCalendarDays(parseISO(dueDate), new Date());
     if (days < 0 || days <= 7) {
       reminders.push(
         buildReminder(
@@ -62,9 +79,9 @@ export function buildReminders(debts: DebtRecord[], owed: OwedRecord[]) {
           "owed",
           "Money owed reminder",
           item.debtorName,
-          item.amount,
+          amount,
           item.currency,
-          item.settlementDate,
+          dueDate,
           days < 0 ? "overdue" : "upcoming"
         )
       );
