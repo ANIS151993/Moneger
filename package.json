@@ -9,7 +9,9 @@
     "build": "next build",
     "start": "next start",
     "lint": "next lint",
-    "typecheck": "tsc --noEmit"
+    "typecheck": "tsc --noEmit",
+    "firebase:admin:check": "node scripts/firebase/check-admin-config.mjs",
+    "firebase:admin:verify": "node scripts/firebase/verify-firestore-access.mjs"
   },
   "dependencies": {
     "@hookform/resolvers": "^5.0.0",
@@ -19,6 +21,7 @@
     "dexie": "^4.0.0",
     "dexie-react-hooks": "^4.0.0",
     "firebase": "^12.0.0",
+    "firebase-admin": "^13.7.0",
     "next": "^15.0.0",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.0.0",

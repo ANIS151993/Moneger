@@ -79,6 +79,30 @@ npm run dev
 
 5. Open `http://localhost:3000`.
 
+## Firebase Admin Verification
+
+If you want to validate Firestore with a Firebase service account locally, keep the JSON key file only on your machine and never commit it.
+
+This repo now includes two local admin scripts:
+
+```bash
+npm run firebase:admin:check
+npm run firebase:admin:verify
+```
+
+What they do:
+
+- `firebase:admin:check`
+  Reads the local service-account JSON file and compares its `project_id` to `NEXT_PUBLIC_FIREBASE_PROJECT_ID` from `.env.local` or `.env.example`.
+- `firebase:admin:verify`
+  Uses `firebase-admin` to verify read/write access to the Firestore paths used by Moneger, including `userDirectory`, `sharedObligations`, and `users/{uid}/settings`.
+
+Important:
+
+- The service account must belong to the same Firebase project as the client app config.
+- This admin key is not used by the Cloudflare Pages client runtime. It is only for trusted local admin scripts or future server-side tooling.
+- If you intentionally want to test a different Firebase project, set `ALLOW_FIREBASE_PROJECT_MISMATCH=1` for the admin script run.
+
 ## Free Deployment Path
 
 The lowest-friction free setup for this repo is:
