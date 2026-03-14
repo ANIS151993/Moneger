@@ -27,6 +27,14 @@ import {
 import { saveUserSettingsToCloud } from "@/lib/services/user-settings-cloud-service";
 import type { LanguagePreference } from "@/types/finance";
 
+async function runOptionalCloudStep(task: () => Promise<void>) {
+  try {
+    await task();
+  } catch (error) {
+    console.warn("Optional cloud collaboration step failed", error);
+  }
+}
+
 async function queueSync(
   userId: string,
   entityType: "income" | "expense" | "debt" | "owed" | "bank" | "settings",
@@ -74,22 +82,26 @@ export const ledgerService = {
   },
   async createDebt(userId: string, input: DebtInput) {
     let record = await debtRepository.create(userId, input);
-    const collaborationMeta = await syncDebtCollaboration(userId, record);
+    await runOptionalCloudStep(async () => {
+      const collaborationMeta = await syncDebtCollaboration(userId, record);
 
-    if (collaborationMeta) {
-      record = await debtRepository.update(userId, record.id, collaborationMeta);
-    }
+      if (collaborationMeta) {
+        record = await debtRepository.update(userId, record.id, collaborationMeta);
+      }
+    });
 
     await queueSync(userId, "debt", "create", record.id);
     return record;
   },
   async updateDebt(userId: string, id: string, input: DebtInput) {
     let record = await debtRepository.update(userId, id, input);
-    const collaborationMeta = await syncDebtCollaboration(userId, record);
+    await runOptionalCloudStep(async () => {
+      const collaborationMeta = await syncDebtCollaboration(userId, record);
 
-    if (collaborationMeta) {
-      record = await debtRepository.update(userId, id, collaborationMeta);
-    }
+      if (collaborationMeta) {
+        record = await debtRepository.update(userId, id, collaborationMeta);
+      }
+    });
 
     await queueSync(userId, "debt", "update", record.id);
     return record;
@@ -98,7 +110,7 @@ export const ledgerService = {
     const current = await debtRepository.get(userId, id);
 
     if (current?.sharedObligationId) {
-      await archiveSharedObligation(userId, current.sharedObligationId);
+      await runOptionalCloudStep(() => archiveSharedObligation(userId, current.sharedObligationId));
     }
 
     await debtRepository.remove(userId, id);
@@ -106,22 +118,26 @@ export const ledgerService = {
   },
   async createOwed(userId: string, input: OwedInput) {
     let record = await owedRepository.create(userId, input);
-    const collaborationMeta = await syncOwedCollaboration(userId, record);
+    await runOptionalCloudStep(async () => {
+      const collaborationMeta = await syncOwedCollaboration(userId, record);
 
-    if (collaborationMeta) {
-      record = await owedRepository.update(userId, record.id, collaborationMeta);
-    }
+      if (collaborationMeta) {
+        record = await owedRepository.update(userId, record.id, collaborationMeta);
+      }
+    });
 
     await queueSync(userId, "owed", "create", record.id);
     return record;
   },
   async updateOwed(userId: string, id: string, input: OwedInput) {
     let record = await owedRepository.update(userId, id, input);
-    const collaborationMeta = await syncOwedCollaboration(userId, record);
+    await runOptionalCloudStep(async () => {
+      const collaborationMeta = await syncOwedCollaboration(userId, record);
 
-    if (collaborationMeta) {
-      record = await owedRepository.update(userId, id, collaborationMeta);
-    }
+      if (collaborationMeta) {
+        record = await owedRepository.update(userId, id, collaborationMeta);
+      }
+    });
 
     await queueSync(userId, "owed", "update", record.id);
     return record;
@@ -130,7 +146,7 @@ export const ledgerService = {
     const current = await owedRepository.get(userId, id);
 
     if (current?.sharedObligationId) {
-      await archiveSharedObligation(userId, current.sharedObligationId);
+      await runOptionalCloudStep(() => archiveSharedObligation(userId, current.sharedObligationId));
     }
 
     await owedRepository.remove(userId, id);

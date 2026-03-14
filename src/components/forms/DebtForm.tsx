@@ -57,6 +57,7 @@ export function DebtForm({
   onCancel?: () => void;
 }) {
   const [message, setMessage] = useState("");
+  const [formError, setFormError] = useState("");
   const [isPending, startTransition] = useTransition();
   const { t } = useI18n();
   const isEditing = Boolean(record);
@@ -87,6 +88,7 @@ export function DebtForm({
 
   useEffect(() => {
     setMessage("");
+    setFormError("");
     reset(getDefaultValues(defaultCurrency, record));
   }, [defaultCurrency, record, reset]);
 
@@ -100,6 +102,7 @@ export function DebtForm({
 
   function onSubmit(values: DebtInput) {
     setMessage("");
+    setFormError("");
     const normalizedInstallments = normalizeInstallments(values.installments);
     const normalizedValues: DebtInput = {
       ...values,
@@ -108,16 +111,20 @@ export function DebtForm({
     };
 
     startTransition(async () => {
-      if (record) {
-        await ledgerService.updateDebt(userId, record.id, normalizedValues);
-        setMessage(t("debtForm.updated"));
-        onSaved?.();
-        return;
-      }
+      try {
+        if (record) {
+          await ledgerService.updateDebt(userId, record.id, normalizedValues);
+          setMessage(t("debtForm.updated"));
+          onSaved?.();
+          return;
+        }
 
-      await ledgerService.createDebt(userId, normalizedValues);
-      setMessage(t("debtForm.saved"));
-      reset(getDefaultValues(defaultCurrency));
+        await ledgerService.createDebt(userId, normalizedValues);
+        setMessage(t("debtForm.saved"));
+        reset(getDefaultValues(defaultCurrency));
+      } catch (error) {
+        setFormError(error instanceof Error ? error.message : "Unable to save debt right now.");
+      }
     });
   }
 
@@ -286,6 +293,7 @@ export function DebtForm({
         </FormField>
 
         {message ? <p className="text-sm font-medium text-emerald-600">{message}</p> : null}
+        {formError ? <p className="text-sm font-medium text-rose-600">{formError}</p> : null}
 
         <Button type="submit" disabled={isPending}>
           {isPending ? t("common.saving") : t(isEditing ? "debtForm.update" : "debtForm.save")}

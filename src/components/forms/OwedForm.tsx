@@ -57,6 +57,7 @@ export function OwedForm({
   onCancel?: () => void;
 }) {
   const [message, setMessage] = useState("");
+  const [formError, setFormError] = useState("");
   const [isPending, startTransition] = useTransition();
   const { t } = useI18n();
   const isEditing = Boolean(record);
@@ -87,6 +88,7 @@ export function OwedForm({
 
   useEffect(() => {
     setMessage("");
+    setFormError("");
     reset(getDefaultValues(defaultCurrency, record));
   }, [defaultCurrency, record, reset]);
 
@@ -100,6 +102,7 @@ export function OwedForm({
 
   function onSubmit(values: OwedInput) {
     setMessage("");
+    setFormError("");
     const normalizedInstallments = normalizeInstallments(values.installments);
     const normalizedValues: OwedInput = {
       ...values,
@@ -108,16 +111,20 @@ export function OwedForm({
     };
 
     startTransition(async () => {
-      if (record) {
-        await ledgerService.updateOwed(userId, record.id, normalizedValues);
-        setMessage(t("owedForm.updated"));
-        onSaved?.();
-        return;
-      }
+      try {
+        if (record) {
+          await ledgerService.updateOwed(userId, record.id, normalizedValues);
+          setMessage(t("owedForm.updated"));
+          onSaved?.();
+          return;
+        }
 
-      await ledgerService.createOwed(userId, normalizedValues);
-      setMessage(t("owedForm.saved"));
-      reset(getDefaultValues(defaultCurrency));
+        await ledgerService.createOwed(userId, normalizedValues);
+        setMessage(t("owedForm.saved"));
+        reset(getDefaultValues(defaultCurrency));
+      } catch (error) {
+        setFormError(error instanceof Error ? error.message : "Unable to save money owed right now.");
+      }
     });
   }
 
@@ -286,6 +293,7 @@ export function OwedForm({
         </FormField>
 
         {message ? <p className="text-sm font-medium text-emerald-600">{message}</p> : null}
+        {formError ? <p className="text-sm font-medium text-rose-600">{formError}</p> : null}
 
         <Button type="submit" disabled={isPending}>
           {isPending ? t("common.saving") : t(isEditing ? "owedForm.update" : "owedForm.save")}
