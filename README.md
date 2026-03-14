@@ -14,6 +14,8 @@ Firebase is intentionally not the default finance database. In this starter it i
 
 Plaintext financial records are not stored remotely by default.
 
+Profile and app-level settings are different. When Firebase and Firestore are configured, Moneger now syncs the signed-in user's settings record to Firestore so profile identity, language, currency preferences, and shortcut-installed app shells can restore those settings automatically across browser contexts.
+
 ## Architecture Decisions
 
 1. Local-first data residency
@@ -62,6 +64,7 @@ cp .env.example .env.local
 Optional:
 - Add `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` if you want live Google-backed bank name autocomplete in the bank form.
 - Enable the Google Maps JavaScript API and Places API for that key, then restrict the key to your domains.
+- If you want profile/settings sync across browser and installed shortcut contexts, enable Firestore and publish the rules from `firestore.rules`.
 
 4. Start the app:
 
@@ -111,6 +114,7 @@ This project is configured for static export, so Cloudflare Pages can host the g
 
 - Primary finance records remain local by default
 - Firebase does not hold plaintext financial data by default
+- Signed-in user settings can sync to Firestore so profile identity and app preferences restore across shortcut-installed contexts
 - Sync scaffolding expects encryption before upload
 - Bank records intentionally store only lightweight references such as name, nickname, and last four digits
 

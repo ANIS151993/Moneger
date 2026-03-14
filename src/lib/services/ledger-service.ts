@@ -18,6 +18,7 @@ import {
   settingsRepository,
   syncQueueRepository
 } from "@/lib/repositories/finance-repositories";
+import { saveUserSettingsToCloud } from "@/lib/services/user-settings-cloud-service";
 import type { LanguagePreference } from "@/types/finance";
 
 async function queueSync(
@@ -85,16 +86,19 @@ export const ledgerService = {
   async saveSettings(userId: string, input: SettingsInput & { browserNotificationsPermission: NotificationPermission | "unsupported" }) {
     const record = await settingsRepository.upsert(userId, input);
     await queueSync(userId, "settings", "update", record.id);
+    void saveUserSettingsToCloud(record).catch(() => undefined);
     return record;
   },
   async saveProfile(userId: string, input: ProfileInput) {
     const record = await settingsRepository.upsert(userId, input);
     await queueSync(userId, "settings", "update", record.id);
+    void saveUserSettingsToCloud(record).catch(() => undefined);
     return record;
   },
   async saveLanguagePreference(userId: string, languagePreference: LanguagePreference) {
     const record = await settingsRepository.upsert(userId, { languagePreference });
     await queueSync(userId, "settings", "update", record.id);
+    void saveUserSettingsToCloud(record).catch(() => undefined);
     return record;
   },
   async clearWorkspace(userId: string) {

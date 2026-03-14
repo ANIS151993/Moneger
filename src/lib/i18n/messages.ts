@@ -367,6 +367,10 @@ const englishMessages: TranslationTable = {
   "profile.storageHeading": "Saved only on this device",
   "profile.storageDescription":
     "Your profile photo and personal details stay in the browser unless you later add remote sync.",
+  "profile.cloudSyncTitle": "Account sync",
+  "profile.cloudSyncHeading": "Profile follows your signed-in account",
+  "profile.cloudSyncDescription":
+    "Profile details are kept locally and also synced to Firestore when Firebase is configured, so installed shortcuts can restore them automatically.",
   "profile.onboardingTitle": "Required setup",
   "profile.onboardingHeading": "Finish your profile before using the app",
   "profile.onboardingDescription":

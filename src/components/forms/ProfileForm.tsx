@@ -14,6 +14,7 @@ import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
 import { genders, maritalStatuses } from "@/lib/constants/options";
+import { firebaseClientConfigured } from "@/lib/firebase/client";
 import { ledgerService } from "@/lib/services/ledger-service";
 import { getProfileDisplayName, getProfileSummary } from "@/lib/utils/profile";
 import { profileSchema, type ProfileFormValues, type ProfileInput } from "@/lib/validators/finance";
@@ -81,6 +82,9 @@ export function ProfileForm({
   });
   const avatarDataUrl = watch("avatarDataUrl");
   const isOnboarding = mode === "onboarding";
+  const profileStorageTitle = firebaseClientConfigured ? t("profile.cloudSyncTitle") : t("profile.storageTitle");
+  const profileStorageHeading = firebaseClientConfigured ? t("profile.cloudSyncHeading") : t("profile.storageHeading");
+  const profileStorageDescription = firebaseClientConfigured ? t("profile.cloudSyncDescription") : t("profile.storageDescription");
   const displayName = getProfileDisplayName({ ...settings, fullName: watch("fullName") }, email);
   const summary = getProfileSummary({
     ...settings,
@@ -198,13 +202,13 @@ export function ProfileForm({
           </div>
           <div className="w-full rounded-[24px] border border-white/15 bg-white/10 px-4 py-4 shadow-lg backdrop-blur lg:w-auto">
             <p className="text-xs uppercase tracking-[0.2em] text-slate-300">
-              {isOnboarding ? t("profile.onboardingTitle") : t("profile.storageTitle")}
+              {isOnboarding ? t("profile.onboardingTitle") : profileStorageTitle}
             </p>
             <p className="mt-2 text-sm font-medium text-white">
-              {isOnboarding ? t("profile.onboardingHeading") : t("profile.storageHeading")}
+              {isOnboarding ? t("profile.onboardingHeading") : profileStorageHeading}
             </p>
             <p className="mt-1 max-w-xs text-sm leading-6 text-slate-300">
-              {isOnboarding ? t("profile.onboardingDescription") : t("profile.storageDescription")}
+              {isOnboarding ? t("profile.onboardingDescription") : profileStorageDescription}
             </p>
           </div>
         </div>

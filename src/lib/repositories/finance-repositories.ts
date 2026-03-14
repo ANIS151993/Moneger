@@ -142,5 +142,25 @@ export const settingsRepository = {
     };
     await getUserDatabase(userId).settings.put(record);
     return record;
+  },
+  async hydrate(
+    userId: string,
+    payload: Partial<Omit<SettingsRecord, "id" | "userId">> &
+      Pick<SettingsRecord, "createdAt" | "updatedAt">
+  ) {
+    const current = await this.get(userId);
+    const now = nowIso();
+    const { createdAt, updatedAt, ...rest } = payload;
+    const record: SettingsRecord = {
+      id: `settings_${userId}`,
+      userId,
+      createdAt: createdAt || current?.createdAt || now,
+      updatedAt: updatedAt || current?.updatedAt || now,
+      ...buildDefaultSettings(),
+      ...current,
+      ...rest
+    };
+    await getUserDatabase(userId).settings.put(record);
+    return record;
   }
 };
