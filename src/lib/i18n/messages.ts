@@ -135,7 +135,7 @@ const englishMessages: TranslationTable = {
   "auth.sending": "Sending...",
   "auth.passwordResetSent": "Password reset flow triggered. Check your email.",
   "auth.rememberedPassword": "Remembered your password?",
-  "auth.passwordHint": "Use at least 6 characters.",
+  "auth.passwordHint": "Use at least 8 characters.",
   "auth.errorSignIn": "Unable to sign in",
   "auth.errorCreateAccount": "Unable to create account",
   "auth.errorReset": "Unable to send reset email",
@@ -144,6 +144,9 @@ const englishMessages: TranslationTable = {
 
   "common.email": "Email",
   "common.password": "Password",
+  "common.confirmPassword": "Confirm password",
+  "common.show": "Show",
+  "common.hide": "Hide",
   "common.amount": "Amount",
   "common.currency": "Currency",
   "common.country": "Country",
@@ -622,6 +625,9 @@ const englishMessages: TranslationTable = {
 
   "validation.enterValidEmailAddress": "Enter a valid email address",
   "validation.passwordAtLeast6": "Password must be at least 6 characters",
+  "validation.passwordAtLeast8": "Password must be at least 8 characters",
+  "validation.confirmPasswordRequired": "Please confirm your password",
+  "validation.passwordsMustMatch": "Passwords do not match",
   "validation.amountGreaterThanZero": "Amount must be greater than zero",
   "validation.sourceRequired": "Source is required",
   "validation.merchantRequired": "Merchant is required",

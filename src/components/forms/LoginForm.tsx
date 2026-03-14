@@ -11,12 +11,14 @@ import { Button } from "@/components/ui/Button";
 import { Card } from "@/components/ui/Card";
 import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
+import { PasswordInput } from "@/components/ui/PasswordInput";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { type LoginInput, loginSchema } from "@/lib/validators/auth";
 
 export function LoginForm() {
   const router = useRouter();
   const [formError, setFormError] = useState("");
+  const [passwordVisible, setPasswordVisible] = useState(false);
   const [isPending, startTransition] = useTransition();
   const { login, authMode, isConfigured } = useAuth();
   const { t } = useI18n();
@@ -64,7 +66,13 @@ export function LoginForm() {
           <Input placeholder="you@example.com" type="email" {...register("email")} />
         </FormField>
         <FormField label={t("common.password")} error={errors.password?.message}>
-          <Input placeholder="••••••••" type="password" {...register("password")} />
+          <PasswordInput
+            isVisible={passwordVisible}
+            placeholder="••••••••"
+            toggleLabel={t(passwordVisible ? "common.hide" : "common.show")}
+            onToggleVisibility={() => setPasswordVisible((current) => !current)}
+            {...register("password")}
+          />
         </FormField>
         {formError ? <p className="text-sm font-medium text-rose-600">{formError}</p> : null}
         <Button className="mt-2 w-full" type="submit" disabled={isPending}>

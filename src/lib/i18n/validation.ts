@@ -4,6 +4,9 @@ import { translateMessage } from "@/lib/i18n/messages";
 const validationMessageMap: Record<string, string> = {
   "Enter a valid email address": "validation.enterValidEmailAddress",
   "Password must be at least 6 characters": "validation.passwordAtLeast6",
+  "Password must be at least 8 characters": "validation.passwordAtLeast8",
+  "Please confirm your password": "validation.confirmPasswordRequired",
+  "Passwords do not match": "validation.passwordsMustMatch",
   "Amount must be greater than zero": "validation.amountGreaterThanZero",
   "Source is required": "validation.sourceRequired",
   "Merchant is required": "validation.merchantRequired",

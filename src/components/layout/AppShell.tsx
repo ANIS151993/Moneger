@@ -1,8 +1,8 @@
 "use client";
 
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { useEffect, useState, type ReactNode } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import { useEffect, useState, type MouseEvent, type ReactNode } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
 
 import { DeveloperSignatureCard } from "@/components/branding/DeveloperSignatureCard";
@@ -162,6 +162,7 @@ function normalizePathname(pathname?: string | null) {
 }
 
 export function AppShell({ children }: { children: ReactNode }) {
+  const router = useRouter();
   const pathname = normalizePathname(usePathname());
   const { logout, user } = useAuth();
   const { t } = useI18n();
@@ -244,6 +245,25 @@ export function AppShell({ children }: { children: ReactNode }) {
     await messageNotificationRepository.markAllRead(user.uid);
   }
 
+  function handleSectionNavigation(event: MouseEvent<HTMLAnchorElement>, href: string, active: boolean) {
+    setMobileNavOpen(false);
+    setMobileActionOpen(false);
+    setNotificationsOpen(false);
+
+    if (!active) {
+      return;
+    }
+
+    event.preventDefault();
+
+    if (typeof window !== "undefined") {
+      window.location.reload();
+      return;
+    }
+
+    router.replace(href);
+  }
+
   const notificationBell = (
     <span className="relative inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition">
       <svg aria-hidden="true" className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24">
@@ -267,23 +287,23 @@ export function AppShell({ children }: { children: ReactNode }) {
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(22,163,74,0.12),_transparent_24rem),linear-gradient(180deg,#f8fafc_0%,#eef6ff_100%)]">
       <div className="safe-shell mx-auto flex min-h-screen max-w-[1600px] flex-col gap-4 px-3 pb-4 pt-3 sm:px-4 sm:pb-5 lg:flex-row lg:gap-6 lg:px-6 lg:py-4">
         <div className="sticky top-0 z-30 lg:hidden">
-          <div className="glass flex items-center justify-between gap-3 rounded-[26px] border border-white/80 px-3 py-3 shadow-[0_16px_40px_rgba(15,23,42,0.1)] backdrop-blur">
+          <div className="mobile-topbar flex items-center justify-between gap-3 rounded-[28px] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(239,246,255,0.94))] px-3 py-3.5 shadow-[0_18px_44px_rgba(15,23,42,0.12)] backdrop-blur-2xl">
             <Link className="flex min-w-0 flex-1 items-center gap-3" href={profileHref}>
               <ProfileAvatar
-                className="origin-left scale-[0.88]"
+                className="origin-left scale-[0.9]"
                 imageUrl={profile?.avatarDataUrl}
                 name={displayName}
                 showBadge={false}
                 size="sm"
               />
               <div className="min-w-0">
-                <p className="truncate text-sm font-semibold tracking-tight text-slate-950">{displayName}</p>
-                <div className="mt-1 flex items-center gap-2">
-                  <span className="inline-flex rounded-full border border-emerald-200 bg-emerald-50 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-emerald-700">
+                <div className="flex items-center gap-2">
+                  <span className="inline-flex rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-700 shadow-[0_6px_18px_rgba(14,116,144,0.08)]">
                     {t(currentPageLabelKey)}
                   </span>
-                  <p className="truncate text-[11px] text-slate-500">{compactMeta}</p>
+                  <p className="truncate text-[11px] font-medium text-slate-500">{compactMeta}</p>
                 </div>
+                <p className="mt-2 truncate text-sm font-semibold tracking-tight text-slate-950">{displayName}</p>
               </div>
             </Link>
 
@@ -305,7 +325,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               {profileComplete ? (
                 <button
                   aria-label="Open quick actions"
-                  className="mobile-fab inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-emerald-200 bg-[linear-gradient(135deg,#16a34a_0%,#14b8a6_100%)] text-lg font-semibold text-white shadow-[0_14px_30px_rgba(22,163,74,0.22)] transition active:scale-[0.98]"
+                  className="mobile-fab inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-emerald-200/80 bg-[linear-gradient(135deg,#16a34a_0%,#0f766e_100%)] text-lg font-semibold text-white shadow-[0_16px_34px_rgba(13,148,136,0.22)] transition active:scale-[0.98]"
                   type="button"
                   onClick={() => {
                     setMobileNavOpen(false);
@@ -318,7 +338,7 @@ export function AppShell({ children }: { children: ReactNode }) {
 
               <button
                 aria-label="Toggle menu"
-                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition active:scale-[0.98]"
+                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-slate-200/90 bg-white text-slate-900 shadow-[0_12px_26px_rgba(15,23,42,0.08)] transition active:scale-[0.98]"
                 type="button"
                 onClick={() => {
                   setMobileActionOpen(false);
@@ -415,6 +435,7 @@ export function AppShell({ children }: { children: ReactNode }) {
                 <Link
                   key={item.href}
                   href={item.href}
+                  onClick={(event) => handleSectionNavigation(event, item.href, active)}
                   className={cn(
                     "group relative overflow-hidden rounded-[24px] border px-4 py-3 text-sm font-medium transition duration-300",
                     active
@@ -455,6 +476,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               variant: "secondary"
             })}
             href="/guide"
+            onClick={(event) => handleSectionNavigation(event, "/guide", guideActive)}
           >
             <div className="absolute -right-6 top-1/2 h-14 w-14 -translate-y-1/2 rounded-full bg-sky-300/20 blur-2xl transition duration-300 group-hover:scale-125" />
             <div className="relative flex items-center gap-3">
@@ -619,15 +641,15 @@ export function AppShell({ children }: { children: ReactNode }) {
 
             <div
               className={cn(
-                "fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(0.85rem+env(safe-area-inset-bottom))] pt-4 transition duration-300 lg:hidden",
+                "fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(0.95rem+env(safe-area-inset-bottom))] pt-4 transition duration-300 lg:hidden",
                 mobileActionOpen ? "pointer-events-auto translate-y-0 opacity-100" : "pointer-events-none translate-y-full opacity-0"
               )}
             >
-              <div className="mobile-sheet relative overflow-hidden rounded-[30px] border border-white/12 bg-slate-950 px-4 py-4 text-white shadow-[0_24px_80px_rgba(2,6,23,0.4)]">
-                <div className="absolute -right-10 top-0 h-24 w-24 rounded-full bg-sky-400/16 blur-3xl" />
-                <div className="absolute -left-10 bottom-0 h-24 w-24 rounded-full bg-emerald-400/16 blur-3xl" />
+              <div className="mobile-sheet relative overflow-hidden rounded-[32px] border border-white/14 bg-[linear-gradient(180deg,rgba(15,23,42,0.98),rgba(8,47,73,0.94))] px-4 py-4 text-white shadow-[0_28px_90px_rgba(2,6,23,0.42)]">
+                <div className="absolute -right-10 top-0 h-24 w-24 rounded-full bg-sky-400/18 blur-3xl" />
+                <div className="absolute -left-10 bottom-0 h-24 w-24 rounded-full bg-emerald-400/18 blur-3xl" />
                 <div className="relative">
-                  <div className="mx-auto mb-4 h-1.5 w-14 rounded-full bg-white/10" />
+                  <div className="mx-auto mb-4 h-1.5 w-16 rounded-full bg-white/12" />
                   <div className="flex items-start justify-between gap-4">
                     <div>
                       <p className="text-[10px] font-semibold uppercase tracking-[0.24em] text-emerald-300">
@@ -649,11 +671,14 @@ export function AppShell({ children }: { children: ReactNode }) {
                       <Link
                         key={item.href}
                         className={cn(
-                          "group relative overflow-hidden rounded-[24px] border border-white/10 bg-[linear-gradient(160deg,rgba(255,255,255,0.08),rgba(255,255,255,0.03))] px-4 py-4 shadow-[0_14px_34px_rgba(2,6,23,0.18)] transition duration-300 active:scale-[0.98]",
+                          "group relative overflow-hidden rounded-[24px] border border-white/12 bg-[linear-gradient(160deg,rgba(255,255,255,0.1),rgba(255,255,255,0.04))] px-4 py-4 shadow-[0_18px_40px_rgba(2,6,23,0.22)] transition duration-300 active:scale-[0.98]",
                           "before:absolute before:inset-0 before:bg-gradient-to-br before:opacity-100 before:content-['']",
                           item.surfaceClassName
                         )}
                         href={item.href}
+                        onClick={(event) =>
+                          handleSectionNavigation(event, item.href, pathname === item.href)
+                        }
                       >
                         <div className="relative">
                           <span className="inline-flex h-10 w-10 items-center justify-center rounded-2xl border border-white/10 bg-white/[0.08] text-slate-100 shadow-[inset_0_1px_0_rgba(255,255,255,0.06)]">
@@ -681,10 +706,10 @@ export function AppShell({ children }: { children: ReactNode }) {
               </div>
             </div>
 
-            <div className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(0.85rem+env(safe-area-inset-bottom))] pt-3 lg:hidden">
+            <div className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(0.95rem+env(safe-area-inset-bottom))] pt-3 lg:hidden">
               <nav
                 className={cn(
-                  "mobile-dock glass flex items-center gap-1 rounded-[28px] border border-slate-900/10 bg-slate-950/85 px-2 py-2 text-white shadow-[0_20px_60px_rgba(15,23,42,0.18)] backdrop-blur-2xl transition duration-300",
+                  "mobile-dock glass mx-auto flex max-w-md items-center gap-1 rounded-[30px] border border-white/12 bg-[linear-gradient(135deg,rgba(15,23,42,0.94),rgba(8,47,73,0.88))] px-2.5 py-2.5 text-white shadow-[0_26px_70px_rgba(15,23,42,0.26)] backdrop-blur-3xl transition duration-300",
                   shellOverlayVisible
                     ? "pointer-events-none translate-y-6 opacity-0"
                     : "pointer-events-auto translate-y-0 opacity-100"
@@ -697,27 +722,28 @@ export function AppShell({ children }: { children: ReactNode }) {
                     <Link
                       key={item.href}
                       className={cn(
-                        "group relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1 rounded-[22px] px-2 py-2.5 text-center transition duration-300",
+                        "group relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1.5 rounded-[22px] px-2 py-2.5 text-center transition duration-300",
                         active
-                          ? "bg-[linear-gradient(135deg,rgba(16,185,129,0.22),rgba(56,189,248,0.22))] text-white shadow-[0_14px_28px_rgba(15,23,42,0.18)]"
-                          : "text-slate-300 hover:bg-white/[0.06]"
+                          ? "bg-[linear-gradient(135deg,rgba(16,185,129,0.28),rgba(56,189,248,0.24))] text-white shadow-[0_16px_30px_rgba(8,47,73,0.24)]"
+                          : "text-slate-300 hover:bg-white/[0.07]"
                       )}
                       href={item.href}
+                      onClick={(event) => handleSectionNavigation(event, item.href, active)}
                     >
                       <span
                         className={cn(
-                          "inline-flex h-8 w-8 items-center justify-center rounded-2xl border transition duration-300",
+                          "inline-flex h-9 w-9 items-center justify-center rounded-2xl border transition duration-300",
                           active
-                            ? "border-white/15 bg-white/[0.12] text-white"
-                            : "border-white/[0.08] bg-white/[0.04] text-slate-300 group-hover:border-white/[0.14] group-hover:bg-white/[0.09]"
+                            ? "border-white/15 bg-white/[0.14] text-white"
+                            : "border-white/[0.08] bg-white/[0.04] text-slate-300 group-hover:border-white/[0.14] group-hover:bg-white/[0.1]"
                         )}
                       >
                         <MobileNavIcon active={active} icon={item.icon} />
                       </span>
                       <span
                         className={cn(
-                          "h-1.5 w-7 rounded-full transition duration-300",
-                          active ? "bg-emerald-300" : "bg-white/10 group-hover:bg-white/20"
+                          "h-1.5 w-8 rounded-full transition duration-300",
+                          active ? "bg-emerald-300 shadow-[0_0_14px_rgba(110,231,183,0.45)]" : "bg-white/10 group-hover:bg-white/20"
                         )}
                       />
                       <span className="truncate text-[11px] font-semibold">{t(item.labelKey)}</span>
