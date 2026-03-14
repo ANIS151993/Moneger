@@ -286,88 +286,93 @@ export function AppShell({ children }: { children: ReactNode }) {
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(22,163,74,0.12),_transparent_24rem),linear-gradient(180deg,#f8fafc_0%,#eef6ff_100%)]">
       <div className="safe-shell mx-auto flex min-h-screen max-w-[1600px] flex-col gap-4 px-3 pb-4 pt-3 sm:px-4 sm:pb-5 lg:flex-row lg:gap-6 lg:px-6 lg:py-4">
-        <div className="sticky top-0 z-30 lg:hidden">
-          <div className="mobile-topbar flex items-center justify-between gap-3 rounded-[28px] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(239,246,255,0.94))] px-3 py-3.5 shadow-[0_18px_44px_rgba(15,23,42,0.12)] backdrop-blur-2xl">
-            <Link className="flex min-w-0 flex-1 items-center gap-3" href={profileHref}>
-              <ProfileAvatar
-                className="origin-left scale-[0.9]"
-                imageUrl={profile?.avatarDataUrl}
-                name={displayName}
-                showBadge={false}
-                size="sm"
-              />
-              <div className="min-w-0">
+        <div className="lg:hidden">
+          <div className="fixed inset-x-0 top-0 z-[70] px-3 pb-2 pt-[max(0.65rem,env(safe-area-inset-top))] sm:px-4">
+            <div className="mx-auto max-w-[1600px]">
+              <div className="mobile-topbar flex items-center justify-between gap-3 rounded-[28px] border border-white/85 bg-[linear-gradient(135deg,rgba(255,255,255,0.96),rgba(239,246,255,0.94))] px-3 py-3.5 shadow-[0_18px_44px_rgba(15,23,42,0.12)] backdrop-blur-2xl">
+                <Link className="flex min-w-0 flex-1 items-center gap-3" href={profileHref}>
+                  <ProfileAvatar
+                    className="origin-left scale-[0.9]"
+                    imageUrl={profile?.avatarDataUrl}
+                    name={displayName}
+                    showBadge={false}
+                    size="sm"
+                  />
+                  <div className="min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="inline-flex rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-700 shadow-[0_6px_18px_rgba(14,116,144,0.08)]">
+                        {t(currentPageLabelKey)}
+                      </span>
+                      <p className="truncate text-[11px] font-medium text-slate-500">{compactMeta}</p>
+                    </div>
+                    <p className="mt-2 truncate text-sm font-semibold tracking-tight text-slate-950">{displayName}</p>
+                  </div>
+                </Link>
+
                 <div className="flex items-center gap-2">
-                  <span className="inline-flex rounded-full border border-sky-200 bg-sky-50 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-[0.2em] text-sky-700 shadow-[0_6px_18px_rgba(14,116,144,0.08)]">
-                    {t(currentPageLabelKey)}
-                  </span>
-                  <p className="truncate text-[11px] font-medium text-slate-500">{compactMeta}</p>
+                  {profileComplete ? (
+                    <button
+                      aria-label={notificationsOpen ? t("notifications.closeInbox") : t("notifications.openInbox")}
+                      type="button"
+                      onClick={() => {
+                        setMobileNavOpen(false);
+                        setMobileActionOpen(false);
+                        setNotificationsOpen((current) => !current);
+                      }}
+                    >
+                      {notificationBell}
+                    </button>
+                  ) : null}
+
+                  {profileComplete ? (
+                    <button
+                      aria-label="Open quick actions"
+                      className="mobile-fab inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-emerald-200/80 bg-[linear-gradient(135deg,#16a34a_0%,#0f766e_100%)] text-lg font-semibold text-white shadow-[0_16px_34px_rgba(13,148,136,0.22)] transition active:scale-[0.98]"
+                      type="button"
+                      onClick={() => {
+                        setMobileNavOpen(false);
+                        setMobileActionOpen((current) => !current);
+                      }}
+                    >
+                      +
+                    </button>
+                  ) : null}
+
+                  <button
+                    aria-label="Toggle menu"
+                    className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-slate-200/90 bg-white text-slate-900 shadow-[0_12px_26px_rgba(15,23,42,0.08)] transition active:scale-[0.98]"
+                    type="button"
+                    onClick={() => {
+                      setMobileActionOpen(false);
+                      setMobileNavOpen((current) => !current);
+                    }}
+                  >
+                    <span className="flex flex-col gap-1.5">
+                      <span
+                        className={cn(
+                          "h-0.5 w-5 rounded-full bg-current transition duration-300",
+                          mobileNavOpen ? "translate-y-2 rotate-45" : ""
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          "h-0.5 w-5 rounded-full bg-current transition duration-300",
+                          mobileNavOpen ? "opacity-0" : ""
+                        )}
+                      />
+                      <span
+                        className={cn(
+                          "h-0.5 w-5 rounded-full bg-current transition duration-300",
+                          mobileNavOpen ? "-translate-y-2 -rotate-45" : ""
+                        )}
+                      />
+                    </span>
+                  </button>
                 </div>
-                <p className="mt-2 truncate text-sm font-semibold tracking-tight text-slate-950">{displayName}</p>
               </div>
-            </Link>
-
-            <div className="flex items-center gap-2">
-              {profileComplete ? (
-                <button
-                  aria-label={notificationsOpen ? t("notifications.closeInbox") : t("notifications.openInbox")}
-                  type="button"
-                  onClick={() => {
-                    setMobileNavOpen(false);
-                    setMobileActionOpen(false);
-                    setNotificationsOpen((current) => !current);
-                  }}
-                >
-                  {notificationBell}
-                </button>
-              ) : null}
-
-              {profileComplete ? (
-                <button
-                  aria-label="Open quick actions"
-                  className="mobile-fab inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-emerald-200/80 bg-[linear-gradient(135deg,#16a34a_0%,#0f766e_100%)] text-lg font-semibold text-white shadow-[0_16px_34px_rgba(13,148,136,0.22)] transition active:scale-[0.98]"
-                  type="button"
-                  onClick={() => {
-                    setMobileNavOpen(false);
-                    setMobileActionOpen((current) => !current);
-                  }}
-                >
-                  +
-                </button>
-              ) : null}
-
-              <button
-                aria-label="Toggle menu"
-                className="inline-flex min-h-11 min-w-11 items-center justify-center rounded-2xl border border-slate-200/90 bg-white text-slate-900 shadow-[0_12px_26px_rgba(15,23,42,0.08)] transition active:scale-[0.98]"
-                type="button"
-                onClick={() => {
-                  setMobileActionOpen(false);
-                  setMobileNavOpen((current) => !current);
-                }}
-              >
-                <span className="flex flex-col gap-1.5">
-                  <span
-                    className={cn(
-                      "h-0.5 w-5 rounded-full bg-current transition duration-300",
-                      mobileNavOpen ? "translate-y-2 rotate-45" : ""
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "h-0.5 w-5 rounded-full bg-current transition duration-300",
-                      mobileNavOpen ? "opacity-0" : ""
-                    )}
-                  />
-                  <span
-                    className={cn(
-                      "h-0.5 w-5 rounded-full bg-current transition duration-300",
-                      mobileNavOpen ? "-translate-y-2 -rotate-45" : ""
-                    )}
-                  />
-                </span>
-              </button>
             </div>
           </div>
+          <div aria-hidden="true" className="h-[5.9rem] sm:h-[6.4rem]" />
         </div>
 
         <button
