@@ -117,6 +117,12 @@ export function SettingsForm({
       return;
     }
 
+    const finalConfirmed = window.confirm(t("settings.clearLocalRecordsFinalConfirmation"));
+
+    if (!finalConfirmed) {
+      return;
+    }
+
     await ledgerService.clearWorkspace(userId);
     setMessage(t("settings.clearLocalRecordsSuccess"));
   }

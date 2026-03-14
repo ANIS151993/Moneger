@@ -458,6 +458,8 @@ const englishMessages: TranslationTable = {
   "settings.clearLocalRecords": "Clear local records",
   "settings.clearLocalRecordsConfirmation":
     "This will permanently remove all local income, expense, debt, owed, bank, and queued sync records on this device.",
+  "settings.clearLocalRecordsFinalConfirmation":
+    "Final confirmation: this action cannot be undone. Do you want to permanently clear all local records now?",
   "settings.clearLocalRecordsSuccess": "Local finance records cleared.",
   "settings.theme.system": "System",
   "settings.theme.light": "Light",
