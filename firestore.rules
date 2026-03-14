@@ -14,6 +14,19 @@ service cloud.firestore {
       request.auth.token.email in data.participantEmails;
   }
 
+  function sharedObligationDoc(docId) {
+    return get(/databases/$(database)/documents/sharedObligations/$(docId));
+  }
+
+  function participantInSharedObligation(docId) {
+    return signedIn() &&
+      exists(/databases/$(database)/documents/sharedObligations/$(docId)) &&
+      (
+        participantByUid(sharedObligationDoc(docId).data) ||
+        participantByEmail(sharedObligationDoc(docId).data)
+      );
+  }
+
   match /databases/{database}/documents {
     match /userDirectory/{uid} {
       allow read: if signedIn();
@@ -35,6 +48,14 @@ service cloud.firestore {
       allow read: if participantByUid(resource.data) || participantByEmail(resource.data);
       allow update: if participantByUid(resource.data) || participantByEmail(resource.data);
       allow delete: if false;
+
+      match /messages/{messageId} {
+        allow read: if participantInSharedObligation(docId);
+        allow create: if participantInSharedObligation(docId) &&
+          request.resource.data.senderUid == request.auth.uid &&
+          request.resource.data.obligationId == docId;
+        allow update, delete: if false;
+      }
     }
 
     match /{document=**} {

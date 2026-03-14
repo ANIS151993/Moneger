@@ -7,6 +7,7 @@ import {
   getDocs,
   limit,
   onSnapshot,
+  orderBy,
   query,
   setDoc,
   where
@@ -26,6 +27,7 @@ import type {
   OwedRecord,
   SettingsRecord,
   SharedAgreementStatus,
+  SharedObligationMessageRecord,
   SharedObligationParticipant,
   SharedObligationRecord,
   SharedRecordMeta,
@@ -34,6 +36,7 @@ import type {
 } from "@/types/finance";
 
 const SHARED_OBLIGATIONS_COLLECTION = "sharedObligations";
+const SHARED_OBLIGATION_MESSAGES_COLLECTION = "messages";
 const USER_DIRECTORY_COLLECTION = "userDirectory";
 
 const supportedCurrencySet = new Set<CurrencyCode>(supportedCurrencies);
@@ -117,10 +120,13 @@ function normalizeSharedObligation(id: string, value: unknown): SharedObligation
 
 function inferCollaborationMeta(
   userId: string,
+  userEmail: string,
   obligation: SharedObligationRecord
 ): SharedRecordMeta {
-  const currentParticipant = obligation.creditor.uid === userId ? obligation.creditor : obligation.debtor;
-  const counterpart = obligation.creditor.uid === userId ? obligation.debtor : obligation.creditor;
+  const currentIsCreditor =
+    obligation.creditor.uid === userId || (userEmail && obligation.creditor.email === userEmail);
+  const currentParticipant = currentIsCreditor ? obligation.creditor : obligation.debtor;
+  const counterpart = currentIsCreditor ? obligation.debtor : obligation.creditor;
   const sharingStatus: SharingStatus = obligation.status === "invited" ? "invited" : "matched";
 
   return {
@@ -131,6 +137,25 @@ function inferCollaborationMeta(
     sharedCurrentUserAcceptedAt: currentParticipant.acceptedAt,
     sharedCounterpartyAcceptedAt: counterpart.acceptedAt,
     sharedUpdatedAt: obligation.updatedAt
+  };
+}
+
+function normalizeSharedMessage(id: string, obligationId: string, value: unknown): SharedObligationMessageRecord | null {
+  const candidate = typeof value === "object" && value !== null ? (value as Record<string, unknown>) : null;
+
+  if (!candidate) {
+    return null;
+  }
+
+  return {
+    id,
+    obligationId,
+    senderUid: typeof candidate.senderUid === "string" ? candidate.senderUid : "",
+    senderEmail: normalizeEmail(typeof candidate.senderEmail === "string" ? candidate.senderEmail : ""),
+    senderName: typeof candidate.senderName === "string" ? candidate.senderName : "",
+    body: typeof candidate.body === "string" ? candidate.body : "",
+    createdAt: typeof candidate.createdAt === "string" ? candidate.createdAt : "",
+    updatedAt: typeof candidate.updatedAt === "string" ? candidate.updatedAt : ""
   };
 }
 
@@ -364,10 +389,34 @@ async function upsertSharedObligationForLocalRecord(
     return localOnlyMeta;
   }
 
-  await upsertUserDirectoryProfile(userId, actorEmail, settings);
+  try {
+    await upsertUserDirectoryProfile(userId, actorEmail, settings);
+  } catch (error) {
+    console.warn("Unable to upsert current user directory profile", error);
+  }
 
-  const matchedCounterparty = await findDirectoryUserByEmail(counterpartEmail, userId);
-  const existing = record.sharedObligationId ? await getSharedObligation(record.sharedObligationId) : undefined;
+  let matchedCounterparty:
+    | {
+        uid: string;
+        email: string;
+        displayName: string;
+        contactNumber: string;
+      }
+    | undefined;
+
+  try {
+    matchedCounterparty = await findDirectoryUserByEmail(counterpartEmail, userId);
+  } catch (error) {
+    console.warn("Unable to look up shared counterparty by email", error);
+  }
+
+  let existing: SharedObligationRecord | undefined;
+
+  try {
+    existing = record.sharedObligationId ? await getSharedObligation(record.sharedObligationId) : undefined;
+  } catch (error) {
+    console.warn("Unable to read existing shared obligation", error);
+  }
   const acceptedAt = nowIso();
   const actor = buildActorParticipant(userId, actorEmail, settings, acceptedAt);
 
@@ -414,15 +463,15 @@ async function upsertSharedObligationForLocalRecord(
 
   await setDoc(doc(db, SHARED_OBLIGATIONS_COLLECTION, sharedObligationId), nextPayload);
 
-  return inferCollaborationMeta(userId, nextPayload);
+  return inferCollaborationMeta(userId, actorEmail, nextPayload);
 }
 
-function getSharedRoleForUser(userId: string, obligation: SharedObligationRecord) {
-  if (obligation.creditor.uid === userId) {
+function getSharedRoleForUser(userId: string, userEmail: string, obligation: SharedObligationRecord) {
+  if (obligation.creditor.uid === userId || (userEmail && obligation.creditor.email === userEmail)) {
     return "creditor" as const;
   }
 
-  if (obligation.debtor.uid === userId) {
+  if (obligation.debtor.uid === userId || (userEmail && obligation.debtor.email === userEmail)) {
     return "debtor" as const;
   }
 
@@ -432,7 +481,7 @@ function getSharedRoleForUser(userId: string, obligation: SharedObligationRecord
 async function putSharedDebtRecord(userId: string, obligation: SharedObligationRecord, current?: DebtRecord) {
   const db = getUserDatabase(userId);
   const counterpart = obligation.creditor;
-  const meta = inferCollaborationMeta(userId, obligation);
+  const meta = inferCollaborationMeta(userId, getAuthenticatedEmail(), obligation);
   const nextRecord: DebtRecord = {
     id: current?.id || createId("debt"),
     userId,
@@ -461,7 +510,7 @@ async function putSharedDebtRecord(userId: string, obligation: SharedObligationR
 async function putSharedOwedRecord(userId: string, obligation: SharedObligationRecord, current?: OwedRecord) {
   const db = getUserDatabase(userId);
   const counterpart = obligation.debtor;
-  const meta = inferCollaborationMeta(userId, obligation);
+  const meta = inferCollaborationMeta(userId, getAuthenticatedEmail(), obligation);
   const nextRecord: OwedRecord = {
     id: current?.id || createId("owed"),
     userId,
@@ -565,38 +614,80 @@ export async function claimPendingSharedObligations(userId: string, email?: stri
 
 export function subscribeToSharedObligations(
   userId: string,
+  email: string | null | undefined,
   onChange: (obligations: SharedObligationRecord[]) => void
 ) {
   const db = firestore;
+  const normalizedEmail = normalizeEmail(email);
 
   if (!db || !userId) {
     onChange([]);
     return () => undefined;
   }
 
-  const obligationsQuery = query(
-    collection(db, SHARED_OBLIGATIONS_COLLECTION),
-    where("participantUids", "array-contains", userId)
-  );
+  let uidObligations: SharedObligationRecord[] = [];
+  let emailObligations: SharedObligationRecord[] = [];
 
-  return onSnapshot(
-    obligationsQuery,
+  function emitMergedObligations() {
+    const merged = new Map<string, SharedObligationRecord>();
+
+    for (const obligation of [...uidObligations, ...emailObligations]) {
+      merged.set(obligation.id, obligation);
+    }
+
+    onChange(
+      Array.from(merged.values()).sort(
+        (left, right) => new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime()
+      )
+    );
+  }
+
+  const unsubscribeByUid = onSnapshot(
+    query(collection(db, SHARED_OBLIGATIONS_COLLECTION), where("participantUids", "array-contains", userId)),
     (snapshot) => {
-      const obligations = snapshot.docs
+      uidObligations = snapshot.docs
         .map((item) => normalizeSharedObligation(item.id, item.data()))
-        .filter((item): item is SharedObligationRecord => Boolean(item))
-        .sort((left, right) => new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime());
-
-      onChange(obligations);
+        .filter((item): item is SharedObligationRecord => Boolean(item));
+      emitMergedObligations();
     },
     (error) => {
-      console.warn("Shared obligations subscription failed", error);
+      console.warn("Shared obligations subscription by uid failed", error);
     }
   );
+
+  if (!normalizedEmail) {
+    return unsubscribeByUid;
+  }
+
+  const unsubscribeByEmail = onSnapshot(
+    query(
+      collection(db, SHARED_OBLIGATIONS_COLLECTION),
+      where("participantEmails", "array-contains", normalizedEmail)
+    ),
+    (snapshot) => {
+      emailObligations = snapshot.docs
+        .map((item) => normalizeSharedObligation(item.id, item.data()))
+        .filter((item): item is SharedObligationRecord => Boolean(item));
+      emitMergedObligations();
+    },
+    (error) => {
+      console.warn("Shared obligations subscription by email failed", error);
+    }
+  );
+
+  return () => {
+    unsubscribeByUid();
+    unsubscribeByEmail();
+  };
 }
 
-export async function mirrorSharedObligationsToLocal(userId: string, obligations: SharedObligationRecord[]) {
+export async function mirrorSharedObligationsToLocal(
+  userId: string,
+  obligations: SharedObligationRecord[],
+  email?: string | null
+) {
   const db = getUserDatabase(userId);
+  const normalizedEmail = normalizeEmail(email || getAuthenticatedEmail());
   const [debts, owed] = await Promise.all([db.debts.toArray(), db.owed.toArray()]);
   const debtsBySharedId = new Map(
     debts
@@ -612,7 +703,7 @@ export async function mirrorSharedObligationsToLocal(userId: string, obligations
   const activeOwedIds = new Set<string>();
 
   for (const obligation of obligations) {
-    const role = getSharedRoleForUser(userId, obligation);
+    const role = getSharedRoleForUser(userId, normalizedEmail, obligation);
 
     if (!role || obligation.status === "cancelled") {
       continue;
@@ -725,6 +816,89 @@ export async function markInviteEmailSent(userId: string, sharedObligationId?: s
     {
       inviteEmailSentAt: nowIso(),
       updatedAt: nowIso()
+    },
+    { merge: true }
+  );
+}
+
+export function subscribeToSharedObligationMessages(
+  sharedObligationId: string,
+  onChange: (messages: SharedObligationMessageRecord[]) => void
+) {
+  const db = firestore;
+
+  if (!db || !sharedObligationId) {
+    onChange([]);
+    return () => undefined;
+  }
+
+  const messagesQuery = query(
+    collection(db, SHARED_OBLIGATIONS_COLLECTION, sharedObligationId, SHARED_OBLIGATION_MESSAGES_COLLECTION),
+    orderBy("createdAt", "asc"),
+    limit(100)
+  );
+
+  return onSnapshot(
+    messagesQuery,
+    (snapshot) => {
+      onChange(
+        snapshot.docs
+          .map((item) => normalizeSharedMessage(item.id, sharedObligationId, item.data()))
+          .filter((item): item is SharedObligationMessageRecord => Boolean(item))
+      );
+    },
+    (error) => {
+      console.warn("Shared obligation messages subscription failed", error);
+    }
+  );
+}
+
+export async function sendSharedObligationMessage(userId: string, sharedObligationId: string, body: string) {
+  const db = firestore;
+  const normalizedBody = body.trim();
+  const actorEmail = getAuthenticatedEmail();
+
+  if (!db || !sharedObligationId || !normalizedBody) {
+    return;
+  }
+
+  if (!actorEmail) {
+    throw new Error("You must be signed in to send a shared message.");
+  }
+
+  const obligation = await getSharedObligation(sharedObligationId);
+
+  if (!obligation) {
+    throw new Error("This shared record could not be found.");
+  }
+
+  const role = getSharedRoleForUser(userId, actorEmail, obligation);
+
+  if (!role) {
+    throw new Error("You do not have access to this shared record.");
+  }
+
+  const settings = await readUserSettings(userId);
+  const now = nowIso();
+  const messageRef = doc(
+    collection(db, SHARED_OBLIGATIONS_COLLECTION, sharedObligationId, SHARED_OBLIGATION_MESSAGES_COLLECTION)
+  );
+  const payload: SharedObligationMessageRecord = {
+    id: messageRef.id,
+    obligationId: sharedObligationId,
+    senderUid: userId,
+    senderEmail: actorEmail,
+    senderName: getProfileDisplayName(settings, actorEmail),
+    body: normalizedBody,
+    createdAt: now,
+    updatedAt: now
+  };
+
+  await setDoc(messageRef, payload);
+  await setDoc(
+    doc(db, SHARED_OBLIGATIONS_COLLECTION, sharedObligationId),
+    {
+      updatedAt: now
     },
     { merge: true }
   );

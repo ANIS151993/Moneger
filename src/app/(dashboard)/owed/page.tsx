@@ -5,6 +5,7 @@ import { useLiveQuery } from "dexie-react-hooks";
 
 import { OwedForm } from "@/components/forms/OwedForm";
 import { useI18n } from "@/components/providers/LanguageProvider";
+import { SharedObligationChat } from "@/components/shared/SharedObligationChat";
 import { SimpleTable } from "@/components/shared/SimpleTable";
 import { Badge } from "@/components/ui/Badge";
 import { Button } from "@/components/ui/Button";
@@ -32,6 +33,8 @@ export default function OwedPage() {
   const { user } = useAuth();
   const { t } = useI18n();
   const [editingId, setEditingId] = useState<string | null>(null);
+  const [chatRecordId, setChatRecordId] = useState<string | null>(null);
+  const [actionError, setActionError] = useState("");
   const settings = useUserSettings(user?.uid);
   const baseCurrency = settings?.baseCurrency || "USD";
   const appUrl =
@@ -50,12 +53,19 @@ export default function OwedPage() {
   );
 
   const editingOwed = owed.find((item) => item.id === editingId);
+  const chatOwed = owed.find((item) => item.id === chatRecordId);
 
   useEffect(() => {
     if (editingId && !editingOwed) {
       setEditingId(null);
     }
   }, [editingId, editingOwed]);
+
+  useEffect(() => {
+    if (chatRecordId && !chatOwed) {
+      setChatRecordId(null);
+    }
+  }, [chatOwed, chatRecordId]);
 
   if (!user) {
     return null;
@@ -72,12 +82,32 @@ export default function OwedPage() {
   }
 
   async function handleInviteEmail(item: (typeof owed)[number]) {
-    await markInviteEmailSent(userId, item.sharedObligationId);
+    setActionError("");
+
+    try {
+      await markInviteEmailSent(userId, item.sharedObligationId);
+    } catch (error) {
+      console.warn("Unable to update shared invite state", error);
+      setActionError(t("collaboration.localSaveWarning"));
+    }
+
     openDraft(buildSharedInviteEmailDraft(item, appUrl));
   }
 
   function handleReminderEmail(item: (typeof owed)[number]) {
+    setActionError("");
     openDraft(buildSharedReminderEmailDraft(item, appUrl));
+  }
+
+  async function handleAcceptSchedule(sharedObligationId?: string) {
+    setActionError("");
+
+    try {
+      await acceptSharedObligationSchedule(userId, sharedObligationId);
+    } catch (error) {
+      console.warn("Unable to accept shared obligation schedule", error);
+      setActionError(t("collaboration.localSaveWarning"));
+    }
   }
 
   return (
@@ -102,125 +132,143 @@ export default function OwedPage() {
             description={t("owedPage.emptyDescription")}
           />
         ) : (
-          <SimpleTable
-            title={t("owedPage.tableTitle")}
-            description={t("owedPage.tableDescription")}
-            rows={owed}
-            columns={[
-              {
-                key: "debtor",
-                header: t("owedPage.debtor"),
-                render: (item) => (
-                  <div>
-                    <div className="flex flex-wrap items-center gap-2">
-                      <p className="font-medium text-slate-900">{item.debtorName}</p>
-                      {item.sharingStatus === "matched" ? (
-                        <Badge tone={item.sharedAgreementStatus === "agreed" ? "success" : "info"}>
-                          {t(
-                            item.sharedAgreementStatus === "agreed"
-                              ? "collaboration.agreed"
-                              : "collaboration.monegerLinked"
-                          )}
-                        </Badge>
-                      ) : item.sharingStatus === "invited" ? (
-                        <Badge tone="warning">{t("collaboration.invitePending")}</Badge>
-                      ) : null}
-                    </div>
-                    <p className="text-xs text-slate-400">
-                      {item.debtorEmail || item.debtorPhone || t("common.noContact")}
-                    </p>
-                  </div>
-                )
-              },
-              {
-                key: "amount",
-                header: t("common.amount"),
-                render: (item) => {
-                  const progress = getInstallmentProgress(item.installments);
-                  const outstandingAmount = getOutstandingScheduledAmount(item.amount, item.installments);
-
-                  return (
+          <div className="space-y-4">
+            {actionError ? <p className="text-sm font-medium text-amber-600">{actionError}</p> : null}
+            <SimpleTable
+              title={t("owedPage.tableTitle")}
+              description={t("owedPage.tableDescription")}
+              rows={owed}
+              columns={[
+                {
+                  key: "debtor",
+                  header: t("owedPage.debtor"),
+                  render: (item) => (
                     <div>
-                      <p className="font-medium text-slate-900">{formatCurrency(item.amount, item.currency)}</p>
+                      <div className="flex flex-wrap items-center gap-2">
+                        <p className="font-medium text-slate-900">{item.debtorName}</p>
+                        {item.sharingStatus === "matched" ? (
+                          <Badge tone={item.sharedAgreementStatus === "agreed" ? "success" : "info"}>
+                            {t(
+                              item.sharedAgreementStatus === "agreed"
+                                ? "collaboration.agreed"
+                                : "collaboration.monegerLinked"
+                            )}
+                          </Badge>
+                        ) : item.sharingStatus === "invited" ? (
+                          <Badge tone="warning">{t("collaboration.invitePending")}</Badge>
+                        ) : null}
+                      </div>
                       <p className="text-xs text-slate-400">
-                        {progress.total
-                          ? `${t("installments.summary", { settled: progress.settled, total: progress.total })} · ${t("installments.remaining", { amount: formatCurrency(outstandingAmount, item.currency) })}`
-                          : t("installments.none")}
+                        {item.debtorEmail || item.debtorPhone || t("common.noContact")}
                       </p>
                     </div>
-                  );
-                }
-              },
-              {
-                key: "settlement",
-                header: t("owedPage.settlement"),
-                render: (item) => {
-                  const nextInstallment = getNextPendingInstallment(item.installments);
+                  )
+                },
+                {
+                  key: "amount",
+                  header: t("common.amount"),
+                  render: (item) => {
+                    const progress = getInstallmentProgress(item.installments);
+                    const outstandingAmount = getOutstandingScheduledAmount(item.amount, item.installments);
 
-                  return (
-                    <div>
-                      <p className="font-medium text-slate-900">
-                        {formatDate(nextInstallment?.dueDate || item.settlementDate)}
-                      </p>
-                      <p className="text-xs text-slate-400">
-                        {nextInstallment
-                          ? `${t("installments.nextDue", { date: formatDate(nextInstallment.dueDate) })} · ${formatCurrency(nextInstallment.amount, item.currency)}`
-                          : item.installments?.length
-                            ? t("installments.complete")
+                    return (
+                      <div>
+                        <p className="font-medium text-slate-900">{formatCurrency(item.amount, item.currency)}</p>
+                        <p className="text-xs text-slate-400">
+                          {progress.total
+                            ? `${t("installments.summary", { settled: progress.settled, total: progress.total })} · ${t("installments.remaining", { amount: formatCurrency(outstandingAmount, item.currency) })}`
                             : t("installments.none")}
-                      </p>
-                      {item.sharedAgreementStatus ? (
-                        <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-sky-500">
-                          {t(`collaboration.status.${item.sharedAgreementStatus}`)}
                         </p>
+                      </div>
+                    );
+                  }
+                },
+                {
+                  key: "settlement",
+                  header: t("owedPage.settlement"),
+                  render: (item) => {
+                    const nextInstallment = getNextPendingInstallment(item.installments);
+
+                    return (
+                      <div>
+                        <p className="font-medium text-slate-900">
+                          {formatDate(nextInstallment?.dueDate || item.settlementDate)}
+                        </p>
+                        <p className="text-xs text-slate-400">
+                          {nextInstallment
+                            ? `${t("installments.nextDue", { date: formatDate(nextInstallment.dueDate) })} · ${formatCurrency(nextInstallment.amount, item.currency)}`
+                            : item.installments?.length
+                              ? t("installments.complete")
+                              : t("installments.none")}
+                        </p>
+                        {item.sharedAgreementStatus ? (
+                          <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-sky-500">
+                            {t(`collaboration.status.${item.sharedAgreementStatus}`)}
+                          </p>
+                        ) : null}
+                      </div>
+                    );
+                  }
+                },
+                {
+                  key: "status",
+                  header: t("common.status"),
+                  render: (item) => (
+                    <Badge tone={item.status === "overdue" ? "danger" : item.status === "settled" ? "success" : "info"}>
+                      {t(`options.owedStatus.${item.status}`)}
+                    </Badge>
+                  )
+                },
+                {
+                  key: "actions",
+                  header: t("common.actions"),
+                  render: (item) => (
+                    <div className="flex flex-wrap gap-2">
+                      <Button variant="ghost" onClick={() => setEditingId(item.id)}>
+                        {t("common.edit")}
+                      </Button>
+                      {item.sharedObligationId && !item.sharedCurrentUserAcceptedAt ? (
+                        <Button
+                          variant="ghost"
+                          onClick={() => void handleAcceptSchedule(item.sharedObligationId)}
+                        >
+                          {t("collaboration.acceptSchedule")}
+                        </Button>
                       ) : null}
+                      {item.sharedObligationId ? (
+                        <Button
+                          variant={chatRecordId === item.id ? "secondary" : "ghost"}
+                          onClick={() => setChatRecordId((current) => (current === item.id ? null : item.id))}
+                        >
+                          {t(chatRecordId === item.id ? "collaboration.closeChat" : "collaboration.openChat")}
+                        </Button>
+                      ) : null}
+                      {item.sharingStatus === "invited" && item.debtorEmail ? (
+                        <Button variant="ghost" onClick={() => void handleInviteEmail(item)}>
+                          {t("collaboration.sendInvite")}
+                        </Button>
+                      ) : null}
+                      {item.sharingStatus === "matched" && item.debtorEmail ? (
+                        <Button variant="ghost" onClick={() => handleReminderEmail(item)}>
+                          {t("collaboration.emailReminder")}
+                        </Button>
+                      ) : null}
+                      <Button variant="ghost" onClick={() => void ledgerService.deleteOwed(userId, item.id)}>
+                        {t("common.delete")}
+                      </Button>
                     </div>
-                  );
+                  )
                 }
-              },
-              {
-                key: "status",
-                header: t("common.status"),
-                render: (item) => (
-                  <Badge tone={item.status === "overdue" ? "danger" : item.status === "settled" ? "success" : "info"}>
-                    {t(`options.owedStatus.${item.status}`)}
-                  </Badge>
-                )
-              },
-              {
-                key: "actions",
-                header: t("common.actions"),
-                render: (item) => (
-                  <div className="flex flex-wrap gap-2">
-                    <Button variant="ghost" onClick={() => setEditingId(item.id)}>
-                      {t("common.edit")}
-                    </Button>
-                    {item.sharedObligationId && !item.sharedCurrentUserAcceptedAt ? (
-                      <Button
-                        variant="ghost"
-                        onClick={() => void acceptSharedObligationSchedule(userId, item.sharedObligationId)}
-                      >
-                        {t("collaboration.acceptSchedule")}
-                      </Button>
-                    ) : null}
-                    {item.sharingStatus === "invited" && item.debtorEmail ? (
-                      <Button variant="ghost" onClick={() => void handleInviteEmail(item)}>
-                        {t("collaboration.sendInvite")}
-                      </Button>
-                    ) : null}
-                    {item.sharingStatus === "matched" && item.debtorEmail ? (
-                      <Button variant="ghost" onClick={() => handleReminderEmail(item)}>
-                        {t("collaboration.emailReminder")}
-                      </Button>
-                    ) : null}
-                    <Button variant="ghost" onClick={() => void ledgerService.deleteOwed(userId, item.id)}>
-                      {t("common.delete")}
-                    </Button>
-                  </div>
-                )
-              }
-            ]}
-          />
+              ]}
+            />
+            {chatOwed?.sharedObligationId ? (
+              <SharedObligationChat
+                counterpartyName={chatOwed.debtorName}
+                sharedObligationId={chatOwed.sharedObligationId}
+                userId={userId}
+              />
+            ) : null}
+          </div>
         )}
       </div>
     </div>

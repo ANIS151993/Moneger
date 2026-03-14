@@ -71,6 +71,28 @@ Optional:
 - If you want creditor/debtor collaboration across Moneger accounts, Firestore is required. The app now publishes a minimal user directory entry and a shared-obligations collection for matched counterparties.
 - Email invites and reminder emails currently open prefilled `mailto:` drafts from the browser. Fully automatic email sending would require a backend mail service or Cloud Functions.
 
+### Firestore Collaboration Setup
+
+If you want shared creditor/debtor records, profile restore across shortcuts, and shared chat to work on the live Cloudflare site, complete these Firebase steps exactly:
+
+1. In Firebase Console, open your project `moneger-a04c6`.
+2. Go to `Build > Firestore Database`.
+3. If Firestore is not created yet, click `Create database`, choose `Production mode`, and pick a region close to your users.
+4. Open the `Rules` tab in Firestore.
+5. Replace the live rules with the contents of [`firestore.rules`](firestore.rules).
+6. Click `Publish`.
+7. Go to `Authentication > Settings > Authorized domains`.
+8. Confirm these domains are present:
+   - `localhost`
+   - your Cloudflare `*.pages.dev` domain
+   - `moneger.marcbd.site`
+9. In Cloudflare Pages, open your project settings.
+10. Confirm every `NEXT_PUBLIC_FIREBASE_*` variable from `.env.local` exists in both `Production` and `Preview`.
+11. If you change any Pages environment variable, trigger a new deployment.
+12. Sign in once with each Moneger user after the new deploy so the app can create their Firestore profile/directory entry.
+
+There are no extra Cloudflare DNS settings required for Firestore itself. If Firebase Auth already works on your live domain, Cloudflare is usually fine and the missing step is publishing the Firestore rules.
+
 4. Start the app:
 
 ```bash

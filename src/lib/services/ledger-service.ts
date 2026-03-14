@@ -25,13 +25,28 @@ import {
   upsertUserDirectoryProfile
 } from "@/lib/services/shared-obligations-cloud-service";
 import { saveUserSettingsToCloud } from "@/lib/services/user-settings-cloud-service";
-import type { LanguagePreference } from "@/types/finance";
+import type { DebtRecord, LanguagePreference, OwedRecord } from "@/types/finance";
+
+export interface LedgerSaveResult<T> {
+  record: T;
+  collaborationWarning?: string;
+}
+
+function getCloudWarningMessage(error: unknown) {
+  if (error instanceof Error && error.message) {
+    return error.message;
+  }
+
+  return "Saved locally, but cloud collaboration did not sync. Check your Firestore setup and try again.";
+}
 
 async function runOptionalCloudStep(task: () => Promise<void>) {
   try {
     await task();
+    return undefined;
   } catch (error) {
     console.warn("Optional cloud collaboration step failed", error);
+    return getCloudWarningMessage(error);
   }
 }
 
@@ -82,7 +97,7 @@ export const ledgerService = {
   },
   async createDebt(userId: string, input: DebtInput) {
     let record = await debtRepository.create(userId, input);
-    await runOptionalCloudStep(async () => {
+    const collaborationWarning = await runOptionalCloudStep(async () => {
       const collaborationMeta = await syncDebtCollaboration(userId, record);
 
       if (collaborationMeta) {
@@ -91,11 +106,14 @@ export const ledgerService = {
     });
 
     await queueSync(userId, "debt", "create", record.id);
-    return record;
+    return {
+      record,
+      collaborationWarning
+    } satisfies LedgerSaveResult<DebtRecord>;
   },
   async updateDebt(userId: string, id: string, input: DebtInput) {
     let record = await debtRepository.update(userId, id, input);
-    await runOptionalCloudStep(async () => {
+    const collaborationWarning = await runOptionalCloudStep(async () => {
       const collaborationMeta = await syncDebtCollaboration(userId, record);
 
       if (collaborationMeta) {
@@ -104,7 +122,10 @@ export const ledgerService = {
     });
 
     await queueSync(userId, "debt", "update", record.id);
-    return record;
+    return {
+      record,
+      collaborationWarning
+    } satisfies LedgerSaveResult<DebtRecord>;
   },
   async deleteDebt(userId: string, id: string) {
     const current = await debtRepository.get(userId, id);
@@ -118,7 +139,7 @@ export const ledgerService = {
   },
   async createOwed(userId: string, input: OwedInput) {
     let record = await owedRepository.create(userId, input);
-    await runOptionalCloudStep(async () => {
+    const collaborationWarning = await runOptionalCloudStep(async () => {
       const collaborationMeta = await syncOwedCollaboration(userId, record);
 
       if (collaborationMeta) {
@@ -127,11 +148,14 @@ export const ledgerService = {
     });
 
     await queueSync(userId, "owed", "create", record.id);
-    return record;
+    return {
+      record,
+      collaborationWarning
+    } satisfies LedgerSaveResult<OwedRecord>;
   },
   async updateOwed(userId: string, id: string, input: OwedInput) {
     let record = await owedRepository.update(userId, id, input);
-    await runOptionalCloudStep(async () => {
+    const collaborationWarning = await runOptionalCloudStep(async () => {
       const collaborationMeta = await syncOwedCollaboration(userId, record);
 
       if (collaborationMeta) {
@@ -140,7 +164,10 @@ export const ledgerService = {
     });
 
     await queueSync(userId, "owed", "update", record.id);
-    return record;
+    return {
+      record,
+      collaborationWarning
+    } satisfies LedgerSaveResult<OwedRecord>;
   },
   async deleteOwed(userId: string, id: string) {
     const current = await owedRepository.get(userId, id);

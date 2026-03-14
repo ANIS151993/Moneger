@@ -249,6 +249,17 @@ export interface SharedObligationRecord {
   debtor: SharedObligationParticipant;
 }
 
+export interface SharedObligationMessageRecord {
+  id: string;
+  obligationId: string;
+  senderUid: string;
+  senderEmail: string;
+  senderName: string;
+  body: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
 export interface OptionalEncryptedSyncPayload {
   version: 1;
   userId: string;

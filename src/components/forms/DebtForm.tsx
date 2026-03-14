@@ -57,6 +57,7 @@ export function DebtForm({
   onCancel?: () => void;
 }) {
   const [message, setMessage] = useState("");
+  const [warningMessage, setWarningMessage] = useState("");
   const [formError, setFormError] = useState("");
   const [isPending, startTransition] = useTransition();
   const { t } = useI18n();
@@ -88,6 +89,7 @@ export function DebtForm({
 
   useEffect(() => {
     setMessage("");
+    setWarningMessage("");
     setFormError("");
     reset(getDefaultValues(defaultCurrency, record));
   }, [defaultCurrency, record, reset]);
@@ -102,6 +104,7 @@ export function DebtForm({
 
   function onSubmit(values: DebtInput) {
     setMessage("");
+    setWarningMessage("");
     setFormError("");
     const normalizedInstallments = normalizeInstallments(values.installments);
     const normalizedValues: DebtInput = {
@@ -113,14 +116,16 @@ export function DebtForm({
     startTransition(async () => {
       try {
         if (record) {
-          await ledgerService.updateDebt(userId, record.id, normalizedValues);
+          const result = await ledgerService.updateDebt(userId, record.id, normalizedValues);
           setMessage(t("debtForm.updated"));
+          setWarningMessage(result.collaborationWarning ? t("collaboration.localSaveWarning") : "");
           onSaved?.();
           return;
         }
 
-        await ledgerService.createDebt(userId, normalizedValues);
+        const result = await ledgerService.createDebt(userId, normalizedValues);
         setMessage(t("debtForm.saved"));
+        setWarningMessage(result.collaborationWarning ? t("collaboration.localSaveWarning") : "");
         reset(getDefaultValues(defaultCurrency));
       } catch (error) {
         setFormError(error instanceof Error ? error.message : "Unable to save debt right now.");
@@ -293,6 +298,7 @@ export function DebtForm({
         </FormField>
 
         {message ? <p className="text-sm font-medium text-emerald-600">{message}</p> : null}
+        {warningMessage ? <p className="text-sm font-medium text-amber-600">{warningMessage}</p> : null}
         {formError ? <p className="text-sm font-medium text-rose-600">{formError}</p> : null}
 
         <Button type="submit" disabled={isPending}>

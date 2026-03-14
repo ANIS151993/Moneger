@@ -20,7 +20,9 @@ export function SharedCollaborationSync() {
       return;
     }
 
-    void upsertUserDirectoryProfile(user.uid, user.email, settings);
+    void upsertUserDirectoryProfile(user.uid, user.email, settings).catch((error) => {
+      console.warn("Unable to upsert current user directory profile", error);
+    });
   }, [settings, user?.email, user?.uid]);
 
   useEffect(() => {
@@ -28,8 +30,8 @@ export function SharedCollaborationSync() {
       return;
     }
 
-    const unsubscribe = subscribeToSharedObligations(user.uid, (obligations) => {
-      void mirrorSharedObligationsToLocal(user.uid, obligations);
+    const unsubscribe = subscribeToSharedObligations(user.uid, user.email, (obligations) => {
+      void mirrorSharedObligationsToLocal(user.uid, obligations, user.email);
     });
 
     void claimPendingSharedObligations(user.uid, user.email).catch((error) => {
