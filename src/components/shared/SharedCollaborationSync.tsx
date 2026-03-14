@@ -28,23 +28,15 @@ export function SharedCollaborationSync() {
       return;
     }
 
-    let unsubscribe = () => {};
-    let active = true;
+    const unsubscribe = subscribeToSharedObligations(user.uid, (obligations) => {
+      void mirrorSharedObligationsToLocal(user.uid, obligations);
+    });
 
-    void (async () => {
-      await claimPendingSharedObligations(user.uid, user.email);
-
-      if (!active) {
-        return;
-      }
-
-      unsubscribe = subscribeToSharedObligations(user.uid, (obligations) => {
-        void mirrorSharedObligationsToLocal(user.uid, obligations);
-      });
-    })();
+    void claimPendingSharedObligations(user.uid, user.email).catch((error) => {
+      console.warn("Unable to claim pending shared obligations", error);
+    });
 
     return () => {
-      active = false;
       unsubscribe();
     };
   }, [user?.email, user?.uid]);

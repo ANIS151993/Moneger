@@ -579,14 +579,20 @@ export function subscribeToSharedObligations(
     where("participantUids", "array-contains", userId)
   );
 
-  return onSnapshot(obligationsQuery, (snapshot) => {
-    const obligations = snapshot.docs
-      .map((item) => normalizeSharedObligation(item.id, item.data()))
-      .filter((item): item is SharedObligationRecord => Boolean(item))
-      .sort((left, right) => new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime());
+  return onSnapshot(
+    obligationsQuery,
+    (snapshot) => {
+      const obligations = snapshot.docs
+        .map((item) => normalizeSharedObligation(item.id, item.data()))
+        .filter((item): item is SharedObligationRecord => Boolean(item))
+        .sort((left, right) => new Date(right.updatedAt).getTime() - new Date(left.updatedAt).getTime());
 
-    onChange(obligations);
-  });
+      onChange(obligations);
+    },
+    (error) => {
+      console.warn("Shared obligations subscription failed", error);
+    }
+  );
 }
 
 export async function mirrorSharedObligationsToLocal(userId: string, obligations: SharedObligationRecord[]) {

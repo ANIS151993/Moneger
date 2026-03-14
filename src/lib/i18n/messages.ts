@@ -211,7 +211,7 @@ const englishMessages: TranslationTable = {
   "debtForm.addInstallment": "Add debt installment",
   "debtForm.installmentSettled": "Mark installment as paid",
   "debtForm.collaborationHint":
-    "Add the creditor email to turn this into a shared Moneger debt. Existing users will see it automatically, and new users can be invited by email.",
+    "Add the creditor email to turn this into a shared Moneger debt. Existing users will see it automatically in their Money Owed records, and new users can be invited by email.",
 
   "owedForm.title": "Track money owed to you",
   "owedForm.editTitle": "Edit money owed",
@@ -231,7 +231,7 @@ const englishMessages: TranslationTable = {
   "owedForm.addInstallment": "Add expected installment",
   "owedForm.installmentSettled": "Mark installment as received",
   "owedForm.collaborationHint":
-    "Add the debtor email to turn this into a shared Moneger receivable. Existing users will see it automatically, and new users can be invited by email.",
+    "Add the debtor email to turn this into a shared Moneger receivable. Existing users will see it automatically in their Debts records, and new users can be invited by email.",
 
   "installments.dueDate": "Installment due date",
   "installments.note": "Installment note",
