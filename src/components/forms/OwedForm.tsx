@@ -11,6 +11,7 @@ import { FormField } from "@/components/ui/FormField";
 import { Input } from "@/components/ui/Input";
 import { Select } from "@/components/ui/Select";
 import { Textarea } from "@/components/ui/Textarea";
+import { firebaseClientConfigured } from "@/lib/firebase/client";
 import { currencyCatalog, installmentFrequencies, owedStatuses, supportedCurrencies } from "@/lib/constants/options";
 import { ledgerService } from "@/lib/services/ledger-service";
 import { getFinalInstallmentDate, normalizeInstallments, sumInstallments } from "@/lib/utils/installments";
@@ -157,6 +158,10 @@ export function OwedForm({
             </Select>
           </FormField>
         </div>
+
+        {firebaseClientConfigured ? (
+          <p className="text-sm leading-6 text-slate-500">{t("owedForm.collaborationHint")}</p>
+        ) : null}
 
         <div className="grid gap-4 md:grid-cols-2">
           <FormField label={t("common.amount")} error={errors.amount?.message}>

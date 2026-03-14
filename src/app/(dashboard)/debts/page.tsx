@@ -14,6 +14,12 @@ import { useAuth } from "@/lib/hooks/use-auth";
 import { getUserDatabase } from "@/lib/db/moneger-db";
 import { useUserSettings } from "@/lib/hooks/use-user-settings";
 import { ledgerService } from "@/lib/services/ledger-service";
+import {
+  acceptSharedObligationSchedule,
+  buildSharedInviteEmailDraft,
+  buildSharedReminderEmailDraft,
+  markInviteEmailSent
+} from "@/lib/services/shared-obligations-cloud-service";
 import { formatDate } from "@/lib/utils/date";
 import { formatCurrency } from "@/lib/utils/finance";
 import {
@@ -28,6 +34,9 @@ export default function DebtsPage() {
   const [editingId, setEditingId] = useState<string | null>(null);
   const settings = useUserSettings(user?.uid);
   const baseCurrency = settings?.baseCurrency || "USD";
+  const appUrl =
+    process.env.NEXT_PUBLIC_APP_URL ||
+    (typeof window !== "undefined" ? window.location.origin : "https://moneger.marcbd.site");
   const debts = useLiveQuery(
     async () => {
       if (!user) {
@@ -52,6 +61,25 @@ export default function DebtsPage() {
     return null;
   }
 
+  const userId = user.uid;
+
+  function openDraft(url: string) {
+    if (typeof window === "undefined") {
+      return;
+    }
+
+    window.location.href = url;
+  }
+
+  async function handleInviteEmail(item: (typeof debts)[number]) {
+    await markInviteEmailSent(userId, item.sharedObligationId);
+    openDraft(buildSharedInviteEmailDraft(item, appUrl));
+  }
+
+  function handleReminderEmail(item: (typeof debts)[number]) {
+    openDraft(buildSharedReminderEmailDraft(item, appUrl));
+  }
+
   return (
     <div className="space-y-6">
       <PageHeader
@@ -66,7 +94,7 @@ export default function DebtsPage() {
           onCancel={() => setEditingId(null)}
           onSaved={() => setEditingId(null)}
           record={editingDebt}
-          userId={user.uid}
+          userId={userId}
         />
         {debts.length === 0 ? (
           <EmptyState
@@ -84,8 +112,23 @@ export default function DebtsPage() {
                 header: t("debtsPage.creditor"),
                 render: (item) => (
                   <div>
-                    <p className="font-medium text-slate-900">{item.creditorName}</p>
-                    <p className="text-xs text-slate-400">{item.creditorEmail || item.creditorPhone || t("common.noContact")}</p>
+                    <div className="flex flex-wrap items-center gap-2">
+                      <p className="font-medium text-slate-900">{item.creditorName}</p>
+                      {item.sharingStatus === "matched" ? (
+                        <Badge tone={item.sharedAgreementStatus === "agreed" ? "success" : "info"}>
+                          {t(
+                            item.sharedAgreementStatus === "agreed"
+                              ? "collaboration.agreed"
+                              : "collaboration.monegerLinked"
+                          )}
+                        </Badge>
+                      ) : item.sharingStatus === "invited" ? (
+                        <Badge tone="warning">{t("collaboration.invitePending")}</Badge>
+                      ) : null}
+                    </div>
+                    <p className="text-xs text-slate-400">
+                      {item.creditorEmail || item.creditorPhone || t("common.noContact")}
+                    </p>
                   </div>
                 )
               },
@@ -126,6 +169,11 @@ export default function DebtsPage() {
                             ? t("installments.complete")
                             : t("installments.none")}
                       </p>
+                      {item.sharedAgreementStatus ? (
+                        <p className="mt-1 text-[11px] font-medium uppercase tracking-[0.18em] text-sky-500">
+                          {t(`collaboration.status.${item.sharedAgreementStatus}`)}
+                        </p>
+                      ) : null}
                     </div>
                   );
                 }
@@ -147,7 +195,25 @@ export default function DebtsPage() {
                     <Button variant="ghost" onClick={() => setEditingId(item.id)}>
                       {t("common.edit")}
                     </Button>
-                    <Button variant="ghost" onClick={() => void ledgerService.deleteDebt(user.uid, item.id)}>
+                    {item.sharedObligationId && !item.sharedCurrentUserAcceptedAt ? (
+                      <Button
+                        variant="ghost"
+                        onClick={() => void acceptSharedObligationSchedule(userId, item.sharedObligationId)}
+                      >
+                        {t("collaboration.acceptSchedule")}
+                      </Button>
+                    ) : null}
+                    {item.sharingStatus === "invited" && item.creditorEmail ? (
+                      <Button variant="ghost" onClick={() => void handleInviteEmail(item)}>
+                        {t("collaboration.sendInvite")}
+                      </Button>
+                    ) : null}
+                    {item.sharingStatus === "matched" && item.creditorEmail ? (
+                      <Button variant="ghost" onClick={() => handleReminderEmail(item)}>
+                        {t("collaboration.emailReminder")}
+                      </Button>
+                    ) : null}
+                    <Button variant="ghost" onClick={() => void ledgerService.deleteDebt(userId, item.id)}>
                       {t("common.delete")}
                     </Button>
                   </div>

@@ -174,6 +174,7 @@ const englishMessages: TranslationTable = {
   "common.save": "Save",
   "common.loadingWorkspace": "Loading workspace",
   "common.returnHome": "Return home",
+  "common.collaboration": "Collaboration",
 
   "incomeForm.title": "Add income",
   "incomeForm.editTitle": "Edit income",
@@ -209,6 +210,8 @@ const englishMessages: TranslationTable = {
     "Add installment rows when this debt will be repaid in parts. The scheduled total must match the full debt amount.",
   "debtForm.addInstallment": "Add debt installment",
   "debtForm.installmentSettled": "Mark installment as paid",
+  "debtForm.collaborationHint":
+    "Add the creditor email to turn this into a shared Moneger debt. Existing users will see it automatically, and new users can be invited by email.",
 
   "owedForm.title": "Track money owed to you",
   "owedForm.editTitle": "Edit money owed",
@@ -227,6 +230,8 @@ const englishMessages: TranslationTable = {
     "Add installment rows when the money will be returned in parts. The scheduled total must match the full amount expected.",
   "owedForm.addInstallment": "Add expected installment",
   "owedForm.installmentSettled": "Mark installment as received",
+  "owedForm.collaborationHint":
+    "Add the debtor email to turn this into a shared Moneger receivable. Existing users will see it automatically, and new users can be invited by email.",
 
   "installments.dueDate": "Installment due date",
   "installments.note": "Installment note",
@@ -236,6 +241,17 @@ const englishMessages: TranslationTable = {
   "installments.complete": "Schedule complete",
   "installments.none": "No installment schedule",
   "installments.remaining": "Remaining {{amount}}",
+
+  "collaboration.monegerLinked": "Moneger linked",
+  "collaboration.invitePending": "Invite pending",
+  "collaboration.agreed": "Schedule agreed",
+  "collaboration.acceptSchedule": "Accept schedule",
+  "collaboration.sendInvite": "Send invite",
+  "collaboration.emailReminder": "Email reminder",
+  "collaboration.status.invited": "Awaiting sign-up",
+  "collaboration.status.pending-acceptance": "Awaiting agreement",
+  "collaboration.status.agreed": "Both sides agreed",
+  "collaboration.status.cancelled": "Cancelled",
 
   "bankForm.title": "Add a bank account",
   "bankForm.saved": "Bank account saved locally.",

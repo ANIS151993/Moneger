@@ -19,6 +19,8 @@ export type IncomeFrequency = "daily" | "weekly" | "monthly" | "one-time";
 export type DebtStatus = "unpaid" | "partial" | "paid" | "overdue";
 export type OwedStatus = "pending" | "partial" | "settled" | "overdue";
 export type InstallmentFrequency = "weekly" | "biweekly" | "monthly" | "custom";
+export type SharingStatus = "local" | "invited" | "matched";
+export type SharedAgreementStatus = "invited" | "pending-acceptance" | "agreed" | "cancelled";
 export type SyncAction = "create" | "update" | "delete";
 export type SyncStatus = "queued" | "encrypted" | "uploaded" | "failed";
 
@@ -56,6 +58,16 @@ export interface InstallmentScheduleItem {
   frequency: InstallmentFrequency;
 }
 
+export interface SharedRecordMeta {
+  sharedObligationId?: string;
+  sharingStatus?: SharingStatus;
+  counterpartUserId?: string;
+  sharedAgreementStatus?: SharedAgreementStatus;
+  sharedCurrentUserAcceptedAt?: string | null;
+  sharedCounterpartyAcceptedAt?: string | null;
+  sharedUpdatedAt?: string;
+}
+
 export interface BankRecord extends BaseEntity {
   country: CountryCode;
   bankName: string;
@@ -65,7 +77,7 @@ export interface BankRecord extends BaseEntity {
   note: string;
 }
 
-export interface DebtRecord extends BaseEntity {
+export interface DebtRecord extends BaseEntity, SharedRecordMeta {
   creditorName: string;
   creditorEmail: string;
   creditorPhone: string;
@@ -78,7 +90,7 @@ export interface DebtRecord extends BaseEntity {
   installments?: InstallmentScheduleItem[];
 }
 
-export interface OwedRecord extends BaseEntity {
+export interface OwedRecord extends BaseEntity, SharedRecordMeta {
   debtorName: string;
   debtorEmail: string;
   debtorPhone: string;
@@ -193,6 +205,48 @@ export interface CurrencyRateMap {
   base: CurrencyCode;
   rates: Record<CurrencyCode, number>;
   updatedAt: string | null;
+}
+
+export interface UserDirectoryRecord {
+  uid: string;
+  email: string;
+  emailLower: string;
+  displayName: string;
+  contactNumber: string;
+  location: string;
+  avatarDataUrl: string;
+  languagePreference: LanguagePreference;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface SharedObligationParticipant {
+  uid: string | null;
+  email: string;
+  name: string;
+  phone: string;
+  acceptedAt: string | null;
+}
+
+export interface SharedObligationRecord {
+  id: string;
+  createdAt: string;
+  updatedAt: string;
+  createdByUid: string;
+  sourceType: "debt" | "owed";
+  amount: number;
+  currency: CurrencyCode;
+  note: string;
+  createdDate: string;
+  settlementDate: string;
+  installments: InstallmentScheduleItem[];
+  sourceStatus: string;
+  participantUids: string[];
+  participantEmails: string[];
+  status: SharedAgreementStatus;
+  inviteEmailSentAt: string | null;
+  creditor: SharedObligationParticipant;
+  debtor: SharedObligationParticipant;
 }
 
 export interface OptionalEncryptedSyncPayload {

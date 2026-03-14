@@ -10,6 +10,7 @@ Firebase is intentionally not the default finance database. In this starter it i
 
 - authentication
 - minimal profile/auth metadata
+- shared creditor/debtor relationship metadata
 - optional encrypted sync scaffolding
 
 Plaintext financial records are not stored remotely by default.
@@ -28,6 +29,8 @@ Profile and app-level settings are different. When Firebase and Firestore are co
    Sync scaffolding is present, but it is framed around device-side encryption before any Firestore upload.
 5. Mobile-ready modular structure
    The codebase separates app routes, components, repositories, services, validators, and types so shared logic can move to React Native / Expo later.
+6. Shared obligations use the cloud, not the primary ledger
+   Cross-user debt matching is stored in Firestore, then mirrored back into each user's local debt/owed tables so the dashboard and reminders keep working offline.
 
 ## Folder Structure
 
@@ -65,6 +68,8 @@ Optional:
 - Add `NEXT_PUBLIC_GOOGLE_MAPS_API_KEY` if you want live Google-backed bank name autocomplete in the bank form.
 - Enable the Google Maps JavaScript API and Places API for that key, then restrict the key to your domains.
 - If you want profile/settings sync across browser and installed shortcut contexts, enable Firestore and publish the rules from `firestore.rules`.
+- If you want creditor/debtor collaboration across Moneger accounts, Firestore is required. The app now publishes a minimal user directory entry and a shared-obligations collection for matched counterparties.
+- Email invites and reminder emails currently open prefilled `mailto:` drafts from the browser. Fully automatic email sending would require a backend mail service or Cloud Functions.
 
 4. Start the app:
 
@@ -81,6 +86,7 @@ The lowest-friction free setup for this repo is:
 - Cloudflare Pages for the web app
 - Firebase Authentication for login/signup/reset
 - Firestore on the Firebase Spark plan only if you later enable sync
+- Firestore on the Firebase Spark plan if you want shortcut profile restore or shared creditor/debtor records
 
 This project is configured for static export, so Cloudflare Pages can host the generated `out/` directory without Firebase App Hosting.
 
@@ -107,6 +113,7 @@ This project is configured for static export, so Cloudflare Pages can host the g
 - Expense tracking
 - Debt tracking
 - Money owed tracking
+- Shared creditor/debtor collaboration with email matching, invite drafts, and agreement status
 - Bank tracking
 - Settings, notification scaffolding, and sync scaffolding
 
@@ -115,6 +122,7 @@ This project is configured for static export, so Cloudflare Pages can host the g
 - Primary finance records remain local by default
 - Firebase does not hold plaintext financial data by default
 - Signed-in user settings can sync to Firestore so profile identity and app preferences restore across shortcut-installed contexts
+- Shared creditor/debtor records store only the minimum cross-user collaboration metadata needed to mirror the agreed obligation and installment schedule
 - Sync scaffolding expects encryption before upload
 - Bank records intentionally store only lightweight references such as name, nickname, and last four digits
 

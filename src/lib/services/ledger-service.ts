@@ -18,6 +18,12 @@ import {
   settingsRepository,
   syncQueueRepository
 } from "@/lib/repositories/finance-repositories";
+import {
+  archiveSharedObligation,
+  syncDebtCollaboration,
+  syncOwedCollaboration,
+  upsertUserDirectoryProfile
+} from "@/lib/services/shared-obligations-cloud-service";
 import { saveUserSettingsToCloud } from "@/lib/services/user-settings-cloud-service";
 import type { LanguagePreference } from "@/types/finance";
 
@@ -67,30 +73,66 @@ export const ledgerService = {
     await queueSync(userId, "expense", "delete", id);
   },
   async createDebt(userId: string, input: DebtInput) {
-    const record = await debtRepository.create(userId, input);
+    let record = await debtRepository.create(userId, input);
+    const collaborationMeta = await syncDebtCollaboration(userId, record);
+
+    if (collaborationMeta) {
+      record = await debtRepository.update(userId, record.id, collaborationMeta);
+    }
+
     await queueSync(userId, "debt", "create", record.id);
     return record;
   },
   async updateDebt(userId: string, id: string, input: DebtInput) {
-    const record = await debtRepository.update(userId, id, input);
+    let record = await debtRepository.update(userId, id, input);
+    const collaborationMeta = await syncDebtCollaboration(userId, record);
+
+    if (collaborationMeta) {
+      record = await debtRepository.update(userId, id, collaborationMeta);
+    }
+
     await queueSync(userId, "debt", "update", record.id);
     return record;
   },
   async deleteDebt(userId: string, id: string) {
+    const current = await debtRepository.get(userId, id);
+
+    if (current?.sharedObligationId) {
+      await archiveSharedObligation(userId, current.sharedObligationId);
+    }
+
     await debtRepository.remove(userId, id);
     await queueSync(userId, "debt", "delete", id);
   },
   async createOwed(userId: string, input: OwedInput) {
-    const record = await owedRepository.create(userId, input);
+    let record = await owedRepository.create(userId, input);
+    const collaborationMeta = await syncOwedCollaboration(userId, record);
+
+    if (collaborationMeta) {
+      record = await owedRepository.update(userId, record.id, collaborationMeta);
+    }
+
     await queueSync(userId, "owed", "create", record.id);
     return record;
   },
   async updateOwed(userId: string, id: string, input: OwedInput) {
-    const record = await owedRepository.update(userId, id, input);
+    let record = await owedRepository.update(userId, id, input);
+    const collaborationMeta = await syncOwedCollaboration(userId, record);
+
+    if (collaborationMeta) {
+      record = await owedRepository.update(userId, id, collaborationMeta);
+    }
+
     await queueSync(userId, "owed", "update", record.id);
     return record;
   },
   async deleteOwed(userId: string, id: string) {
+    const current = await owedRepository.get(userId, id);
+
+    if (current?.sharedObligationId) {
+      await archiveSharedObligation(userId, current.sharedObligationId);
+    }
+
     await owedRepository.remove(userId, id);
     await queueSync(userId, "owed", "delete", id);
   },
@@ -113,12 +155,14 @@ export const ledgerService = {
     const record = await settingsRepository.upsert(userId, input);
     await queueSync(userId, "settings", "update", record.id);
     void saveUserSettingsToCloud(record).catch(() => undefined);
+    void upsertUserDirectoryProfile(userId, undefined, record).catch(() => undefined);
     return record;
   },
   async saveLanguagePreference(userId: string, languagePreference: LanguagePreference) {
     const record = await settingsRepository.upsert(userId, { languagePreference });
     await queueSync(userId, "settings", "update", record.id);
     void saveUserSettingsToCloud(record).catch(() => undefined);
+    void upsertUserDirectoryProfile(userId, undefined, record).catch(() => undefined);
     return record;
   },
   async clearWorkspace(userId: string) {
