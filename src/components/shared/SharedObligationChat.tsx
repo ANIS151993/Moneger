@@ -11,6 +11,7 @@ import {
   sendSharedObligationMessage,
   subscribeToSharedObligationMessages
 } from "@/lib/services/shared-obligations-cloud-service";
+import { markSharedConversationSeen } from "@/lib/services/shared-message-notification-service";
 import { cn } from "@/lib/utils/cn";
 import { formatDateTime, relativeFromNow } from "@/lib/utils/date";
 import type { SharedObligationMessageRecord } from "@/types/finance";
@@ -42,6 +43,16 @@ export function SharedObligationChat({
   useEffect(() => {
     endRef.current?.scrollIntoView({ behavior: "smooth", block: "end" });
   }, [messages]);
+
+  useEffect(() => {
+    const latestMessageAt = messages[messages.length - 1]?.createdAt;
+
+    if (!latestMessageAt) {
+      return;
+    }
+
+    void markSharedConversationSeen(userId, sharedObligationId, latestMessageAt);
+  }, [messages, sharedObligationId, userId]);
 
   function handleSubmit(event: React.FormEvent<HTMLFormElement>) {
     event.preventDefault();

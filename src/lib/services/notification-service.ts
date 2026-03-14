@@ -7,6 +7,10 @@ export function browserNotificationSupported() {
   return typeof window !== "undefined" && "Notification" in window;
 }
 
+export function appBadgeSupported() {
+  return typeof navigator !== "undefined" && "setAppBadge" in navigator && "clearAppBadge" in navigator;
+}
+
 export async function requestBrowserNotificationPermission() {
   if (!browserNotificationSupported()) {
     return "unsupported" as const;
@@ -35,6 +39,30 @@ export function pushReminderNotifications(reminders: ReminderItem[]) {
       tag: reminder.id
     });
   });
+}
+
+export function pushBrowserNotification(title: string, body: string, tag: string) {
+  if (!browserNotificationSupported() || Notification.permission !== "granted") {
+    return;
+  }
+
+  new Notification(title, {
+    body,
+    tag
+  });
+}
+
+export async function syncAppBadge(unreadCount: number) {
+  if (!appBadgeSupported()) {
+    return;
+  }
+
+  if (unreadCount > 0) {
+    await navigator.setAppBadge(unreadCount);
+    return;
+  }
+
+  await navigator.clearAppBadge();
 }
 
 export const notificationArchitectureNote =

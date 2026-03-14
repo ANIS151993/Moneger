@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useSearchParams } from "next/navigation";
 
 import { OwedForm } from "@/components/forms/OwedForm";
 import { useI18n } from "@/components/providers/LanguageProvider";
@@ -32,6 +33,7 @@ import {
 export default function OwedPage() {
   const { user } = useAuth();
   const { t } = useI18n();
+  const searchParams = useSearchParams();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [chatRecordId, setChatRecordId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
@@ -66,6 +68,20 @@ export default function OwedPage() {
       setChatRecordId(null);
     }
   }, [chatOwed, chatRecordId]);
+
+  useEffect(() => {
+    const requestedSharedChatId = searchParams.get("chat");
+
+    if (!requestedSharedChatId) {
+      return;
+    }
+
+    const matchingRecord = owed.find((item) => item.sharedObligationId === requestedSharedChatId);
+
+    if (matchingRecord && matchingRecord.id !== chatRecordId) {
+      setChatRecordId(matchingRecord.id);
+    }
+  }, [chatRecordId, owed, searchParams]);
 
   if (!user) {
     return null;

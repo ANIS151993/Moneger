@@ -8,8 +8,10 @@ import type {
   ExchangeRateSnapshotRecord,
   ExpenseRecord,
   IncomeRecord,
+  MessageNotificationRecord,
   OwedRecord,
   SettingsRecord,
+  SharedMessageStateRecord,
   SyncQueueRecord
 } from "@/types/finance";
 import { getUserDatabase } from "@/lib/db/moneger-db";
@@ -161,6 +163,93 @@ export const settingsRepository = {
       ...rest
     };
     await getUserDatabase(userId).settings.put(record);
+    return record;
+  }
+};
+
+export const messageNotificationRepository = {
+  async get(userId: string, messageId: string) {
+    return getUserDatabase(userId).messageNotifications.get(`message_notification_${messageId}`);
+  },
+  async listRecent(userId: string, limit = 8) {
+    return getUserDatabase(userId).messageNotifications
+      .orderBy("messageCreatedAt")
+      .reverse()
+      .limit(limit)
+      .toArray();
+  },
+  async countUnread(userId: string) {
+    const items = await getUserDatabase(userId).messageNotifications.toArray();
+    return items.filter((item) => !item.readAt).length;
+  },
+  async upsert(
+    userId: string,
+    payload: Omit<MessageNotificationRecord, "id" | "userId" | "createdAt" | "updatedAt">
+  ) {
+    const id = `message_notification_${payload.messageId}`;
+    const current = await getUserDatabase(userId).messageNotifications.get(id);
+    const now = nowIso();
+    const record: MessageNotificationRecord = {
+      id,
+      userId,
+      createdAt: current?.createdAt || now,
+      updatedAt: now,
+      ...payload
+    };
+    await getUserDatabase(userId).messageNotifications.put(record);
+    return record;
+  },
+  async markRead(userId: string, id: string) {
+    const current = await getUserDatabase(userId).messageNotifications.get(id);
+
+    if (!current || current.readAt) {
+      return current;
+    }
+
+    const nextRecord: MessageNotificationRecord = {
+      ...current,
+      readAt: nowIso(),
+      updatedAt: nowIso()
+    };
+    await getUserDatabase(userId).messageNotifications.put(nextRecord);
+    return nextRecord;
+  },
+  async markSharedObligationRead(userId: string, sharedObligationId: string) {
+    const items = await getUserDatabase(userId).messageNotifications
+      .where("sharedObligationId")
+      .equals(sharedObligationId)
+      .toArray();
+
+    await Promise.all(items.filter((item) => !item.readAt).map((item) => this.markRead(userId, item.id)));
+  },
+  async markAllRead(userId: string) {
+    const items = await getUserDatabase(userId).messageNotifications.toArray();
+    await Promise.all(items.filter((item) => !item.readAt).map((item) => this.markRead(userId, item.id)));
+  }
+};
+
+export const sharedMessageStateRepository = {
+  async get(userId: string, sharedObligationId: string) {
+    return getUserDatabase(userId).sharedMessageStates.get(`shared_message_state_${sharedObligationId}`);
+  },
+  async upsert(
+    userId: string,
+    sharedObligationId: string,
+    payload: Omit<SharedMessageStateRecord, "id" | "userId" | "sharedObligationId" | "createdAt" | "updatedAt">
+  ) {
+    const id = `shared_message_state_${sharedObligationId}`;
+    const current = await getUserDatabase(userId).sharedMessageStates.get(id);
+    const now = nowIso();
+    const record: SharedMessageStateRecord = {
+      id,
+      userId,
+      sharedObligationId,
+      createdAt: current?.createdAt || now,
+      updatedAt: now,
+      lastKnownMessageAt: payload.lastKnownMessageAt,
+      lastSeenAt: payload.lastSeenAt
+    };
+    await getUserDatabase(userId).sharedMessageStates.put(record);
     return record;
   }
 };

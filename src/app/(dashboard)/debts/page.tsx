@@ -2,6 +2,7 @@
 
 import { useEffect, useState } from "react";
 import { useLiveQuery } from "dexie-react-hooks";
+import { useSearchParams } from "next/navigation";
 
 import { DebtForm } from "@/components/forms/DebtForm";
 import { useI18n } from "@/components/providers/LanguageProvider";
@@ -32,6 +33,7 @@ import {
 export default function DebtsPage() {
   const { user } = useAuth();
   const { t } = useI18n();
+  const searchParams = useSearchParams();
   const [editingId, setEditingId] = useState<string | null>(null);
   const [chatRecordId, setChatRecordId] = useState<string | null>(null);
   const [actionError, setActionError] = useState("");
@@ -66,6 +68,20 @@ export default function DebtsPage() {
       setChatRecordId(null);
     }
   }, [chatDebt, chatRecordId]);
+
+  useEffect(() => {
+    const requestedSharedChatId = searchParams.get("chat");
+
+    if (!requestedSharedChatId) {
+      return;
+    }
+
+    const matchingRecord = debts.find((item) => item.sharedObligationId === requestedSharedChatId);
+
+    if (matchingRecord && matchingRecord.id !== chatRecordId) {
+      setChatRecordId(matchingRecord.id);
+    }
+  }, [chatRecordId, debts, searchParams]);
 
   if (!user) {
     return null;

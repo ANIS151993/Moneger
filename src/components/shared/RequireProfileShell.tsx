@@ -4,6 +4,7 @@ import type { ReactNode } from "react";
 
 import { ProfileCompletionGate } from "@/components/shared/ProfileCompletionGate";
 import { SharedCollaborationSync } from "@/components/shared/SharedCollaborationSync";
+import { SharedMessageNotificationsSync } from "@/components/shared/SharedMessageNotificationsSync";
 import { LoadingCard } from "@/components/shared/LoadingCard";
 import { useI18n } from "@/components/providers/LanguageProvider";
 import { useAuth } from "@/lib/hooks/use-auth";
@@ -19,6 +20,7 @@ export function RequireProfileShell({ children }: { children: ReactNode }) {
   return (
     <ProfileCompletionGate userId={user.uid}>
       <SharedCollaborationSync />
+      <SharedMessageNotificationsSync />
       {children}
     </ProfileCompletionGate>
   );

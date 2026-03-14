@@ -260,6 +260,24 @@ export interface SharedObligationMessageRecord {
   updatedAt: string;
 }
 
+export interface MessageNotificationRecord extends BaseEntity {
+  type: "shared-message";
+  sharedObligationId: string;
+  messageId: string;
+  counterpartName: string;
+  title: string;
+  body: string;
+  routeHref: string;
+  messageCreatedAt: string;
+  readAt: string | null;
+}
+
+export interface SharedMessageStateRecord extends BaseEntity {
+  sharedObligationId: string;
+  lastKnownMessageAt: string;
+  lastSeenAt: string | null;
+}
+
 export interface OptionalEncryptedSyncPayload {
   version: 1;
   userId: string;

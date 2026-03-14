@@ -10,8 +10,10 @@ import type {
   ExchangeRateSnapshotRecord,
   ExpenseRecord,
   IncomeRecord,
+  MessageNotificationRecord,
   OwedRecord,
   SettingsRecord,
+  SharedMessageStateRecord,
   SyncQueueRecord
 } from "@/types/finance";
 
@@ -25,6 +27,8 @@ export class MonegerDatabase extends Dexie {
   exchangeRateSnapshots!: Table<ExchangeRateSnapshotRecord, string>;
   syncQueue!: Table<SyncQueueRecord, string>;
   settings!: Table<SettingsRecord, string>;
+  messageNotifications!: Table<MessageNotificationRecord, string>;
+  sharedMessageStates!: Table<SharedMessageStateRecord, string>;
 
   constructor(name: string) {
     super(name);
@@ -76,6 +80,20 @@ export class MonegerDatabase extends Dexie {
             record.country = inferBankCountry(record.bankName || "", record.currency || "USD");
           });
       });
+
+    this.version(4).stores({
+      incomes: "id, userId, date, category, source, createdAt, updatedAt",
+      expenses: "id, userId, date, category, source, createdAt, updatedAt",
+      debts: "id, userId, settlementDate, status, creditorName, createdAt, updatedAt",
+      owed: "id, userId, settlementDate, status, debtorName, createdAt, updatedAt",
+      banks: "id, userId, country, bankName, nickname, createdAt, updatedAt",
+      exchangeRates: "pair, userId, fetchedAt, updatedAt",
+      exchangeRateSnapshots: "id, userId, fetchedAt, updatedAt",
+      syncQueue: "id, userId, entityType, status, createdAt, updatedAt",
+      settings: "id, userId, updatedAt",
+      messageNotifications: "id, userId, sharedObligationId, readAt, messageCreatedAt, updatedAt",
+      sharedMessageStates: "id, userId, sharedObligationId, lastKnownMessageAt, lastSeenAt, updatedAt"
+    });
   }
 }
 

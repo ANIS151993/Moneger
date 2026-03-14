@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { useEffect, useState, type ReactNode } from "react";
+import { useLiveQuery } from "dexie-react-hooks";
 
 import { DeveloperSignatureCard } from "@/components/branding/DeveloperSignatureCard";
 import { ProfileAvatar } from "@/components/profile/ProfileAvatar";
@@ -12,7 +13,10 @@ import { useI18n } from "@/components/providers/LanguageProvider";
 import { dashboardNavigation, onboardingNavigation } from "@/lib/constants/navigation";
 import { useAuth } from "@/lib/hooks/use-auth";
 import { useUserSettings } from "@/lib/hooks/use-user-settings";
+import { messageNotificationRepository } from "@/lib/repositories/finance-repositories";
+import { syncAppBadge } from "@/lib/services/notification-service";
 import { cn } from "@/lib/utils/cn";
+import { relativeFromNow } from "@/lib/utils/date";
 import { getCompactProfileMeta, getProfileDisplayName, isProfileComplete } from "@/lib/utils/profile";
 
 const mobilePrimaryNavigation = [
@@ -163,7 +167,30 @@ export function AppShell({ children }: { children: ReactNode }) {
   const { t } = useI18n();
   const [mobileNavOpen, setMobileNavOpen] = useState(false);
   const [mobileActionOpen, setMobileActionOpen] = useState(false);
+  const [notificationsOpen, setNotificationsOpen] = useState(false);
   const profile = useUserSettings(user?.uid);
+  const unreadMessageCount = useLiveQuery(
+    async () => {
+      if (!user?.uid) {
+        return 0;
+      }
+
+      return messageNotificationRepository.countUnread(user.uid);
+    },
+    [user?.uid],
+    0
+  );
+  const recentMessageNotifications = useLiveQuery(
+    async () => {
+      if (!user?.uid) {
+        return [];
+      }
+
+      return messageNotificationRepository.listRecent(user.uid, 7);
+    },
+    [user?.uid],
+    []
+  );
   const displayName = getProfileDisplayName(profile, user?.email);
   const compactMeta = getCompactProfileMeta(profile, user?.email);
   const profileComplete = isProfileComplete(profile);
@@ -175,25 +202,66 @@ export function AppShell({ children }: { children: ReactNode }) {
     [...dashboardNavigation, ...onboardingNavigation, { href: "/guide", labelKey: "nav.guide" as const }].find(
       (item) => pathname === item.href
     )?.labelKey || "nav.overview";
-  const mobileOverlayVisible = mobileNavOpen || mobileActionOpen;
+  const shellOverlayVisible = mobileNavOpen || mobileActionOpen || notificationsOpen;
 
   useEffect(() => {
     setMobileNavOpen(false);
     setMobileActionOpen(false);
+    setNotificationsOpen(false);
   }, [pathname]);
 
   useEffect(() => {
     const { body } = document;
     const previousOverflow = body.style.overflow;
 
-    if (mobileOverlayVisible) {
+    if (shellOverlayVisible) {
       body.style.overflow = "hidden";
     }
 
     return () => {
       body.style.overflow = previousOverflow;
     };
-  }, [mobileOverlayVisible]);
+  }, [shellOverlayVisible]);
+
+  useEffect(() => {
+    void syncAppBadge(unreadMessageCount || 0).catch(() => undefined);
+  }, [unreadMessageCount]);
+
+  async function handleNotificationClick(notificationId: string) {
+    if (!user?.uid) {
+      return;
+    }
+
+    await messageNotificationRepository.markRead(user.uid, notificationId);
+    setNotificationsOpen(false);
+  }
+
+  async function handleMarkAllNotificationsRead() {
+    if (!user?.uid) {
+      return;
+    }
+
+    await messageNotificationRepository.markAllRead(user.uid);
+  }
+
+  const notificationBell = (
+    <span className="relative inline-flex h-11 w-11 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 text-slate-900 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition">
+      <svg aria-hidden="true" className="h-[18px] w-[18px]" fill="none" viewBox="0 0 24 24">
+        <path
+          d="M9.75 18.25h4.5M6.75 16.5h10.5l-1.25-1.5v-3.5a4.5 4.5 0 1 0-9 0V15l-1.25 1.5Z"
+          stroke="currentColor"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          strokeWidth="1.6"
+        />
+      </svg>
+      {unreadMessageCount ? (
+        <span className="absolute -right-1 -top-1 inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-rose-500 px-1 text-[10px] font-bold text-white shadow-[0_10px_20px_rgba(244,63,94,0.35)]">
+          {unreadMessageCount > 99 ? "99+" : unreadMessageCount}
+        </span>
+      ) : null}
+    </span>
+  );
 
   return (
     <div className="min-h-screen bg-[radial-gradient(circle_at_top_left,_rgba(22,163,74,0.12),_transparent_24rem),linear-gradient(180deg,#f8fafc_0%,#eef6ff_100%)]">
@@ -220,6 +288,20 @@ export function AppShell({ children }: { children: ReactNode }) {
             </Link>
 
             <div className="flex items-center gap-2">
+              {profileComplete ? (
+                <button
+                  aria-label={notificationsOpen ? t("notifications.closeInbox") : t("notifications.openInbox")}
+                  type="button"
+                  onClick={() => {
+                    setMobileNavOpen(false);
+                    setMobileActionOpen(false);
+                    setNotificationsOpen((current) => !current);
+                  }}
+                >
+                  {notificationBell}
+                </button>
+              ) : null}
+
               {profileComplete ? (
                 <button
                   aria-label="Open quick actions"
@@ -269,15 +351,16 @@ export function AppShell({ children }: { children: ReactNode }) {
         </div>
 
         <button
-          aria-hidden={!mobileOverlayVisible}
+          aria-hidden={!shellOverlayVisible}
           className={cn(
             "fixed inset-0 z-40 bg-slate-950/45 backdrop-blur-sm transition duration-300 lg:hidden",
-            mobileOverlayVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
+            shellOverlayVisible ? "pointer-events-auto opacity-100" : "pointer-events-none opacity-0"
           )}
           type="button"
           onClick={() => {
             setMobileNavOpen(false);
             setMobileActionOpen(false);
+            setNotificationsOpen(false);
           }}
         />
 
@@ -382,6 +465,34 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </Link>
 
+          {profileComplete ? (
+            <button
+              className="group relative mt-3 flex min-h-11 w-full items-center justify-between overflow-hidden rounded-[24px] border border-white/10 bg-white/[0.05] px-4 py-3 text-sm font-semibold text-white shadow-[0_14px_34px_rgba(2,6,23,0.18)] transition hover:-translate-y-0.5 hover:border-sky-300/[0.22] hover:bg-white/[0.08]"
+              type="button"
+              onClick={() => setNotificationsOpen((current) => !current)}
+            >
+              <span className="flex items-center gap-3">
+                <span className="inline-flex h-8 w-8 items-center justify-center rounded-full border border-white/12 bg-white/10 text-white">
+                  <svg aria-hidden="true" className="h-4 w-4" fill="none" viewBox="0 0 24 24">
+                    <path
+                      d="M9.75 18.25h4.5M6.75 16.5h10.5l-1.25-1.5v-3.5a4.5 4.5 0 1 0-9 0V15l-1.25 1.5Z"
+                      stroke="currentColor"
+                      strokeLinecap="round"
+                      strokeLinejoin="round"
+                      strokeWidth="1.6"
+                    />
+                  </svg>
+                </span>
+                <span>{t("notifications.inboxTitle")}</span>
+              </span>
+              {unreadMessageCount ? (
+                <span className="inline-flex min-h-6 min-w-6 items-center justify-center rounded-full bg-rose-500 px-1.5 text-[10px] font-bold text-white">
+                  {unreadMessageCount > 99 ? "99+" : unreadMessageCount}
+                </span>
+              ) : null}
+            </button>
+          ) : null}
+
           <div className="mt-6 rounded-3xl border border-white/10 bg-white/5 p-4 lg:mt-8">
             <p className="text-xs uppercase tracking-[0.22em] text-slate-400">{t("layout.privacyMode")}</p>
             <p className="mt-3 text-sm text-slate-300">{t("layout.privacyDescription")}</p>
@@ -425,11 +536,87 @@ export function AppShell({ children }: { children: ReactNode }) {
             </div>
           </main>
 
-          <InstallShortcutPrompt enabled={profileComplete} hidden={mobileOverlayVisible} />
+          <InstallShortcutPrompt enabled={profileComplete} hidden={shellOverlayVisible} />
         </div>
 
         {profileComplete ? (
           <>
+            <aside
+              className={cn(
+                "fixed inset-y-0 right-0 z-50 flex w-[min(92vw,360px)] flex-col border-l border-slate-200/70 bg-[linear-gradient(180deg,rgba(255,255,255,0.96),rgba(241,245,249,0.96))] shadow-[0_28px_90px_rgba(15,23,42,0.18)] backdrop-blur-xl transition-transform duration-300",
+                notificationsOpen ? "translate-x-0" : "translate-x-[105%]"
+              )}
+            >
+              <div className="flex items-start justify-between gap-4 border-b border-slate-200/80 px-4 py-4 sm:px-5">
+                <div>
+                  <p className="text-[11px] font-semibold uppercase tracking-[0.24em] text-sky-500">
+                    {t("common.collaboration")}
+                  </p>
+                  <h3 className="mt-2 text-lg font-semibold tracking-tight text-slate-950">
+                    {t("notifications.inboxTitle")}
+                  </h3>
+                  <p className="mt-1 text-sm text-slate-500">{t("notifications.inboxDescription")}</p>
+                </div>
+                <button
+                  aria-label={t("notifications.closeInbox")}
+                  className="inline-flex min-h-10 min-w-10 items-center justify-center rounded-2xl border border-slate-200 bg-white/90 text-slate-900"
+                  type="button"
+                  onClick={() => setNotificationsOpen(false)}
+                >
+                  ×
+                </button>
+              </div>
+
+              <div className="flex items-center justify-between gap-3 border-b border-slate-100 px-4 py-3 sm:px-5">
+                <p className="text-sm font-medium text-slate-700">
+                  {unreadMessageCount ? `${unreadMessageCount} unread` : t("notifications.emptyTitle")}
+                </p>
+                <Button
+                  className="min-h-9 rounded-2xl px-3 py-2 text-xs"
+                  type="button"
+                  variant="ghost"
+                  onClick={() => void handleMarkAllNotificationsRead()}
+                >
+                  {t("notifications.markAllRead")}
+                </Button>
+              </div>
+
+              <div className="flex-1 space-y-3 overflow-y-auto px-4 py-4 sm:px-5">
+                {recentMessageNotifications.length === 0 ? (
+                  <div className="rounded-[24px] border border-dashed border-slate-200 bg-white/80 px-4 py-8 text-center">
+                    <p className="text-sm font-semibold text-slate-900">{t("notifications.emptyTitle")}</p>
+                    <p className="mt-2 text-sm text-slate-500">{t("notifications.emptyDescription")}</p>
+                  </div>
+                ) : (
+                  recentMessageNotifications.map((item) => (
+                    <Link
+                      key={item.id}
+                      className={cn(
+                        "block rounded-[24px] border px-4 py-4 transition",
+                        item.readAt
+                          ? "border-slate-200 bg-white/75 text-slate-700"
+                          : "border-sky-200 bg-[linear-gradient(180deg,rgba(239,246,255,0.95),rgba(255,255,255,0.98))] text-slate-900 shadow-[0_16px_40px_rgba(14,116,144,0.08)]"
+                      )}
+                      href={item.routeHref}
+                      onClick={() => void handleNotificationClick(item.id)}
+                    >
+                      <div className="flex items-start justify-between gap-3">
+                        <div>
+                          <p className="text-sm font-semibold tracking-tight">{item.title}</p>
+                          <p className="mt-1 text-xs text-slate-500">{item.counterpartName}</p>
+                        </div>
+                        {!item.readAt ? <span className="mt-1 h-2.5 w-2.5 rounded-full bg-sky-500" /> : null}
+                      </div>
+                      <p className="mt-3 max-h-12 overflow-hidden text-sm leading-6 text-slate-600">{item.body}</p>
+                      <p className="mt-3 text-[11px] font-medium uppercase tracking-[0.2em] text-slate-400">
+                        {relativeFromNow(item.messageCreatedAt)}
+                      </p>
+                    </Link>
+                  ))
+                )}
+              </div>
+            </aside>
+
             <div
               className={cn(
                 "fixed inset-x-0 bottom-0 z-50 px-3 pb-[calc(0.85rem+env(safe-area-inset-bottom))] pt-4 transition duration-300 lg:hidden",
@@ -498,7 +685,7 @@ export function AppShell({ children }: { children: ReactNode }) {
               <nav
                 className={cn(
                   "mobile-dock glass flex items-center gap-1 rounded-[28px] border border-slate-900/10 bg-slate-950/85 px-2 py-2 text-white shadow-[0_20px_60px_rgba(15,23,42,0.18)] backdrop-blur-2xl transition duration-300",
-                  mobileOverlayVisible
+                  shellOverlayVisible
                     ? "pointer-events-none translate-y-6 opacity-0"
                     : "pointer-events-auto translate-y-0 opacity-100"
                 )}
