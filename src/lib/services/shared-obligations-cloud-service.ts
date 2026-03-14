@@ -478,6 +478,67 @@ function getSharedRoleForUser(userId: string, userEmail: string, obligation: Sha
   return null;
 }
 
+function getRecordSyncTimestamp(record: { sharedUpdatedAt?: string; updatedAt: string }) {
+  return new Date(record.sharedUpdatedAt || record.updatedAt).getTime();
+}
+
+function buildSharedRecordMap<TRecord extends { id: string; sharedObligationId?: string; sharedUpdatedAt?: string; updatedAt: string }>(
+  records: TRecord[]
+) {
+  const map = new Map<string, TRecord>();
+  const duplicateIds = new Set<string>();
+
+  for (const record of records) {
+    if (!record.sharedObligationId) {
+      continue;
+    }
+
+    const existing = map.get(record.sharedObligationId);
+
+    if (!existing) {
+      map.set(record.sharedObligationId, record);
+      continue;
+    }
+
+    if (getRecordSyncTimestamp(record) > getRecordSyncTimestamp(existing)) {
+      duplicateIds.add(existing.id);
+      map.set(record.sharedObligationId, record);
+      continue;
+    }
+
+    duplicateIds.add(record.id);
+  }
+
+  return {
+    map,
+    duplicateIds
+  };
+}
+
+function matchesDebtMirrorCandidate(record: DebtRecord, obligation: SharedObligationRecord) {
+  return (
+    !record.sharedObligationId &&
+    normalizeEmail(record.creditorEmail) === obligation.creditor.email &&
+    record.amount === obligation.amount &&
+    record.currency === obligation.currency &&
+    record.createdDate === obligation.createdDate &&
+    record.settlementDate === obligation.settlementDate &&
+    record.note === obligation.note
+  );
+}
+
+function matchesOwedMirrorCandidate(record: OwedRecord, obligation: SharedObligationRecord) {
+  return (
+    !record.sharedObligationId &&
+    normalizeEmail(record.debtorEmail) === obligation.debtor.email &&
+    record.amount === obligation.amount &&
+    record.currency === obligation.currency &&
+    record.createdDate === obligation.createdDate &&
+    record.settlementDate === obligation.settlementDate &&
+    record.note === obligation.note
+  );
+}
+
 async function putSharedDebtRecord(userId: string, obligation: SharedObligationRecord, current?: DebtRecord) {
   const db = getUserDatabase(userId);
   const counterpart = obligation.creditor;
@@ -689,18 +750,14 @@ export async function mirrorSharedObligationsToLocal(
   const db = getUserDatabase(userId);
   const normalizedEmail = normalizeEmail(email || getAuthenticatedEmail());
   const [debts, owed] = await Promise.all([db.debts.toArray(), db.owed.toArray()]);
-  const debtsBySharedId = new Map(
-    debts
-      .filter((item) => item.sharedObligationId)
-      .map((item) => [item.sharedObligationId as string, item])
-  );
-  const owedBySharedId = new Map(
-    owed
-      .filter((item) => item.sharedObligationId)
-      .map((item) => [item.sharedObligationId as string, item])
-  );
+  const { map: debtsBySharedId, duplicateIds: duplicateDebtIds } = buildSharedRecordMap(debts);
+  const { map: owedBySharedId, duplicateIds: duplicateOwedIds } = buildSharedRecordMap(owed);
+  const unlinkedDebts = debts.filter((item) => !item.sharedObligationId);
+  const unlinkedOwed = owed.filter((item) => !item.sharedObligationId);
   const activeDebtIds = new Set<string>();
   const activeOwedIds = new Set<string>();
+  const orphanDebtIds = new Set<string>(duplicateDebtIds);
+  const orphanOwedIds = new Set<string>(duplicateOwedIds);
 
   for (const obligation of obligations) {
     const role = getSharedRoleForUser(userId, normalizedEmail, obligation);
@@ -710,23 +767,57 @@ export async function mirrorSharedObligationsToLocal(
     }
 
     if (role === "debtor") {
+      const existingDebt = debtsBySharedId.get(obligation.id);
+      const fallbackDebt = unlinkedDebts.find((item) => matchesDebtMirrorCandidate(item, obligation));
+      const currentDebt = existingDebt || fallbackDebt;
+
+      if (existingDebt) {
+        unlinkedDebts
+          .filter((item) => matchesDebtMirrorCandidate(item, obligation))
+          .forEach((item) => orphanDebtIds.add(item.id));
+      } else if (fallbackDebt) {
+        unlinkedDebts
+          .filter((item) => item.id !== fallbackDebt.id && matchesDebtMirrorCandidate(item, obligation))
+          .forEach((item) => orphanDebtIds.add(item.id));
+      }
+
       activeDebtIds.add(obligation.id);
-      await putSharedDebtRecord(userId, obligation, debtsBySharedId.get(obligation.id));
+      await putSharedDebtRecord(userId, obligation, currentDebt);
       continue;
     }
 
+    const existingOwed = owedBySharedId.get(obligation.id);
+    const fallbackOwed = unlinkedOwed.find((item) => matchesOwedMirrorCandidate(item, obligation));
+    const currentOwed = existingOwed || fallbackOwed;
+
+    if (existingOwed) {
+      unlinkedOwed
+        .filter((item) => matchesOwedMirrorCandidate(item, obligation))
+        .forEach((item) => orphanOwedIds.add(item.id));
+    } else if (fallbackOwed) {
+      unlinkedOwed
+        .filter((item) => item.id !== fallbackOwed.id && matchesOwedMirrorCandidate(item, obligation))
+        .forEach((item) => orphanOwedIds.add(item.id));
+    }
+
     activeOwedIds.add(obligation.id);
-    await putSharedOwedRecord(userId, obligation, owedBySharedId.get(obligation.id));
+    await putSharedOwedRecord(userId, obligation, currentOwed);
   }
 
   await Promise.all(
     debts
-      .filter((item) => item.sharedObligationId && !activeDebtIds.has(item.sharedObligationId))
+      .filter(
+        (item) =>
+          orphanDebtIds.has(item.id) || (item.sharedObligationId && !activeDebtIds.has(item.sharedObligationId))
+      )
       .map((item) => db.debts.delete(item.id))
   );
   await Promise.all(
     owed
-      .filter((item) => item.sharedObligationId && !activeOwedIds.has(item.sharedObligationId))
+      .filter(
+        (item) =>
+          orphanOwedIds.has(item.id) || (item.sharedObligationId && !activeOwedIds.has(item.sharedObligationId))
+      )
       .map((item) => db.owed.delete(item.id))
   );
 }

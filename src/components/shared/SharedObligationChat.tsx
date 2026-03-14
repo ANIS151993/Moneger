@@ -52,6 +52,16 @@ export function SharedObligationChat({
         await sendSharedObligationMessage(userId, sharedObligationId, draft);
         setDraft("");
       } catch (submitError) {
+        if (
+          typeof submitError === "object" &&
+          submitError !== null &&
+          "code" in submitError &&
+          (submitError as { code?: string }).code === "permission-denied"
+        ) {
+          setError("Chat is blocked by Firestore rules. Publish the latest firestore.rules in Firebase.");
+          return;
+        }
+
         setError(
           submitError instanceof Error
             ? submitError.message

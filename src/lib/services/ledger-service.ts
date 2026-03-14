@@ -33,6 +33,15 @@ export interface LedgerSaveResult<T> {
 }
 
 function getCloudWarningMessage(error: unknown) {
+  if (
+    typeof error === "object" &&
+    error !== null &&
+    "code" in error &&
+    (error as { code?: string }).code === "permission-denied"
+  ) {
+    return "Saved locally, but Firestore blocked collaboration sync. Publish the latest firestore.rules in Firebase and redeploy Cloudflare Pages if you changed env values.";
+  }
+
   if (error instanceof Error && error.message) {
     return error.message;
   }
