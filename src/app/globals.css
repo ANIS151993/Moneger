@@ -184,8 +184,10 @@ button,
 
 .mobile-dock {
   box-shadow:
-    0 26px 70px rgba(15, 23, 42, 0.26),
-    inset 0 1px 0 rgba(255, 255, 255, 0.1);
+    0 24px 54px rgba(15, 23, 42, 0.14),
+    0 10px 22px rgba(14, 165, 233, 0.08),
+    inset 0 1px 0 rgba(255, 255, 255, 0.82);
+  animation: mobileTopbarFloat 8.2s ease-in-out infinite;
 }
 
 .mobile-sheet {

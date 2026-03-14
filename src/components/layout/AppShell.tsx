@@ -74,8 +74,8 @@ const mobileQuickActions = [
 
 type MobileIconName = (typeof mobilePrimaryNavigation)[number]["icon"] | (typeof mobileQuickActions)[number]["icon"];
 
-function MobileNavIcon({ icon, active = false }: { icon: MobileIconName; active?: boolean }) {
-  const strokeClassName = active ? "stroke-white" : "stroke-current";
+function MobileNavIcon({ icon }: { icon: MobileIconName; active?: boolean }) {
+  const strokeClassName = "stroke-current";
   const iconClassName = cn("h-[18px] w-[18px]", strokeClassName);
 
   switch (icon) {
@@ -714,12 +714,17 @@ export function AppShell({ children }: { children: ReactNode }) {
             <div className="fixed inset-x-0 bottom-0 z-40 px-3 pb-[calc(0.95rem+env(safe-area-inset-bottom))] pt-3 lg:hidden">
               <nav
                 className={cn(
-                  "mobile-dock glass mx-auto flex max-w-md items-center gap-1 rounded-[30px] border border-white/12 bg-[linear-gradient(135deg,rgba(15,23,42,0.94),rgba(8,47,73,0.88))] px-2.5 py-2.5 text-white shadow-[0_26px_70px_rgba(15,23,42,0.26)] backdrop-blur-3xl transition duration-300",
+                  "mobile-dock glass relative mx-auto flex max-w-md items-center gap-1 overflow-hidden rounded-[30px] border border-slate-200/90 bg-[linear-gradient(135deg,rgba(255,255,255,0.97),rgba(241,245,249,0.95))] px-2.5 py-2.5 text-slate-700 shadow-[0_26px_70px_rgba(15,23,42,0.14)] backdrop-blur-3xl transition duration-300",
                   shellOverlayVisible
                     ? "pointer-events-none translate-y-6 opacity-0"
                     : "pointer-events-auto translate-y-0 opacity-100"
                 )}
               >
+                <div className="pointer-events-none absolute inset-0">
+                  <div className="absolute inset-x-10 top-0 h-px bg-[linear-gradient(90deg,rgba(255,255,255,0),rgba(14,165,233,0.55),rgba(255,255,255,0))]" />
+                  <div className="absolute -left-6 top-1/2 h-20 w-20 -translate-y-1/2 rounded-full bg-emerald-200/55 blur-2xl" />
+                  <div className="absolute -right-6 top-1/2 h-20 w-20 -translate-y-1/2 rounded-full bg-sky-200/60 blur-2xl" />
+                </div>
                 {mobilePrimaryNavigation.map((item) => {
                   const active = pathname === item.href;
 
@@ -727,10 +732,10 @@ export function AppShell({ children }: { children: ReactNode }) {
                     <Link
                       key={item.href}
                       className={cn(
-                        "group relative flex min-w-0 flex-1 flex-col items-center justify-center gap-1.5 rounded-[22px] px-2 py-2.5 text-center transition duration-300",
+                        "group relative z-10 flex min-w-0 flex-1 flex-col items-center justify-center gap-1.5 rounded-[22px] px-2 py-2.5 text-center transition duration-300",
                         active
-                          ? "bg-[linear-gradient(135deg,rgba(16,185,129,0.28),rgba(56,189,248,0.24))] text-white shadow-[0_16px_30px_rgba(8,47,73,0.24)]"
-                          : "text-slate-300 hover:bg-white/[0.07]"
+                          ? "bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(236,253,245,0.98))] text-slate-950 ring-1 ring-emerald-200/90 shadow-[0_16px_30px_rgba(14,165,233,0.16)]"
+                          : "text-slate-600 hover:bg-white/75 hover:text-slate-900"
                       )}
                       href={item.href}
                       onClick={(event) => handleSectionNavigation(event, item.href, active)}
@@ -739,8 +744,8 @@ export function AppShell({ children }: { children: ReactNode }) {
                         className={cn(
                           "inline-flex h-9 w-9 items-center justify-center rounded-2xl border transition duration-300",
                           active
-                            ? "border-white/15 bg-white/[0.14] text-white"
-                            : "border-white/[0.08] bg-white/[0.04] text-slate-300 group-hover:border-white/[0.14] group-hover:bg-white/[0.1]"
+                            ? "border-emerald-200 bg-[linear-gradient(135deg,rgba(255,255,255,0.98),rgba(209,250,229,0.98))] text-emerald-700 shadow-[0_10px_22px_rgba(16,185,129,0.18)]"
+                            : "border-slate-200 bg-slate-50/95 text-slate-500 group-hover:border-sky-200 group-hover:bg-white group-hover:text-sky-700"
                         )}
                       >
                         <MobileNavIcon active={active} icon={item.icon} />
@@ -748,10 +753,12 @@ export function AppShell({ children }: { children: ReactNode }) {
                       <span
                         className={cn(
                           "h-1.5 w-8 rounded-full transition duration-300",
-                          active ? "bg-emerald-300 shadow-[0_0_14px_rgba(110,231,183,0.45)]" : "bg-white/10 group-hover:bg-white/20"
+                          active
+                            ? "bg-[linear-gradient(90deg,#16a34a_0%,#0ea5e9_100%)] shadow-[0_0_16px_rgba(14,165,233,0.28)]"
+                            : "bg-slate-200 group-hover:bg-sky-200"
                         )}
                       />
-                      <span className="truncate text-[11px] font-semibold">{t(item.labelKey)}</span>
+                      <span className="truncate text-[11px] font-semibold tracking-[0.01em]">{t(item.labelKey)}</span>
                     </Link>
                   );
                 })}
